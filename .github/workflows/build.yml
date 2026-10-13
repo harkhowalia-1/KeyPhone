@@ -1,10 +1,16 @@
 name: Build apps
 
-# Push a tag like v1.0.0 to build both apps and publish them as a GitHub release.
-# "Run workflow" on the Actions tab builds them without publishing.
+# Every change to the apps or the phone on main builds both apps and publishes
+# them as the release named in the VERSION file (v1.0.0, …). Raise VERSION
+# for a new release; otherwise the current release's files are replaced.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+    paths:
+      - "apple/**"
+      - "phone/**"
+      - "VERSION"
+      - ".github/workflows/build.yml"
   workflow_dispatch:
 
 permissions:
@@ -21,8 +27,7 @@ jobs:
 
       - name: Version
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="0.0.${GITHUB_RUN_NUMBER}"; fi
-          echo "VERSION=$V" >> "$GITHUB_ENV"
+          echo "VERSION=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_ENV"
 
       - name: Generate Xcode project
         working-directory: apple
@@ -74,10 +79,13 @@ jobs:
             LarchK7.dmg
 
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ env.VERSION }}
+          target_commitish: ${{ github.sha }}
           name: Larch K7 ${{ env.VERSION }}
+          make_latest: true
+          overwrite_files: true
           generate_release_notes: true
           files: |
             LarchK7.ipa

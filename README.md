@@ -19,13 +19,10 @@ connect it to the system, so calls, messages, contacts, photos and alarms are re
 
 ## Making a release
 
-```sh
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-The **Build apps** workflow builds both apps and publishes them to a release
-named after the tag. The website's download buttons always point at the latest release.
+Every push to `main` that changes the phone or the apps runs **Build apps**,
+which builds both apps on macOS and publishes them to the release named in
+`VERSION` (for example `v1.0.0`). Raise the number in `VERSION` to start a new
+release. The website's download buttons always point at the latest release.
 
 The apps are not signed with an Apple Developer ID:
 
