@@ -1,0 +1,12 @@
+.DS_Store
+apple/Web/
+apple/build/
+apple/*.xcodeproj/
+apple/iOS/Info.plist
+apple/macOS/Info.plist
+apple/Payload/
+/dmg/
+*.ipa
+*.dmg
+_site/
+xcuserdata/

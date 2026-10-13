@@ -1,0 +1,74 @@
+# XcodeGen spec: `./make_web.sh && xcodegen generate` creates Larch.xcodeproj
+name: Larch
+options:
+  bundleIdPrefix: io.github.larchk7
+  deploymentTarget:
+    iOS: "16.0"
+    macOS: "13.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  Larch:
+    type: application
+    platform: iOS
+    sources:
+      - path: iOS
+      - path: Shared
+      - path: Web
+        type: folder
+        buildPhase: resources
+    info:
+      path: iOS/Info.plist
+      properties:
+        CFBundleDisplayName: Larch K7
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UIStatusBarHidden: true
+        UIViewControllerBasedStatusBarAppearance: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSContactsUsageDescription: Larch K7 shows and edits your iPhone contacts in the phone's Names list.
+        NSCameraUsageDescription: Larch K7 uses the camera to take photos for its Gallery.
+        NSPhotoLibraryUsageDescription: Larch K7 adds photos you choose to its Gallery and wallpapers.
+        LSApplicationQueriesSchemes:
+          - tel
+          - sms
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_NAME: LarchK7
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.larchk7.ios
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  LarchMac:
+    type: application
+    platform: macOS
+    sources:
+      - path: macOS
+      - path: Shared
+      - path: Web
+        type: folder
+        buildPhase: resources
+    info:
+      path: macOS/Info.plist
+      properties:
+        CFBundleName: Larch K7
+        CFBundleDisplayName: Larch K7
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.utilities
+        NSContactsUsageDescription: Larch K7 shows and edits your Mac contacts in the phone's Names list.
+        NSHumanReadableCopyright: Larch K7
+    settings:
+      base:
+        PRODUCT_NAME: Larch K7
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.larchk7.mac
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_HARDENED_RUNTIME: NO
+        COMBINE_HIDPI_IMAGES: YES

@@ -1,0 +1,1349 @@
+<title>Larch K7 Phone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600&family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: phone on the left, a narrow workbench panel on the right; stacks on phones. */
+:root{
+  --page:#dfe4ea; --page2:#c9d0d9; --ink:#1b222b; --muted:#5b6674; --line:#b7c0cb; --accent:#2f6fb8; --card:#eef1f5;
+  --f-ui:'Barlow',system-ui,sans-serif; --f-cond:'Barlow Semi Condensed','Barlow',system-ui,sans-serif; --f-lcd:'Fira Sans','Helvetica Neue',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--page:#15191f;--page2:#0e1115;--ink:#e3e8ee;--muted:#98a3b1;--line:#2c343e;--accent:#7fb2ee;--card:#1c2229;color-scheme:dark}}
+:root[data-theme="dark"]{--page:#15191f;--page2:#0e1115;--ink:#e3e8ee;--muted:#98a3b1;--line:#2c343e;--accent:#7fb2ee;--card:#1c2229;color-scheme:dark}
+html,body{height:100%}
+body{background:radial-gradient(120% 90% at 30% 20%,var(--page),var(--page2));color:var(--ink);font-family:var(--f-ui);padding-inline:16px;padding-block:16px;box-sizing:border-box;overflow-x:hidden}
+.stage{display:flex;justify-content:center;align-items:center;min-height:100%}
+.wrap{position:relative;flex:none}
+.panel{width:300px;max-width:100%;min-width:0;display:flex;flex-direction:column;gap:18px;padding-top:8px}
+.panel h1{font-family:var(--f-cond);font-size:28px;letter-spacing:.02em;margin:0;line-height:1.1;text-wrap:balance}
+.panel p{margin:0;color:var(--muted);line-height:1.45;font-size:14px}
+.grp{display:flex;flex-direction:column;gap:8px}
+.grp h2{font-family:var(--f-cond);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:500 14px var(--f-ui);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.inp:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.inp{font:15px var(--f-ui);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;box-sizing:border-box}
+textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;color:var(--muted)}
+.keys kbd{font:600 12px ui-monospace,Menlo,monospace;background:var(--card);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--ink);white-space:nowrap;justify-self:start}
+.msg{font-size:13px;color:var(--accent);min-height:18px}
+
+/* ---------- the handset (fixed product colours, not themed) ---------- */
+.phone{position:absolute;left:0;top:0;width:280px;height:742px;transform-origin:0 0;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.body{position:absolute;inset:0;border-radius:30px 30px 34px 34px;
+  background:linear-gradient(90deg,#1d232a 0%,#5b6774 3.5%,#39424d 8%,#2a3139 50%,#39424d 92%,#5b6774 96.5%,#1d232a 100%);
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.55),0 4px 10px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.25)}
+.face{position:absolute;left:9px;right:9px;top:9px;bottom:9px;border-radius:23px 23px 27px 27px;
+  background:linear-gradient(180deg,#171b20 0%,#101317 42%,#171b20 43%,#1b2026 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.ear{position:absolute;left:50%;top:16px;width:56px;height:6px;margin-left:-28px;border-radius:4px;background:repeating-linear-gradient(90deg,#05070a 0 3px,#2b3138 3px 5px);box-shadow:inset 0 1px 2px #000}
+.brand{position:absolute;left:0;right:0;top:32px;text-align:center;font:600 11px/1 var(--f-cond),Arial,sans-serif;letter-spacing:.5em;color:#a7b1bd;padding-left:.5em}
+.bezel{position:absolute;left:11px;top:56px;width:258px;height:338px;border-radius:6px;background:#020304;box-shadow:inset 0 0 0 1px #2a3037}
+#lcd{position:absolute;left:9px;top:9px;width:240px;height:320px;overflow:hidden;font-family:var(--f-lcd);font-size:14px;line-height:1.2;color:var(--tfg);background:#000;cursor:default}
+.glass{position:absolute;inset:0;border-radius:6px;pointer-events:none;background:linear-gradient(120deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,0) 38%)}
+.emu{position:absolute;left:24px;top:30px;width:28px;height:20px;border-radius:6px;cursor:pointer;z-index:2;display:grid;place-items:center;
+  background:linear-gradient(180deg,#4a535e,#232930);box-shadow:0 0 0 1px #0b0e12,inset 0 1px 0 rgba(255,255,255,.22),0 2px 3px rgba(0,0,0,.6)}
+.emu svg{width:14px;height:10px}
+.emu:active,.emu.dn{filter:brightness(1.35);transform:translateY(.5px)}
+.inner{position:absolute;left:0;top:0;width:280px;height:742px;pointer-events:none}
+.inner>*{pointer-events:auto}
+.pwr,.side,.emu{z-index:3}
+.side i,.pwr i{display:none}
+.embed{color-scheme:dark}
+.embed,.embed body{padding:0!important;margin:0;overflow:hidden;background:transparent!important}
+.embed .stage{min-height:0;height:100%}
+.fsm,.fsm body{padding:0!important;margin:0;overflow:hidden;background:#14181d!important}
+.fsm .stage{min-height:0;height:100%}
+.phone.fs .body{border-radius:0;background:#14181d;box-shadow:none}
+.phone.fs .face{inset:0;border-radius:0;box-shadow:none;background:linear-gradient(180deg,#14181d 0%,#101317 45%,#181c22 100%)}
+.phone.fs .ear,.phone.fs .brand{display:none}
+.phone.fs .emu{left:16px;top:33px;width:28px;height:20px}
+.phone.fs .pwr,.phone.fs .side{top:33px;left:auto;width:26px;height:20px;border-radius:6px;display:grid;place-items:center;color:#d6dde5;
+  background:linear-gradient(180deg,#4a535e,#232930);box-shadow:0 0 0 1px #0b0e12,inset 0 1px 0 rgba(255,255,255,.22),0 2px 3px rgba(0,0,0,.6)}
+.phone.fs .pwr{right:16px}.phone.fs .side.vup{right:48px}.phone.fs .side.vdn{right:80px}
+.phone.fs .side i,.phone.fs .pwr i{display:block;font:500 16px/1 Arial,sans-serif;font-style:normal}
+.phone.fs .pwr i svg{display:block}
+.phone.fs .pwr:active,.phone.fs .side:active,.phone.fs .pwr.dn,.phone.fs .side.dn{filter:brightness(1.35)}
+.side{position:absolute;right:-5px;width:6px;border-radius:0 4px 4px 0;background:linear-gradient(90deg,#3f4954,#8d99a6);cursor:pointer}
+.side.vup{top:150px;height:34px}.side.vdn{top:188px;height:34px}
+.pwr{position:absolute;top:-5px;left:176px;width:40px;height:6px;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#8d99a6,#3f4954);cursor:pointer}
+.ctl{position:absolute;left:11px;right:11px;top:404px;height:112px}
+.k{position:absolute;cursor:pointer;display:grid;place-items:center}
+.k:active,.k.dn{filter:brightness(1.35)}
+.soft{width:66px;height:30px;top:2px;background:linear-gradient(180deg,#3a424c,#232930);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 3px rgba(0,0,0,.5)}
+.soft i{display:block;width:22px;height:3px;border-radius:2px;background:#c4ccd5}
+.soft.l{left:0;border-radius:6px 16px 6px 6px}.soft.r{right:0;border-radius:16px 6px 6px 6px}
+.cl,.en{width:66px;height:38px;top:62px;background:linear-gradient(180deg,#3a424c,#232930);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 3px rgba(0,0,0,.5)}
+.cl{left:0;border-radius:6px 6px 6px 18px}.en{right:0;border-radius:6px 6px 18px 6px}
+.cl svg,.en svg{width:22px;height:22px}
+.pad{position:absolute;left:50%;top:0;width:110px;height:110px;margin-left:-55px;border-radius:50%;
+  background:conic-gradient(from 0deg,#aab4bf,#e7ecf1,#aab4bf,#7d8895,#aab4bf,#e7ecf1,#aab4bf,#7d8895,#aab4bf);box-shadow:0 3px 5px rgba(0,0,0,.6),inset 0 0 0 1px rgba(0,0,0,.35)}
+.pad .dz{position:absolute;width:38px;height:38px;display:grid;place-items:center}
+.pad .dz i{width:0;height:0;border:5px solid transparent}
+.dz.u{left:36px;top:0}.dz.u i{border-bottom-color:#3a434d;margin-top:-6px}
+.dz.d{left:36px;bottom:0}.dz.d i{border-top-color:#3a434d;margin-bottom:-6px}
+.dz.lt{left:0;top:36px}.dz.lt i{border-right-color:#3a434d;margin-left:-6px}
+.dz.rt{right:0;top:36px}.dz.rt i{border-left-color:#3a434d;margin-right:-6px}
+.pad .ok{position:absolute;left:33px;top:33px;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#4a535e,#1c2127);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 2px #11151a}
+.kp{position:absolute;left:14px;right:14px;top:528px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px 8px}
+.kk{position:relative;height:40px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;
+  background:linear-gradient(180deg,#e9edf1,#b6bfc9);box-shadow:inset 0 1px 0 #fff,0 2px 0 #6d7884,0 3px 4px rgba(0,0,0,.45);color:#1a2027}
+.kk:nth-child(3n+1){border-radius:9px 9px 9px 14px}.kk:nth-child(3n){border-radius:9px 9px 14px 9px}
+.kk:active,.kk.dn{transform:translateY(1px);box-shadow:inset 0 1px 0 #fff,0 1px 0 #6d7884,0 1px 2px rgba(0,0,0,.4)}
+.kk b{font:500 20px/1 var(--f-lcd)}
+.kk small{font:600 9px/1 var(--f-cond);letter-spacing:.08em;color:#4a5562;text-transform:uppercase}
+.mic{position:absolute;left:50%;bottom:20px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#000}
+.phone.vib{animation:vib .12s linear infinite}
+@keyframes vib{0%{transform:var(--sc) translateX(0)}25%{transform:var(--sc) translateX(-1.5px)}75%{transform:var(--sc) translateX(1.5px)}}
+
+/* ---------- LCD ---------- */
+#scr{position:absolute;inset:0;background:var(--tbg)}
+#scr.off{background:#000}
+.hd{position:absolute;left:0;right:0;top:0;height:26px;display:flex;align-items:center;gap:6px;padding:0 7px;background:var(--thd);color:var(--thdfg);font-weight:500;font-size:14px}
+.hd .ht{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hd .hr{font-size:12px;opacity:.9;font-variant-numeric:tabular-nums}
+.bd{position:absolute;left:0;right:0;top:26px;bottom:28px;overflow:hidden}
+.full .bd{top:0}
+.sk{position:absolute;left:0;right:0;bottom:0;height:28px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 7px;background:var(--tsk);color:var(--tskfg);font-weight:500;font-size:14px}
+.sk span{cursor:pointer;white-space:nowrap}
+.sk .skm{text-align:center;padding:0 6px}.sk .skr{text-align:right}
+.sk.ov{background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.45));color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.ls{position:absolute;inset:0}
+.li{height:33px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:0 10px 0 8px;border-bottom:1px solid rgba(127,127,127,.14);cursor:pointer}
+.li.two{height:47px}
+.li.on{background:var(--thl);color:var(--thlfg)}
+.li .lt{flex:1;min-width:0}
+.li b{display:block;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li.unread b{font-weight:600}
+.li small{display:block;font-size:12px;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.lic{width:22px;height:22px;flex:none;display:grid;place-items:center}
+.lic svg{width:20px;height:20px}
+.lic img{width:22px;height:22px;object-fit:cover;border-radius:3px}
+.rb{width:12px;height:12px;border-radius:50%;border:2px solid currentColor;flex:none;opacity:.8;display:grid;place-items:center}
+.rb.on::after{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.cb{width:12px;height:12px;border:2px solid currentColor;border-radius:2px;flex:none;opacity:.8;display:grid;place-items:center;font-size:11px;line-height:1}
+.cb.on::after{content:"✓";font-weight:700}
+.sbar{position:absolute;right:1px;top:2px;bottom:2px;width:3px;border-radius:2px;background:rgba(127,127,127,.18)}
+.sbar i{position:absolute;left:0;right:0;border-radius:2px;background:var(--tsub)}
+.empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:16px;color:var(--tsub);font-size:14px}
+.foot{position:absolute;left:0;right:0;bottom:0;height:24px;display:flex;align-items:center;padding:0 8px;background:var(--tsolid);border-top:1px solid rgba(127,127,127,.3);font-size:13px}
+.txt{padding:8px 10px;font-size:14px;line-height:1.35;white-space:pre-wrap;word-wrap:break-word;overflow:hidden;height:100%;box-sizing:border-box}
+.txt .lbl{color:var(--tsub);font-size:12px;display:block;margin-bottom:2px}
+.txt p{margin:0 0 6px}
+.fs-small{font-size:12px}.fs-large{font-size:17px}
+.ed{padding:6px 9px;height:100%;box-sizing:border-box;overflow:hidden;white-space:pre-wrap;word-wrap:break-word;line-height:1.35}
+.ed .lbl{display:block;color:var(--tsub);font-size:12px;margin-bottom:3px}
+.ed .box{display:block;min-height:22px;border-bottom:1px solid rgba(127,127,127,.4);padding-bottom:2px}
+.cr{display:inline-block;width:1.5px;height:1.05em;background:currentColor;vertical-align:-2px;margin:0 -0.75px;animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.mt{background:var(--thl);color:var(--thlfg)}
+.tw{text-decoration:underline;text-underline-offset:2px}
+.tw.miss{color:#d33}
+.dial{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-end;padding:10px 12px;font-weight:300;word-break:break-all;text-align:right;line-height:1.05;font-variant-numeric:tabular-nums}
+.dlgw{position:absolute;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;padding:12px}
+.dlg{background:var(--tsolid);color:var(--tfg);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.4);padding:14px;text-align:center;width:100%;box-sizing:border-box;border:1px solid rgba(127,127,127,.35)}
+.dlg .dq{width:30px;height:30px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background:#3f7fd1}
+.dlg p{margin:0;font-size:15px;line-height:1.3}
+#note[hidden]{display:none}
+#note{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;z-index:5}
+#note .nb{background:var(--tsolid);color:var(--tfg);border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.45);padding:14px 12px;text-align:center;width:100%;border:1px solid rgba(127,127,127,.35)}
+#note .ni{width:32px;height:32px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px}
+.ni.ok{background:#2f9a4a}.ni.info{background:#3f7fd1}.ni.warn{background:#d0682a}.ni.wait{background:#6b6fd6}
+#note p{margin:0;font-size:15px;line-height:1.3}
+#dim{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .6s;z-index:6}
+/* standby */
+.sb{position:absolute;inset:0;color:var(--sf)}
+.sb .sig{position:absolute;left:5px;top:6px}
+.sb .bat{position:absolute;right:5px;top:6px}
+.sb .icr{position:absolute;left:24px;right:24px;top:6px;display:flex;justify-content:center;gap:5px}
+.sb .icr svg{width:14px;height:14px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
+.sb .op{position:absolute;left:0;right:0;top:34px;text-align:center;font-size:17px;font-weight:500;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.sb .clk{position:absolute;left:0;right:0;top:62px;text-align:center;font-size:44px;font-weight:300;letter-spacing:-.01em;text-shadow:0 2px 6px rgba(0,0,0,.6);font-variant-numeric:tabular-nums}
+.sb .clk small{font-size:16px;margin-left:3px}
+.sb .dt{position:absolute;left:0;right:0;top:118px;text-align:center;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.sb .pf{position:absolute;left:0;right:0;top:140px;text-align:center;font-size:13px;text-shadow:0 1px 3px rgba(0,0,0,.7);opacity:.95}
+.sb .as{position:absolute;left:10px;right:10px;bottom:36px;display:flex;flex-direction:column;gap:4px}
+.sb .as div{display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.38);border-radius:6px;padding:4px 7px;font-size:12px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb .as svg{width:14px;height:14px;flex:none}
+.sb .nv{position:absolute;left:50%;bottom:40px;width:56px;height:56px;margin-left:-28px;opacity:.75}
+.lock{position:absolute;left:0;right:0;bottom:44px;text-align:center}
+.lock span{display:inline-flex;gap:6px;align-items:center;background:rgba(0,0,0,.5);color:#fff;border-radius:12px;padding:3px 10px;font-size:12px}
+/* menu grid */
+.gm{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:6px;gap:3px}
+.gi{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:10px;cursor:pointer}
+.gi.on{background:var(--thl);color:var(--thlfg)}
+.tile{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -8px 14px rgba(0,0,0,.18),0 2px 4px rgba(0,0,0,.3);transition:transform .12s}
+.tile svg{width:28px;height:28px}
+.gi.on .tile{transform:scale(1.1)}
+.gi span{font-size:11px;white-space:nowrap}
+.gm.lbl .tile{width:42px;height:42px}.gm.lbl .tile svg{width:24px;height:24px}
+.help{position:absolute;left:8px;right:8px;bottom:6px;background:#fffbe0;color:#2a2410;border:1px solid #c9b960;border-radius:6px;padding:6px 8px;font-size:12px;line-height:1.3;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+/* call */
+.call{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:10px}
+.call .av{width:64px;height:64px;border-radius:50%;background:var(--thl);color:var(--thlfg);display:grid;place-items:center;margin-bottom:6px}
+.call .av svg{width:38px;height:38px}
+.call .nm{font-size:19px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.call .st{color:var(--tsub);font-size:13px}
+.call .tm{font-size:24px;font-weight:300;font-variant-numeric:tabular-nums}
+.ring .av{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.big{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:10px}
+.big .t1{font-size:40px;font-weight:300;font-variant-numeric:tabular-nums}
+.big .t2{color:var(--tsub);font-size:14px}
+.cv{display:block}
+.cal{position:absolute;inset:0;padding:2px 4px}
+.cal table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;font-variant-numeric:tabular-nums}
+.cal th{font-weight:500;color:var(--tsub);font-size:11px;height:18px}
+.cal td{height:36px;text-align:center;position:relative;cursor:pointer}
+.cal td.o{opacity:.3}
+.cal td.today span{outline:1.5px solid var(--tsub);outline-offset:1px}
+.cal td span{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:5px}
+.cal td.sel span{background:var(--thl);color:var(--thlfg)}
+.cal td.has::after{content:"";position:absolute;left:50%;bottom:2px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#d0682a}
+.calc{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums}
+.calc .a{color:var(--tsub);font-size:16px;min-height:20px}
+.calc .b{font-size:34px;font-weight:300;word-break:break-all}
+.calc .h{font-size:11px;color:var(--tsub);text-align:left;margin-bottom:auto;line-height:1.5}
+.sym{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,1fr);padding:6px;gap:3px;align-content:start}
+.sym span{height:36px;display:grid;place-items:center;font-size:18px;border-radius:5px}
+.sym span.on{background:var(--thl);color:var(--thlfg)}
+.lv{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:8px;padding:40px 30px 60px}
+.lv i{flex:1;background:rgba(127,127,127,.25);border-radius:3px}
+.lv i.on{background:var(--thl)}
+.lvl{position:absolute;left:0;right:0;bottom:24px;text-align:center;color:var(--tsub);font-size:13px}
+.di{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.di .v{font-size:36px;font-weight:300;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.di .v u{text-decoration:none;border-bottom:2px solid var(--thl)}
+.di .h{color:var(--tsub);font-size:12px}
+.img{position:absolute;inset:0;background:#000 center/contain no-repeat}
+.mp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px;text-align:center}
+.mp .disc{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle,var(--tsolid) 12%,#222 13%,#444 40%,#222 41%,#333 70%,#111 71%);box-shadow:0 3px 10px rgba(0,0,0,.4)}
+.mp.play .disc{animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mp .ti{font-size:15px;font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mp .pr{width:100%;height:4px;background:rgba(127,127,127,.3);border-radius:2px;overflow:hidden}
+.mp .pr i{display:block;height:100%;background:var(--thl)}
+.mp .tm{font-size:12px;color:var(--tsub);font-variant-numeric:tabular-nums}
+.web{position:absolute;inset:0;overflow:hidden;padding:8px 10px;font-size:13px;line-height:1.35;background:#fff;color:#111}
+.web h3{margin:0 0 6px;font-size:15px;color:#164a8a}
+.web a{color:#1a5fb4;word-break:break-all}
+.web .bmk{padding:5px 0;border-bottom:1px solid #e3e3e3}
+.web .bmk.on{background:#dbe8fb}
+.boot{position:absolute;inset:0;background:#000;display:grid;place-items:center}
+.ss{position:absolute;inset:0;background:#000;color:#cfd8e3;cursor:pointer}
+.ss .c{position:absolute;font-size:34px;font-weight:300;font-variant-numeric:tabular-nums;text-align:center}
+.ss .c small{display:block;font-size:13px;color:#7c8794}
+@media (prefers-reduced-motion: reduce){.cr,.ring .av,.mp.play .disc,.phone.vib{animation:none}}
+</style>
+
+<div class="stage">
+  <input type="file" id="fin" multiple hidden accept="image/*,audio/*,.jar,.jad,.nth,.zip">
+  <input type="file" id="pin" multiple hidden accept="image/*">
+  <input type="file" id="cin" hidden accept="image/*" capture="environment">
+  <div class="wrap" id="wrap">
+    <div class="phone" id="phone">
+      <div class="body"></div>
+      <div class="pwr" data-k="PWR" title="Power: tap for profiles, hold to switch off/on"><i><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></i></div>
+      <div class="side vup" data-k="VUP" title="Volume up"><i>+</i></div>
+      <div class="side vdn" data-k="VDN" title="Volume down"><i>−</i></div>
+      <div class="face">
+        <div class="ear"></div>
+        <div class="brand">LARCH</div>
+      </div>
+      <div class="k emu" data-k="EMU" title="Emulator settings"><svg viewBox="0 0 14 10" fill="#d6dde5"><rect y="0" width="14" height="2" rx="1"/><rect y="4" width="14" height="2" rx="1"/><rect y="8" width="14" height="2" rx="1"/></svg></div>
+      <div class="inner" id="inner">
+      <div class="bezel">
+        <div id="lcd"><div id="scr" class="off"></div><div id="note" hidden></div><div id="dim"></div></div>
+        <div class="glass"></div>
+      </div>
+      <div class="ctl">
+        <div class="k soft l" data-k="L" title="Left selection key"><i></i></div>
+        <div class="k soft r" data-k="R" title="Right selection key"><i></i></div>
+        <div class="k cl" data-k="CALL" title="Call"><svg viewBox="0 0 24 24"><path fill="#38c35a" d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div>
+        <div class="k en" data-k="END" title="End / hold to power"><svg viewBox="0 0 24 24"><path fill="#e2453c" d="M12 9c-1.6 0-3.2.3-4.6.7v3.1c0 .4-.2.7-.6.9-1 .5-1.9 1.1-2.7 1.8-.2.2-.4.3-.7.3s-.5-.1-.7-.3L.3 13.1c-.2-.2-.3-.4-.3-.7s.1-.5.3-.7A16.8 16.8 0 0 1 12 7c4.6 0 8.7 1.8 11.7 4.7.2.2.3.4.3.7s-.1.5-.3.7l-2.4 2.4c-.2.2-.4.3-.7.3s-.5-.1-.7-.3c-.8-.7-1.7-1.3-2.7-1.8-.3-.2-.6-.5-.6-.9V9.7C15.2 9.3 13.6 9 12 9z"/></svg></div>
+        <div class="pad">
+          <div class="k dz u" data-k="U"><i></i></div>
+          <div class="k dz d" data-k="D"><i></i></div>
+          <div class="k dz lt" data-k="LT"><i></i></div>
+          <div class="k dz rt" data-k="RT"><i></i></div>
+          <div class="k ok" data-k="M" title="Select"></div>
+        </div>
+      </div>
+      <div class="kp" id="kp"></div>
+      <div class="mic"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+/* =========================================================
+   Larch K7 — S40-style phone shell
+   One file so the same phone can be wrapped by a Mac app,
+   an iPhone app, or a kiosk Linux image (window.PhoneHost).
+   ========================================================= */
+const $=s=>document.querySelector(s);
+const SCR=$('#scr'), NOTE=$('#note'), DIM=$('#dim'), PHONE=$('#phone');
+const Host=window.PhoneHost||null;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad2=n=>String(n).padStart(2,'0');
+const uid=()=>Math.random().toString(36).slice(2,10);
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+/* ---------------- defaults & storage ---------------- */
+const SYS_TZ=-new Date().getTimezoneOffset()/60;
+const DEF={
+  on:true, net:'Larch Mobile', profile:'general', timedUntil:0, timedPrev:'general',
+  profiles:{
+    general:{name:'General',tone:'Larch theme',vol:3,alert:'ring',vib:false,msg:'Twin',keys:2,warn:true,alertFor:'all'},
+    silent:{name:'Silent',tone:'Larch theme',vol:0,alert:'off',vib:true,msg:'Off',keys:0,warn:false,alertFor:'all'},
+    meeting:{name:'Meeting',tone:'Larch theme',vol:1,alert:'beep',vib:true,msg:'Beep',keys:0,warn:false,alertFor:'all'},
+    outdoor:{name:'Outdoor',tone:'Old bell',vol:5,alert:'ring',vib:true,msg:'Rise',keys:3,warn:true,alertFor:'all'},
+    pager:{name:'Pager',tone:'Larch theme',vol:0,alert:'off',vib:true,msg:'Beep',keys:2,warn:false,alertFor:'all'},
+    flight:{name:'Flight',tone:'Larch theme',vol:0,alert:'off',vib:false,msg:'Off',keys:1,warn:true,alertFor:'all'}
+  },
+  theme:'steel', wall:{on:true,id:'w:dawn'}, sfont:'#ffffff', navIcons:false, activeSb:true,
+  ss:{on:false,type:'digital',to:60}, psaver:false, sleep:false,
+  fs:{msg:'normal',contacts:'normal',web:'normal'}, opLogo:true,
+  clock:{show:true,h24:true,off:0,tz:SYS_TZ}, date:{show:true,fmt:'DD-MM-YYYY',sep:'-'}, autoTime:'on',
+  sc:{L:'goto',R:'names',U:'web',D:'names',LT:'newmsg',RT:'calendar'},
+  gotoList:['newmsg','inbox','calendar','alarm','web','gallery','profiles','snake'],
+  bt:{on:false,vis:'all',name:'Larch K7',paired:[]}, packet:'needed', usb:'ask',
+  call:{anykey:false,redial:false,speed:true,summary:true,cid:'net',line:1},
+  phone:{lang:'auto',wlang:'English',akg:{on:false,sec:60},seckg:false,welcome:'',flightQ:false,help:true,startTone:true},
+  sec:{pinReq:false,pin:'1234',pin2:'5678',code:'12345',level:'none',cug:'default',inuse:'pin'},
+  cfg:'operator', apn:'Internet',
+  menuView:'grid', menuOrder:['msg','contacts','log','settings','gallery','media','org','apps','web'],
+  contacts:[], cview:'name', groups:['Family','VIP','Friends','Business','Others'], speed:{}, myNum:'', vmail:'',
+  msgs:{inbox:[],sent:[],drafts:[],saved:[]},
+  msgSet:{saveSent:true,overwrite:'allowed',reports:false,centre:'+1 555 010 0100',validity:'max',type:'text',charset:'full',replySame:false},
+  msgCount:{sent:0,recv:0}, info:false,
+  logs:{missed:[],recv:[],dialled:[],msgTo:[]}, dur:{last:0,recv:0,dialled:0}, pdata:{sent:0,recv:0},
+  alarm:{on:false,h:7,m:0,rep:false,days:[1,2,3,4,5],tone:'Alarm',snz:10,fired:''},
+  cal:[], weekStart:1, todo:[], notes:[],
+  timer:null, swTimes:[],
+  web:{home:'start',last:'',bm:[{t:'Wikipedia (mobile)',u:'https://en.m.wikipedia.org'},{t:'Weather',u:'https://wttr.in'},{t:'Hacker News',u:'https://news.ycombinator.com'}],wrap:true,img:true,cookies:true,dlsave:'ask'},
+  jars:[], images:[], themes:[], snake:{lvl:5,best:0}, eq:'Normal', widen:false, t9:true, words:[], seeded:false
+};
+let S;
+function deepMerge(base,over){ if(Array.isArray(base)||typeof base!=='object'||base===null) return over===undefined?base:over;
+  const out={...base}; if(over&&typeof over==='object'&&!Array.isArray(over)) for(const k in over) out[k]=k in base?deepMerge(base[k],over[k]):over[k]; return out }
+function load(){ let raw=null; try{raw=window.__LARCH_STATE||JSON.parse(localStorage.getItem('larchK7')||'null')}catch(e){} S=deepMerge(clone(DEF),raw||{}) }
+let saveT;
+function save(){ clearTimeout(saveT); saveT=setTimeout(()=>{ try{localStorage.setItem('larchK7',JSON.stringify(S))}catch(e){ if(S.on&&e&&(e.name==='QuotaExceededError'||e.code===22)) note('Phone memory full','warn') } if(Host&&Host.persist) Host.persist(JSON.stringify(S)).catch(()=>{}); syncSchedule() },250) }
+let lastSched='';
+function syncSchedule(){ if(!Host||!Host.schedule) return; const items=[], off=S.clock.off, nowP=now();
+  if(S.alarm.on){ if(S.alarm.rep) S.alarm.days.forEach(d=>items.push({id:'alarm-'+d,title:'Alarm',body:fmtTime(new Date(2000,0,1,S.alarm.h,S.alarm.m)),hour:S.alarm.h,minute:S.alarm.m,weekday:d+1,repeats:true}));
+    else { const t=new Date(nowP); t.setHours(S.alarm.h,S.alarm.m,0,0); if(t<=nowP) t.setDate(t.getDate()+1); items.push({id:'alarm',title:'Alarm',body:fmtTime(t),at:t.getTime()-off}) } }
+  if(snoozeAt) items.push({id:'snooze',title:'Alarm',body:'Snooze',at:snoozeAt});
+  if(S.timer) items.push({id:'timer',title:'Timer expired',body:S.timer.note||'',at:S.timer.end});
+  for(const n of S.cal) if(n.alarm&&!n.fired&&n.time){ const [Y,M,D]=n.date.split('-').map(Number), [h,m]=n.time.split(':').map(Number); const at=new Date(Y,M-1,D,h,m).getTime()-off; if(at>Date.now()) items.push({id:'cal-'+n.id,title:n.type,body:n.subject,at}) }
+  const js=JSON.stringify(items); if(js===lastSched) return; lastSched=js; Host.schedule(items).catch(()=>{}) }
+load();
+if(!S.mig2){ S.mig2=true; S.ss.on=false; S.psaver=false; S.sleep=false; save() }
+if(!S.seeded){ S.seeded=true; S.msgs.inbox.push({id:uid(),from:'Larch',text:'Welcome to your Larch K7. Press Menu to explore. Add Java apps, pictures and music in Settings › Emulator › Add files.',t:Date.now(),read:false}); save() }
+
+/* ---------------- time ---------------- */
+const now=()=>new Date(Date.now()+S.clock.off);
+const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAY=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function fmtTime(d,secs){ let h=d.getHours(),m=pad2(d.getMinutes()),s=secs?':'+pad2(d.getSeconds()):'';
+  if(S.clock.h24) return pad2(h)+':'+m+s; const ap=h<12?'am':'pm'; h=h%12||12; return h+':'+m+s+' '+ap }
+function fmtTimeHTML(d){ if(S.clock.h24) return fmtTime(d); let h=d.getHours(); const ap=h<12?'am':'pm'; h=h%12||12; return h+':'+pad2(d.getMinutes())+`<small>${ap}</small>` }
+function fmtDate(d){ const D=pad2(d.getDate()),M=pad2(d.getMonth()+1),Y=d.getFullYear(),s=S.date.sep;
+  return {'DD-MM-YYYY':D+s+M+s+Y,'MM-DD-YYYY':M+s+D+s+Y,'YYYY-MM-DD':Y+s+M+s+D,'DD-MM-YY':D+s+M+s+String(Y).slice(2),'MM-DD-YY':M+s+D+s+String(Y).slice(2),'YY-MM-DD':String(Y).slice(2)+s+M+s+D}[S.date.fmt]||D+s+M+s+Y }
+const dkey=d=>d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+function fmtStamp(t){ const d=new Date(t+S.clock.off); return dkey(d)===dkey(now())?fmtTime(d):fmtDate(d)+' '+fmtTime(d) }
+const fmtDur=s=>pad2(Math.floor(s/3600))+':'+pad2(Math.floor(s/60)%60)+':'+pad2(Math.floor(s)%60);
+
+/* ---------------- sound ---------------- */
+let AC=null;
+function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){AC=null} } if(AC&&AC.state==='suspended') AC.resume(); return AC }
+const RING={
+  'Larch theme':'E5 8,G5 8,B5 8,E6 4,D6 8,B5 8,G5 4,R 4,A5 8,B5 8,D6 8,B5 4,G5 4',
+  'Spring':'C6 16,E6 16,G6 8,E6 16,C6 16,D6 8,R 8,C6 16,E6 16,G6 8,A6 8,G6 4',
+  'Old bell':'A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,R 4,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32',
+  'Pulse':'C5 16,R 16,C5 16,R 16,G5 8,R 8,C5 16,R 16,C5 16,R 16,A#5 8',
+  'Waltz in G':'G5 4,B5 8,D6 8,G6 4,F#6 8,E6 8,D6 2,C6 8,B5 8,A5 4,F#5 8,A5 8,G5 2',
+  'Bleeps':'E6 16,R 16,E6 16,R 16,E6 16,R 8,G6 16,R 16,G6 16,R 4',
+  'Lantern':'D6 8,A5 8,F#5 8,A5 8,D6 8,E6 8,F#6 4,E6 8,D6 8,C#6 8,A5 8,B5 4'
+};
+const MSGT={'Beep':'A6 16','Twin':'E6 16,R 32,E6 16','Rise':'C6 16,E6 16,G6 16,C7 8','Drop':'G6 16,E6 16,C6 8','Chime':'G6 8,C7 8,E7 4'};
+const ALARMT={'Alarm':'A6 16,R 16,A6 16,R 16,A6 16,R 16,A6 16,R 4','Rooster':'C6 16,E6 16,G6 16,C7 4,R 8,C7 16,G6 16,E6 16,C6 4','Larch theme':RING['Larch theme']};
+function noteF(n){ const m=/^([A-G])(#?)(\d)$/.exec(n); const b={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]]+(m[2]?1:0); return 440*Math.pow(2,((+m[3]+1)*12+b-69)/12) }
+function parseSeq(s,bpm){ const q=60/(bpm||150); return s.split(',').map(x=>{const [n,d]=x.trim().split(' '); return {f:n==='R'?0:noteF(n),d:q*4/(+d)}}) }
+function playSeq(str,o={}){ const a=ac(); const vol=o.vol==null?.12:o.vol; if(!a||!vol||!str) return {stop(){}};
+  const notes=parseSeq(str,o.bpm); let stopped=false,oscs=[],timer=null,rep=0;
+  const run=()=>{ if(stopped) return; let t=a.currentTime+.03; const g0=Math.min(.32,vol+(o.step||0)*rep);
+    for(const n of notes){ if(n.f){ const os=a.createOscillator(),g=a.createGain(); os.type=o.wave||'square'; os.frequency.value=n.f;
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(g0,t+.006); g.gain.setValueAtTime(g0,t+n.d*.82); g.gain.linearRampToValueAtTime(0,t+n.d*.95);
+      os.connect(g).connect(a.destination); os.start(t); os.stop(t+n.d); oscs.push(os); os.onended=()=>{oscs=oscs.filter(x=>x!==os)} } t+=n.d }
+    rep++; const total=(t-a.currentTime)*1000; if(o.loop&&rep<(o.max||1e9)) timer=setTimeout(run,total+600); else if(o.onend) timer=setTimeout(o.onend,total) };
+  run(); return {stop(){stopped=true;clearTimeout(timer);oscs.forEach(x=>{try{x.stop()}catch(e){}});oscs=[]}} }
+const volG=v=>[0,.03,.06,.1,.15,.22][v]||0;
+const DTMF={'1':[697,1209],'2':[697,1336],'3':[697,1477],'4':[770,1209],'5':[770,1336],'6':[770,1477],'7':[852,1209],'8':[852,1336],'9':[852,1477],'*':[941,1209],'0':[941,1336],'#':[941,1477]};
+function beep(fs,dur,g,wave){ const a=ac(); if(!a||!g) return; const t=a.currentTime; const gn=a.createGain(); gn.gain.setValueAtTime(g,t); gn.gain.setValueAtTime(g,t+dur*.8); gn.gain.linearRampToValueAtTime(0,t+dur); gn.connect(a.destination);
+  fs.forEach(f=>{const o=a.createOscillator(); o.type=wave||'sine'; o.frequency.value=f; o.connect(gn); o.start(t); o.stop(t+dur)}) }
+const prof=()=>S.profiles[S.profile];
+function keyTone(k){ if(!S.on) return; const lv=prof().keys; if(!lv) return; beep(DTMF[k]||[1320],DTMF[k]?.09:.05,[0,.04,.08,.13][lv],DTMF[k]?'sine':'square') }
+function warnTone(){ if(prof().warn) beep([880,660],.18,.05,'square') }
+let ringH=null;
+let vibI=null;
+function startRing(kind){ stopRing(); const p=prof(); const v=volG(p.vol);
+  if(p.vib){ PHONE.classList.add('vib'); if(Host&&Host.haptic){ Host.haptic('vibrate'); vibI=setInterval(()=>Host.haptic('vibrate'),1600) } }
+  if(kind==='alarm'){ ringH=playSeq(ALARMT[S.alarm.tone]||ALARMT.Alarm,{vol:Math.max(v,.08),loop:true}); return }
+  if(p.alert==='off'||!v) return;
+  if(p.alert==='beep'){ ringH=playSeq('A6 16',{vol:v}); return }
+  ringH=playSeq(RING[p.tone]||RING['Larch theme'],{vol:p.alert==='asc'?.02:v,step:p.alert==='asc'?.03:0,loop:p.alert!=='once'}) }
+function stopRing(){ if(ringH){ringH.stop();ringH=null} clearInterval(vibI); vibI=null; PHONE.classList.remove('vib') }
+function msgAlert(){ const p=prof(); if(p.vib&&Host&&Host.haptic) Host.haptic('vibrate'); if(p.vib){PHONE.classList.add('vib');setTimeout(()=>{if(!ringH)PHONE.classList.remove('vib')},700)} if(p.msg!=='Off'&&MSGT[p.msg]) playSeq(MSGT[p.msg],{vol:Math.max(volG(p.vol),.04)}) }
+
+/* ---------------- icons (original line art) ---------------- */
+const P={
+  msg:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3.5 7.5 12 13l8.5-5.5"/>',
+  contacts:'<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.6-3.8 3.6-6 7.5-6s6.9 2.2 7.5 6"/>',
+  log:'<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>',
+  settings:'<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="currentColor"/><circle cx="15.5" cy="12" r="2" fill="currentColor"/><circle cx="8" cy="17" r="2" fill="currentColor"/>',
+  gallery:'<path d="M3 7.5V18a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8.5L10 6H4a1 1 0 0 0-1 1.5z"/><path d="m6.5 16.5 3.5-4 2.5 2.5 2-2 3 3.5"/>',
+  media:'<circle cx="12" cy="12" r="8.5"/><path d="M10 8.3v7.4l6-3.7z" fill="currentColor"/>',
+  org:'<rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/><path d="M8 14h3v3H8z" fill="currentColor"/>',
+  apps:'<rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="3.5"/>',
+  web:'<circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.6" ry="8.5"/><path d="M3.8 9h16.4M3.8 15h16.4"/>',
+  person:'<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.6-3.8 3.6-6 7.5-6s6.9 2.2 7.5 6"/>',
+  phone:'<path d="M7 3.5h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A16 16 0 0 1 5.5 5.1 1.5 1.5 0 0 1 7 3.5z"/>',
+  missed:'<path d="M7 3.5h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A16 16 0 0 1 5.5 5.1 1.5 1.5 0 0 1 7 3.5z"/><path d="m15 3 5 5M20 3l-5 5"/>',
+  alarm:'<circle cx="12" cy="13" r="7"/><path d="M12 9.5V13l2.2 1.6M4 5.5 7 3M20 5.5 17 3"/>',
+  bt:'<path d="m7 7.5 10 9-5 4.5V3l5 4.5-10 9"/>',
+  lock:'<rect x="5.5" y="10.5" width="13" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
+  silent:'<path d="M6 16h12l-1.6-2.4V10a4.4 4.4 0 0 0-8.8 0v3.6z"/><path d="M10.2 19a2 2 0 0 0 3.6 0M4 4l16 16"/>',
+  timer:'<path d="M7 3.5h10M7 20.5h10M8 3.5c0 5 8 5 8 8.5s-8 3.5-8 8.5M16 3.5c0 5-8 5-8 8.5s8 3.5 8 8.5"/>',
+  note:'<path d="M9 17.5V6l10-2v11.5"/><circle cx="6.8" cy="17.5" r="2.2" fill="currentColor"/><circle cx="16.8" cy="15.5" r="2.2" fill="currentColor"/>',
+  cal:'<rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
+  folder:'<path d="M3 7.5V18a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-8.5L10 6H4a1 1 0 0 0-1 1.5z"/>',
+  java:'<path d="M8 16.5c2 1.3 6 1.3 8 0M7 19.5c3 1.5 7 1.5 10 0M14 13H7.5v3h8a2 2 0 0 0 0-4H15M10 4c2 2-2 3 0 6M13 3c2 2.5-2 3.5 0 7"/>',
+  game:'<rect x="3" y="8" width="18" height="10" rx="4"/><path d="M7.5 11v4M5.5 13h4"/><circle cx="15.5" cy="12" r="1" fill="currentColor"/><circle cx="17.5" cy="14.5" r="1" fill="currentColor"/>',
+  img:'<rect x="3.5" y="5" width="17" height="14" rx="1.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4 17.5 5-5 4 4 2.5-2.5 4.5 4"/>',
+  tone:'<path d="M9 17.5V6l10-2v11.5"/><circle cx="6.8" cy="17.5" r="2.2"/><circle cx="16.8" cy="15.5" r="2.2"/>',
+  theme:'<path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.6-.9 1.2-1.8-.5-1-.1-2.2 1.2-2.2H17a3.5 3.5 0 0 0 3.5-3.5c0-5-3.8-9.5-8.5-9.5z"/><circle cx="8" cy="11" r="1.2" fill="currentColor"/><circle cx="11" cy="7.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"/>',
+  doc:'<path d="M6.5 3.5h7.5l4 4v13h-11.5z"/><path d="M14 3.5v4h4M9 12h6M9 15.5h6"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  envin:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3.5 7.5 12 13l8.5-5.5"/>',
+  envopen:'<path d="M3 10v9h18v-9l-9-6z"/><path d="m3.5 10.5 8.5 5.5 8.5-5.5"/>',
+  out:'<path d="M4 12h12M12 7l5 5-5 5"/><path d="M20 4v16"/>',
+  inc:'<path d="M20 12H8M12 7l-5 5 5 5"/><path d="M4 4v16"/>'
+};
+const ico=(n,w)=>`<svg viewBox="0 0 24 24" ${w?`width="${w}" height="${w}"`:''} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[n]||''}</svg>`;
+function sigSVG(n){ let s='<svg width="14" height="74" viewBox="0 0 14 74">'; s+='<path d="M7 2v10M3 3l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
+  for(let i=0;i<5;i++){ const w=4+i*2, y=68-i*11; s+=`<rect x="${7-w/2}" y="${y}" width="${w}" height="7" rx="1" fill="currentColor" opacity="${i<n?1:.25}"/>` } return s+'</svg>' }
+function batSVG(n){ let s='<svg width="14" height="74" viewBox="0 0 14 74"><rect x="2.5" y="3" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="5" y="1" width="4" height="2" fill="currentColor"/><rect x="4.3" y="6" width="5.4" height="6" fill="currentColor"/>';
+  for(let i=0;i<4;i++){ const w=4+i*2.5, y=68-i*13; s+=`<rect x="${7-w/2}" y="${y}" width="${w}" height="9" rx="1" fill="currentColor" opacity="${i<n?1:.25}"/>` } return s+'</svg>' }
+
+/* ---------------- themes & wallpapers (original) ---------------- */
+const TILES=['#3f7fd1','#e0742a','#3c9a4a','#6b6fd6','#c24d6b','#2e9e8f','#9a5bc4','#c9a227','#2f8fc0'];
+const THEMES={
+  steel:{n:'Steel',bg:'linear-gradient(180deg,#f1f4f8,#d3dce7)',solid:'#eef2f6',fg:'#16212e',sub:'#5a6a7e',hd:'linear-gradient(180deg,#4d79b0,#264e7e)',hdfg:'#fff',hl:'linear-gradient(180deg,#78b3f0,#2f6fb8)',hlfg:'#fff',sk:'linear-gradient(180deg,#e3e9f1,#bcc8d8)',skfg:'#16212e',wall:'w:dawn'},
+  lagoon:{n:'Lagoon',bg:'linear-gradient(180deg,#e8f6f4,#bfe1dc)',solid:'#e6f4f2',fg:'#0d2a2a',sub:'#3f6a68',hd:'linear-gradient(180deg,#1f9a91,#0f6a66)',hdfg:'#fff',hl:'linear-gradient(180deg,#4fd0c3,#13897f)',hlfg:'#fff',sk:'linear-gradient(180deg,#d8efec,#a9d5cf)',skfg:'#0d2a2a',wall:'w:ripples'},
+  ember:{n:'Ember',bg:'linear-gradient(180deg,#fff4ea,#f3d4b8)',solid:'#fff1e4',fg:'#2e1607',sub:'#7a5236',hd:'linear-gradient(180deg,#e0742a,#a8460f)',hdfg:'#fff',hl:'linear-gradient(180deg,#ffae5c,#e06a1a)',hlfg:'#fff',sk:'linear-gradient(180deg,#f7e2cf,#e6bf9c)',skfg:'#2e1607',wall:'w:petals'},
+  graphite:{n:'Graphite',bg:'linear-gradient(180deg,#22272e,#14171b)',solid:'#1e2329',fg:'#e9edf2',sub:'#9aa5b1',hd:'linear-gradient(180deg,#3a414b,#262b32)',hdfg:'#fff',hl:'linear-gradient(180deg,#f0a43a,#c97a12)',hlfg:'#16110a',sk:'linear-gradient(180deg,#2d333b,#1b1f24)',skfg:'#e9edf2',wall:'w:grid'},
+  meadow:{n:'Meadow',bg:'linear-gradient(180deg,#f2f8e9,#d2e6b8)',solid:'#eff6e5',fg:'#1c2a10',sub:'#56693f',hd:'linear-gradient(180deg,#5c9a2c,#3a6a16)',hdfg:'#fff',hl:'linear-gradient(180deg,#9ad25a,#4f8f1e)',hlfg:'#fff',sk:'linear-gradient(180deg,#e2eed3,#c0d99f)',skfg:'#1c2a10',wall:'w:hills'},
+  night:{n:'Night',bg:'linear-gradient(180deg,#1b1f3a,#0d0f20)',solid:'#171a32',fg:'#e6e8ff',sub:'#9aa0d0',hd:'linear-gradient(180deg,#3b3f86,#22255a)',hdfg:'#fff',hl:'linear-gradient(180deg,#7d6cf0,#4b39c4)',hlfg:'#fff',sk:'linear-gradient(180deg,#262a4f,#151831)',skfg:'#e6e8ff',wall:'w:glass'}
+};
+function rng(seed){ return ()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646 } }
+const WALLS={};
+function mkWalls(){
+  const W=240,H=320; const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+  const out=(id,n,fn)=>{ x.save(); x.clearRect(0,0,W,H); fn(); x.restore(); WALLS[id]={n,src:c.toDataURL('image/jpeg',.88)} };
+  out('w:dawn','Larch dawn',()=>{ let g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2b2a63'); g.addColorStop(.45,'#c4577a'); g.addColorStop(.7,'#ffb07a'); x.fillStyle=g; x.fillRect(0,0,W,H);
+    x.fillStyle='rgba(255,236,190,.9)'; x.beginPath(); x.arc(150,200,26,0,7); x.fill();
+    const r=rng(7); [['#3a2848',215],['#241a33',245],['#120d1c',280]].forEach(([col,base],li)=>{ x.fillStyle=col; x.beginPath(); x.moveTo(0,H); for(let i=0;i<=W;i+=8) x.lineTo(i,base+Math.sin(i/40+li)*10); x.lineTo(W,H); x.fill();
+      for(let i=0;i<14;i++){ const tx=r()*W, th=18+r()*30+li*10, ty=base+Math.sin(tx/40+li)*10+4; x.beginPath(); x.moveTo(tx,ty-th); x.lineTo(tx-th*.28,ty); x.lineTo(tx+th*.28,ty); x.fill() } }) });
+  out('w:ripples','Ripples',()=>{ const g=x.createRadialGradient(120,140,10,120,160,260); g.addColorStop(0,'#5fe0cf'); g.addColorStop(1,'#0b4d57'); x.fillStyle=g; x.fillRect(0,0,W,H);
+    for(let i=1;i<18;i++){ x.strokeStyle=`rgba(255,255,255,${.22-i*.011})`; x.lineWidth=2; x.beginPath(); x.ellipse(120,150,i*16,i*12,0,0,7); x.stroke() } });
+  out('w:glass','Glass',()=>{ x.fillStyle='#0d1030'; x.fillRect(0,0,W,H); const r=rng(42); const cols=['#5b4bff','#00c2ff','#ff4fa3','#7dffb2','#ffb340'];
+    for(let i=0;i<9;i++){ x.save(); x.translate(r()*W,r()*H); x.rotate(r()*3); x.globalAlpha=.32; x.fillStyle=cols[i%5]; const w=60+r()*90,h=40+r()*70; x.beginPath(); x.roundRect(-w/2,-h/2,w,h,14); x.fill(); x.restore() } });
+  out('w:grid','Night grid',()=>{ const g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#05070d'); g.addColorStop(1,'#0e1d3a'); x.fillStyle=g; x.fillRect(0,0,W,H);
+    for(let yy=10;yy<H;yy+=14) for(let xx=10;xx<W;xx+=14){ x.fillStyle=`rgba(120,170,255,${.08+ (yy/H)*.3})`; x.fillRect(xx,yy,1.6,1.6) }
+    x.strokeStyle='rgba(255,170,60,.7)'; x.lineWidth=2; x.beginPath(); for(let i=0;i<=W;i+=4) x.lineTo(i,230+Math.sin(i/18)*12+Math.sin(i/7)*4); x.stroke() });
+  out('w:petals','Petals',()=>{ const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#ffcf9f'); g.addColorStop(1,'#d9486a'); x.fillStyle=g; x.fillRect(0,0,W,H);
+    x.translate(120,150); for(let i=0;i<14;i++){ x.rotate(Math.PI*2/14); x.fillStyle='rgba(255,255,255,.18)'; x.beginPath(); x.ellipse(0,-60,22,60,0,0,7); x.fill() } x.fillStyle='rgba(255,240,200,.85)'; x.beginPath(); x.arc(0,0,16,0,7); x.fill() });
+  out('w:hills','Green hills',()=>{ const g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#9fd8ff'); g.addColorStop(.6,'#e8f7ff'); x.fillStyle=g; x.fillRect(0,0,W,H);
+    [['#8cc63f',200,.02],['#5aa02c',240,.03],['#3b7a1a',280,.025]].forEach(([c2,b,f],i)=>{ x.fillStyle=c2; x.beginPath(); x.moveTo(0,H); for(let j=0;j<=W;j+=6) x.lineTo(j,b+Math.sin(j*f+i*2)*18); x.lineTo(W,H); x.fill() }) });
+  out('w:plain','Brushed steel',()=>{ const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#8b98a8'); g.addColorStop(1,'#2e3742'); x.fillStyle=g; x.fillRect(0,0,W,H);
+    const r=rng(3); for(let i=0;i<500;i++){ x.fillStyle=`rgba(255,255,255,${r()*.06})`; x.fillRect(0,r()*H,W,1) } });
+}
+mkWalls();
+function wallSrc(id){ if(WALLS[id]) return WALLS[id].src; const im=S.images.find(i=>i.id===id); if(im) return im.data; const th=S.themes.find(t=>'t:'+t.id===id); return th?th.wall:null }
+function applyTheme(){ const lcd=$('#lcd'); let t=THEMES[S.theme]; let bg; if(!t){ const u=S.themes.find(x=>x.id===S.theme); t={...THEMES.steel,...(u?{n:u.n}:{})}; if(u&&u.bg) bg=`url(${u.bg}) center/cover`; }
+  const m={tbg:bg||t.bg,tsolid:t.solid,tfg:t.fg,tsub:t.sub,thd:t.hd,thdfg:t.hdfg,thl:t.hl,thlfg:t.hlfg,tsk:t.sk,tskfg:t.skfg};
+  for(const k in m) lcd.style.setProperty('--'+k,m[k]); lcd.style.setProperty('--sf',S.sfont) }
+
+/* ---------------- predictive text ---------------- */
+const MT={'1':".,?!'\"-()@/:_;1",'2':'abc2','3':'def3','4':'ghi4','5':'jkl5','6':'mno6','7':'pqrs7','8':'tuv8','9':'wxyz9','0':' 0'};
+const L2D={}; for(const d in MT) for(const ch of MT[d]) if(/[a-z']/.test(ch)) L2D[ch]=d;
+const t9of=w=>w.toLowerCase().split('').map(c=>L2D[c]||'').join('');
+const DICT=("i a the to you and it is in of that for on be have are with this at not but so we my me do was what can if your will just know get all no yes ok okay hi hey hello thanks thank please sorry love like good great see now how when where who why here there go going come coming home work later today tomorrow tonight morning night day week weekend time call text phone back out up down one two three four five six seven eight nine ten soon late early meet meeting lunch dinner coffee tea food eat movie game play party free busy ready done sure fine nice happy birthday friday saturday sunday monday tuesday wednesday thursday car bus train school office class talk tell said say make made take need want think feel miss let look find give help start stop wait still also too very much more less some any every about after before again only then than them they their our us he she him her his its from by as or an off over into new old big small long best last next first other same well way right left yes yeah maybe because could would should did does has had been were am got put keep run walk open close buy pay money cash bank shop store price cheap free street road city house room door bed sleep up hope wish hear heard read write sent send message number name family mom dad brother sister friend friends people man woman boy girl baby kids dog cat water rain sun snow cold hot warm weather news story book music song radio photo picture camera video world country place near far side top end part point fun funny cool awesome really always never often sometimes usually something nothing everything anything someone everyone thing things guy guys bye goodnight cheers xoxo lol it's i'm don't can't won't that's i'll you're we're they're isn't didn't doesn't wasn't i've let's what's where's who's").split(' ');
+function dictWords(){ return [...S.words,...DICT] }
+function t9Cands(seq){ const ex=[],pre=[],seen=new Set(); for(const w of dictWords()){ const s=t9of(w); if(s===seq){ if(!seen.has(w)){seen.add(w);ex.push(w)} } }
+  for(const w of dictWords()){ const s=t9of(w); if(s.length>seq.length&&s.startsWith(seq)){ const p=w.slice(0,seq.length); if(!seen.has(p)){seen.add(p);pre.push(p)} } } return ex.concat(pre) }
+
+/* ---------------- view stack ---------------- */
+let V=[]; const tv=()=>V[V.length-1];
+function push(v){ v.moved=Date.now(); V.push(v); render() }
+function pop(n){ n=n||1; for(let i=0;i<n&&V.length>1;i++){ const v=V.pop(); v.onPop&&v.onPop() } render() }
+function popTo(name){ while(V.length>1&&tv().name!==name){ const v=V.pop(); v.onPop&&v.onPop() } render() }
+function home(){ while(V.length>1){ const v=V.pop(); v.onPop&&v.onPop() } if(!V.length&&S.on) V.push(Standby()); render() }
+function render(){ applyTheme(); const v=tv(); if(!v||!S.on){ SCR.className='off'; SCR.innerHTML=''; return }
+  SCR.className=(v.full?'full ':'')+(v.cls||'');
+  const title=v.hdText?v.hdText():v.title;
+  let h=v.full?'':`<div class="hd"><span class="ht">${title==null?'':esc(title)}</span><span class="hr">${v.hdRight?v.hdRight():''}</span></div>`;
+  h+='<div class="bd"></div>';
+  const s=v.soft?v.soft():[{},{},{}];
+  if(!v.noSoft) h+=`<div class="sk${v.full&&v.ovSoft?' ov':''}"><span class="skl" data-s="L">${esc(s[0]&&s[0].t||'')}</span><span class="skm" data-s="M">${esc(s[1]&&s[1].t||'')}</span><span class="skr" data-s="R">${esc(s[2]&&s[2].t||'')}</span></div>`;
+  SCR.innerHTML=h; const bd=SCR.querySelector('.bd'); if(v.noSoft) bd.style.bottom='0'; v.draw&&v.draw(bd) }
+
+/* note / ask / helpers */
+let noteThen=null,noteT=null;
+const NI={ok:'✓',info:'i',warn:'!',wait:'…'};
+function note(text,kind,ms,then){ kind=kind||'ok'; NOTE.innerHTML=`<div class="nb"><div class="ni ${kind}">${NI[kind]}</div><p>${esc(text)}</p></div>`; NOTE.hidden=false;
+  noteThen=then||null; clearTimeout(noteT); noteT=setTimeout(endNote,ms||1400); if(kind==='warn') warnTone() }
+function endNote(){ clearTimeout(noteT); NOTE.hidden=true; const t=noteThen; noteThen=null; t&&t() }
+function Ask(text,yes,no,o){ o=o||{}; push({name:'ask',title:o.title||'',full:!o.title,cls:'',
+  draw(el){ el.innerHTML=`<div class="dlgw"><div class="dlg"><div class="dq">?</div><p>${esc(text)}</p></div></div>` },
+  soft(){ return [{t:'Yes',f:()=>{pop();yes&&yes()}},{t:''},{t:'No',f:()=>{pop();no&&no()}}] } }) }
+function Info(title,html,o){ o=o||{}; push({name:'info',title,draw(el){ el.innerHTML=`<div class="txt">${html}</div>` },soft(){return [o.L||{t:''},o.M||{t:''},{t:'Back',f:pop}]},
+  key(k){ if(k==='D'||k==='U'){ const t=SCR.querySelector('.txt'); if(t){t.scrollTop+=k==='D'?40:-40} return true } return false } }) }
+function scrollbar(topI,rows,n){ const h=rows/n*100, t=topI/n*100; return `<div class="sbar"><i style="top:${t}%;height:${h}%"></i></div>` }
+
+function List(title,items,o){ o=o||{};
+  const v={name:o.name||'list',title,o,i:o.i||0,top:0,
+    items(){ return typeof items==='function'?items():items },
+    hdRight(){ if(o.hdRight) return o.hdRight.call(this); const n=this.items().length; return o.count===false||!n?'':`${this.i+1}/${n}` },
+    draw(el){ const it=this.items(), n=it.length; if(o.cls) el.classList.add(o.cls);
+      if(!n){ el.innerHTML=`<div class="empty">${esc(o.empty||'(empty)')}</div>`+(o.foot?`<div class="foot">${o.foot.call(this)}</div>`:''); return }
+      if(this.i>=n) this.i=n-1; if(this.i<0) this.i=0;
+      const avail=266-(o.foot?24:0), rh=o.two?47:33, rows=Math.floor(avail/rh);
+      if(this.i<this.top) this.top=this.i; if(this.i>=this.top+rows) this.top=this.i-rows+1; if(this.top>Math.max(0,n-rows)) this.top=Math.max(0,n-rows);
+      let h='<div class="ls">';
+      for(let j=this.top;j<Math.min(n,this.top+rows);j++){ const x=it[j];
+        h+=`<div class="li${j===this.i?' on':''}${o.two?' two':''}${x.bold?' unread':''}" data-i="${j}">${x.ic?`<span class="lic">${x.ic}</span>`:''}<span class="lt"><b>${esc(x.t)}</b>${x.s!=null&&x.s!==''?`<small>${esc(x.s)}</small>`:''}</span>${x.radio?`<span class="rb${x.on?' on':''}"></span>`:''}${x.check!=null?`<span class="cb${x.check?' on':''}"></span>`:''}</div>` }
+      h+='</div>'; if(n>rows) h+=scrollbar(this.top,rows,n); if(o.foot) h+=`<div class="foot">${o.foot.call(this)}</div>`; el.innerHTML=h },
+    soft(){ const it=this.items()[this.i];
+      const L=o.L?o.L.call(this,it)||{t:''}:{t:''};
+      const M=it?(o.M?o.M.call(this,it):{t:'Select',f:()=>this.select()}):(o.Mempty||{t:''});
+      const R=o.R?o.R.call(this,it):{t:'Back',f:pop}; return [L,M,R] },
+    select(){ const it=this.items()[this.i]; if(!it) return; if(o.onSel) return o.onSel.call(this,it); if(it.toggle){ it.toggle(); save(); render(); return } it.f&&it.f(it,this) },
+    key(k,long){ if(o.key&&o.key.call(this,k,long)) return true; const n=this.items().length; if(!n) return false;
+      if(k==='U'||k==='D'){ this.i=(this.i+(k==='U'?-1:1)+n)%n; this.moved=Date.now(); o.onMove&&o.onMove.call(this,this.items()[this.i]); render(); return true }
+      if(o.nums&&/^[1-9]$/.test(k)&&+k<=n&&!long){ this.i=+k-1; render(); this.select(); return true }
+      return false },
+    onPop(){ o.onPop&&o.onPop() } };
+  return v }
+const menu=(title,arr,o)=>push(List(title,arr.filter(Boolean).map(a=>({t:a[0],f:a[1],ic:a[2]?ico(a[2]):''})),Object.assign({nums:true},o||{})));
+function Radio(title,opts,get,set,o){ o=o||{}; const cur=get(); const i=Math.max(0,opts.findIndex(x=>x[0]===cur));
+  push(List(title,()=>opts.map(([val,t])=>({t,val,radio:true,on:get()===val})),{i,count:false,onMove:o.onMove,onPop:o.onPop,
+    onSel(it){ set(it.val); save(); if(o.keep){ render(); o.after&&o.after(it.val); return } pop(); o.after&&o.after(it.val); if(o.note) note(o.note) } })) }
+const OnOff=(title,obj,key,o)=>Radio(title,[[true,'On'],[false,'Off']],()=>obj[key],v=>obj[key]=v,o);
+function Checks(title,opts,get,set){ push(List(title,()=>opts.map(([val,t])=>({t,val,check:get().includes(val)})),{count:false,
+  onSel(it){ const a=get().slice(); const i=a.indexOf(it.val); if(i>=0) a.splice(i,1); else a.push(it.val); set(a); save(); render() },
+  M:()=>({t:'Mark',f:function(){ tv().select() }}), L:()=>({t:'Done',f:pop}) })) }
+function Level(title,get,set,max,preview){ let val=get(); let h=null;
+  push({name:'level',title,draw(el){ let s='<div class="lv">'; for(let i=1;i<=max;i++) s+=`<i class="${i<=val?'on':''}" style="height:${18+i*(70/max)}%"></i>`; el.innerHTML=s+`</div><div class="lvl">Level ${val}</div>` },
+    soft(){ return [{t:'OK',f:()=>{set(val);save();h&&h.stop();pop()}},{t:''},{t:'Back',f:()=>{h&&h.stop();pop()}}] },
+    key(k){ if(k==='U'||k==='RT'||k==='VUP'){val=Math.min(max,val+1)} else if(k==='D'||k==='LT'||k==='VDN'){val=Math.max(1,val-1)} else return false; h&&h.stop(); h=preview?preview(val):null; render(); return true },
+    onPop(){ h&&h.stop() } }) }
+function DigitInput(title,tmpl,init,done,o){ o=o||{}; const slots=tmpl.split('').filter(c=>c==='#').length; let d=(init||'').padEnd(slots,'0').slice(0,slots).split(''); let pos=0;
+  push({name:'digits',title,draw(el){ let k=0,s=''; for(const c of tmpl){ if(c==='#'){ s+=k===pos?`<u>${d[k]}</u>`:d[k]; k++ } else s+=c }
+      el.innerHTML=`<div class="di"><div class="h">${esc(o.hint||'')}</div><div class="v">${s}</div>${o.ampm?`<div class="h">${o.ampm()}</div>`:''}</div>` },
+    soft(){ return [{t:'OK',f:()=>{ const r=done(d.join('')); if(r===false) note(o.bad||'Invalid entry','warn') }},{t:''},{t:'Back',f:pop}] },
+    key(k){ if(/^\d$/.test(k)){ d[pos]=k; pos=Math.min(slots-1,pos+1); render(); return true }
+      if(k==='LT'){pos=Math.max(0,pos-1);render();return true} if(k==='RT'){pos=Math.min(slots-1,pos+1);render();return true}
+      if(k==='M'){ this.soft()[0].f(); return true } if(o.key&&o.key(k)){render();return true} return false } }) }
+function TimeEntry(title,h,m,done){ DigitInput(title,'##:##',pad2(h)+pad2(m),s=>{ const H=+s.slice(0,2),M=+s.slice(2); if(H>23||M>59) return false; done(H,M) },{hint:'hh:mm (24-hour)'}) }
+
+/* ---------------- text editor (multi-tap + predictive) ---------------- */
+function Editor(o){
+  const v={name:'editor',o,text:o.text||'',caret:(o.text||'').length,cm:o.mode==='text'?(o.lower?'abc':'Abc'):'123',pred:o.mode==='text'&&S.t9&&!o.noPred,mt:null,w:null,lastHash:0,
+    title:o.title,
+    numeric(){ return o.mode!=='text'||this.cm==='123' },
+    sentence(pos){ const b=this.text.slice(0,pos).replace(/\s+$/,''); return !b||/[.!?]$/.test(b) },
+    modeLabel(){ if(o.mode!=='text') return '123'; if(this.cm==='123') return '123'; if(this.cm==='Abc') return this.sentence(this.caret)?'Abc':'abc'; return this.cm },
+    hdText(){ if(o.sms){ const n=this.text.length, parts=Math.max(1,Math.ceil(n/153)), left=n<=160?160-n:153*parts-n; return `${left}/${parts}` } return o.title||'' },
+    hdRight(){ if(o.mode==='pass'||o.mode==='phone'||o.mode==='num') return ''; return (this.pred?'✎ ':'')+this.modeLabel() },
+    cased(ch,pos){ if(!/[a-z]/.test(ch)) return ch; if(this.cm==='ABC') return ch.toUpperCase(); if(this.cm==='Abc'&&this.sentence(pos)) return ch.toUpperCase(); return ch },
+    ins(s){ if(o.max&&this.text.length+s.length>o.max){ warnTone(); return } this.text=this.text.slice(0,this.caret)+s+this.text.slice(this.caret); this.caret+=s.length },
+    del(){ if(this.caret>0){ this.text=this.text.slice(0,this.caret-1)+this.text.slice(this.caret); this.caret-- } },
+    mtEnd(){ this.mt=null },
+    commit(){ this.w=null },
+    multitap(k){ const g=MT[k]; const t=Date.now();
+      if(this.mt&&this.mt.k===k&&t-this.mt.t<950){ this.mt.i=(this.mt.i+1)%g.length; const pos=this.caret-1; this.text=this.text.slice(0,pos)+this.cased(g[this.mt.i],pos)+this.text.slice(this.caret) }
+      else { this.mt={k,i:0}; const pos=this.caret; this.ins(this.cased(g[0],pos)) }
+      this.mt.t=t; clearTimeout(this.mtT); this.mtT=setTimeout(()=>{ this.mt=null; if(tv()===this) render() },950) },
+    wordCased(w,pos){ if(this.cm==='ABC') return w.toUpperCase(); if(this.cm==='Abc'&&this.sentence(pos)) return w.charAt(0).toUpperCase()+w.slice(1); return w },
+    applyW(){ const w=this.w; const c=t9Cands(w.seq); let word; if(c.length){ word=c[w.alt%c.length]; w.miss=false } else { word=w.seq.split('').map(d=>MT[d][0]).join(''); w.miss=true }
+      word=this.wordCased(word,w.start); this.text=this.text.slice(0,w.start)+word+this.text.slice(w.start+w.len); w.len=word.length; this.caret=w.start+word.length; w.cands=c.length },
+    draw(el){ const t=this.text; let shown=o.mode==='pass'?t.replace(/./g,'*'):t; let a=this.caret, html;
+      if(this.w&&o.mode!=='pass'){ const s=this.w.start,e=s+this.w.len; html=esc(shown.slice(0,s))+`<span class="tw${this.w.miss?' miss':''}">${esc(shown.slice(s,e))}</span>`+(a===e?'<span class="cr"></span>':'')+esc(shown.slice(e)) }
+      else if(this.mt&&o.mode!=='pass'&&a>0){ html=esc(shown.slice(0,a-1))+`<span class="mt">${esc(shown.slice(a-1,a))}</span><span class="cr"></span>`+esc(shown.slice(a)) }
+      else html=esc(shown.slice(0,a))+'<span class="cr"></span>'+esc(shown.slice(a));
+      const fs=o.sms?S.fs.msg:'normal';
+      el.innerHTML=`<div class="ed fs-${fs}">${o.label?`<span class="lbl">${esc(o.label)}</span>`:''}<span class="box">${html}</span></div>`;
+      if(o.mode==='phone'||o.mode==='num') el.firstChild.style.fontSize='22px';
+      const ed=el.firstChild, cr=ed.querySelector('.cr'); if(cr&&cr.offsetTop>ed.clientHeight-30) ed.scrollTop=cr.offsetTop-ed.clientHeight+40 },
+    soft(){ let L; if(this.w&&this.w.miss) L={t:'Spell',f:()=>this.spell()}; else if(o.opts) L={t:'Options',f:()=>this.options()}; else L={t:o.okLabel||'OK',f:()=>this.done()};
+      const M=o.opts?{t:o.midLabel||'',f:o.mid?()=>o.mid(this.text,this):null}:{t:o.okLabel||'OK',f:()=>this.done()};
+      const R=this.text.length?{t:'Clear',f:()=>this.clear()}:{t:'Back',f:()=>{pop();o.cancel&&o.cancel()}}; return [L,M,R] },
+    done(){ this.commit(); this.mt=null; if(o.min&&this.text.length<o.min){ note('Too short','warn'); return } o.done&&o.done(this.text,this) },
+    clear(){ if(this.w){ this.w.seq=this.w.seq.slice(0,-1); if(!this.w.seq){ this.text=this.text.slice(0,this.w.start)+this.text.slice(this.w.start+this.w.len); this.caret=this.w.start; this.w=null } else { this.w.alt=0; this.applyW() } }
+      else { this.mt=null; this.del() } render() },
+    spell(){ const self=this; push(Editor({mode:'text',noPred:true,title:'Spell',label:'Word:',lower:true,done(t){ t=t.trim(); pop(); if(!t) return; if(!S.words.includes(t.toLowerCase())) S.words.unshift(t.toLowerCase()); save();
+        const w=self.w; self.text=self.text.slice(0,w.start)+t+self.text.slice(w.start+w.len); self.caret=w.start+t.length; self.w=null; render() }})) },
+    options(){ const self=this; const items=(o.opts(this.text,this)||[]).slice();
+      items.push(['Insert symbol',()=>{ pop(); symbols(ch=>{self.commit();self.ins(ch)}) }]);
+      if(o.mode==='text'){ items.push([this.pred?'Prediction off':'Prediction on',()=>{ S.t9=!this.pred; this.pred=S.t9; this.commit(); save(); pop(); note(this.pred?'Prediction on':'Prediction off','info') }]);
+        items.push(['Writing language',()=>Radio('Writing language',[['English','English']],()=>S.phone.wlang,v=>S.phone.wlang=v)]);
+        if(this.pred) items.push(['Insert word',()=>{ pop(); push(Editor({mode:'text',noPred:true,title:'Insert word',label:'Word:',lower:true,done(t){ t=t.trim(); pop(); if(t){ if(!S.words.includes(t.toLowerCase())) S.words.unshift(t.toLowerCase()); save(); self.commit(); self.ins(t+' ') } render() }})) }]) }
+      items.push(['Clear text',()=>{ pop(); self.text=''; self.caret=0; self.w=null; render() }]);
+      items.push(['Exit editor',()=>{ pop(); if(o.exit) o.exit(self.text); else pop() }]);
+      menu('Options',items,{nums:false}) },
+    key(k,long){
+      if(k==='R'&&long){ this.text=''; this.caret=0; this.w=null; this.mt=null; render(); return true }
+      if(/^\d$/.test(k)){
+        if(long){ this.commit(); this.mt=null; this.ins(k); render(); return true }
+        if(o.mode==='phone'||o.mode==='num'||o.mode==='pass'||this.cm==='123'){ this.mt=null; this.ins(k); render(); return true }
+        if(this.pred&&/[2-9]/.test(k)){ this.mt=null; if(!this.w) this.w={seq:'',alt:0,start:this.caret,len:0}; this.w.seq+=k; this.w.alt=0; this.applyW(); render(); return true }
+        if(this.pred&&k==='0'){ this.commit(); this.ins(' '); render(); return true }
+        if(this.pred) this.commit();
+        this.multitap(k); render(); return true }
+      if(k==='*'){ if(o.mode==='phone'){ const g='*+pw'; const t=Date.now(); const last=this.text[this.caret-1];
+          if(this.mt&&this.mt.k==='*'&&t-this.mt.t<950&&g.includes(last)){ this.mt.i=(this.mt.i+1)%4; this.text=this.text.slice(0,this.caret-1)+g[this.mt.i]+this.text.slice(this.caret) } else { this.mt={k:'*',i:0}; this.ins('*') } this.mt.t=t; render(); return true }
+        if(o.mode!=='text') return true;
+        if(this.w&&this.w.cands>1){ this.w.alt++; this.applyW(); render(); return true }
+        this.commit(); this.mt=null; const self=this; symbols(ch=>{self.ins(ch)}); return true }
+      if(k==='#'){ if(o.mode==='phone'){ this.ins('#'); render(); return true } if(o.mode!=='text') return true;
+        if(long){ this.cm=this.cm==='123'?'Abc':'123'; this.commit(); render(); return true }
+        const t=Date.now(); this.commit(); this.mt=null;
+        if(t-this.lastHash<450){ this.cm=this.prevCm; this.pred=!this.pred; S.t9=this.pred; save(); note(this.pred?'Prediction on':'Prediction off','info',900) }
+        else { this.prevCm=this.cm; this.cm={Abc:'abc',abc:'ABC',ABC:'123','123':'Abc'}[this.cm] }
+        this.lastHash=t; render(); return true }
+      if(k==='LT'){ this.commit(); this.mt=null; this.caret=Math.max(0,this.caret-1); render(); return true }
+      if(k==='RT'){ this.commit(); this.mt=null; this.caret=Math.min(this.text.length,this.caret+1); render(); return true }
+      if(k==='U'){ this.commit(); this.caret=0; render(); return true }
+      if(k==='D'){ this.commit(); this.caret=this.text.length; render(); return true }
+      if(k==='CALL'&&o.mode==='phone'&&this.text){ callNumber(this.text); return true }
+      return false },
+    typeChar(ch){ this.commit(); this.mt=null; if(o.mode==='pass'||o.mode==='num'){ if(/\d/.test(ch)) this.ins(ch) } else if(o.mode==='phone'){ if(/[\d*#+pw]/.test(ch)) this.ins(ch) } else this.ins(ch); render() },
+    onPop(){ clearTimeout(this.mtT) } };
+  push(v); return v }
+function symbols(cb){ const chars=".,'?!\"-()@/:_;+&%*=<>£$€¥#[]{}\\~^¡¿§|°…•→".split(''); let i=0;
+  push({name:'sym',title:'Symbols',draw(el){ el.innerHTML='<div class="sym">'+chars.map((c,j)=>`<span class="${j===i?'on':''}" data-i="${j}">${esc(c)}</span>`).join('')+'</div>' },
+    soft(){ return [{t:'Use',f:()=>{pop();cb(chars[i]);render()}},{t:'Use',f:()=>{pop();cb(chars[i]);render()}},{t:'Back',f:pop}] },
+    key(k){ const n=chars.length; if(k==='LT')i=(i-1+n)%n; else if(k==='RT')i=(i+1)%n; else if(k==='U')i=(i-6+n)%n; else if(k==='D')i=(i+6)%n; else return false; render(); return true },
+    pick(j){ i=j; pop(); cb(chars[i]); render() } }) }
+
+/* ---------------- contacts helpers ---------------- */
+const DEVC=()=>!!(Host&&Host.contacts);
+function refreshContacts(){ if(!DEVC()) return; Host.contacts().then(list=>{ const old={}; S.contacts.forEach(c=>old[c.id]=c); S.contacts=(list||[]).map(c=>({...c,group:(old[c.id]||{}).group||''})); save(); if(S.on&&V.length) render() }).catch(()=>{}) }
+function pushContact(c){ if(!DEVC()||!Host.saveContact) return; Host.saveContact(c).then(id=>{ if(id&&id!==c.id){ for(const k in S.speed) if(S.speed[k]===c.id) S.speed[k]=id; c.id=id; save() } },()=>note('Could not save to Contacts','warn')) }
+function dropContact(c){ if(DEVC()&&Host.deleteContact) Host.deleteContact(c.id).catch(()=>{}) }
+window.LarchResume=()=>{ refreshContacts(); if(typeof readNet==='function') readNet() };
+const norm=n=>String(n||'').replace(/[^\d+]/g,'').replace(/^\+?1(?=\d{10}$)/,'');
+function findContact(num){ const n=norm(num); if(!n) return null; return S.contacts.find(c=>['num','home','work'].some(f=>c[f]&&norm(c[f])===n))||null }
+const nameFor=num=>{ const c=findContact(num); return c?c.name:num };
+const sortedContacts=()=>S.contacts.slice().sort((a,b)=>a.name.localeCompare(b.name));
+
+/* ---------------- device status (battery and network of the host device) ---------------- */
+const dev={bat:4,level:null,charging:false,sig:5,online:navigator.onLine!==false,src:'browser'};
+function readNet(){ if(dev.src==='host') return; dev.online=navigator.onLine!==false; const c=navigator.connection||navigator.webkitConnection;
+  if(!dev.online){ dev.sig=0 } else if(c&&c.effectiveType){ const et=c.effectiveType; dev.sig=et==='slow-2g'?1:et==='2g'?2:et==='3g'?3:(c.downlink>=5?5:4); if(c.rtt&&c.rtt>500) dev.sig=Math.min(dev.sig,3) } else dev.sig=5;
+  if(S&&S.on&&tv()&&tv().name==='standby') render() }
+addEventListener('online',readNet); addEventListener('offline',readNet);
+try{ const c=navigator.connection; if(c&&c.addEventListener) c.addEventListener('change',readNet) }catch(e){}
+try{ if(navigator.getBattery) navigator.getBattery().then(b=>{ const up=()=>{ if(dev.src==='host') return; dev.level=b.level; dev.charging=b.charging; dev.bat=Math.max(0,Math.min(4,Math.round(b.level*4))); if(S.on&&tv()&&tv().name==='standby') render() };
+  up(); b.addEventListener('levelchange',up); b.addEventListener('chargingchange',up) }).catch(()=>{}) }catch(e){}
+// A Mac or iPhone wrapper can push real values: window.LarchStatus({level:0.8,charging:true,sig:4,online:true})
+window.LarchStatus=o=>{ dev.src='host'; if(o.level!=null){ dev.level=o.level; dev.bat=Math.max(0,Math.min(4,Math.round(o.level*4))) } if(o.charging!=null) dev.charging=!!o.charging; if(o.sig!=null) dev.sig=o.sig; if(o.online!=null) dev.online=!!o.online; if(S.on&&tv()&&tv().name==='standby') render() };
+
+/* ---------------- standby ---------------- */
+let locked=false, unlockAt=0, lastActivity=Date.now();
+function statusIcons(){ const out=[]; const unread=S.msgs.inbox.filter(m=>!m.read).length;
+  if(unread) out.push(ico('msg')); if(S.logs.missed.some(x=>!x.seen)) out.push(ico('missed'));
+  if(S.alarm.on) out.push(ico('alarm')); if(S.bt.on) out.push(ico('bt')); if(S.timer) out.push(ico('timer'));
+  if(music.playing) out.push(ico('note')); if(prof().alert==='off'&&!prof().vol) out.push(ico('silent')); if(locked) out.push(ico('lock')); return out.join('') }
+function nextEvents(){ const out=[]; const d=now();
+  if(S.alarm.on) out.push([ico('alarm'),'Alarm '+fmtTime(new Date(2000,0,1,S.alarm.h,S.alarm.m))]);
+  const today=dkey(d); const evs=S.cal.filter(n=>n.date>=today||n.type==='Birthday').sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
+  const e=evs.find(n=>n.type!=='Birthday')||evs[0]; if(e) out.push([ico('cal'),(e.date===today?'Today':e.date.slice(5).replace('-','/'))+(e.time?' '+e.time:'')+' · '+e.subject]);
+  if(S.timer){ const left=Math.max(0,Math.round((S.timer.end-Date.now())/1000)); out.push([ico('timer'),'Timer '+fmtDur(left)]) }
+  if(music.playing&&music.cur) out.push([ico('note'),music.cur.name]);
+  return out.slice(0,3) }
+function Standby(){
+  return {name:'standby',full:true,ovSoft:true,
+    draw(el){ const d=now(); const fl=S.profile==='flight'; const w=S.wall.on?wallSrc(S.wall.id):null;
+      el.style.background=w?`#000 url(${w}) center/cover`:'var(--tbg)';
+      const pf=S.profile!=='general'?`<div class="pf">${esc(prof().name)}${S.timedUntil?' ◷':''}</div>`:'';
+      let h=`<div class="sb"><div class="sig">${sigSVG(fl?0:dev.sig)}</div><div class="icr">${statusIcons()}</div><div class="bat">${batSVG(dev.charging&&dev.bat<4?(dev.bat+(Math.floor(Date.now()/1000)%(5-dev.bat))):dev.bat)}</div>`;
+      if(S.opLogo) h+=`<div class="op">${esc(fl?'Flight':dev.online?S.net:'No network')}</div>`;
+      if(S.clock.show) h+=`<div class="clk">${fmtTimeHTML(d)}</div>`;
+      if(S.date.show) h+=`<div class="dt">${DAY[d.getDay()].slice(0,3)} ${fmtDate(d)}</div>`;
+      h+=pf;
+      if(locked) h+=`<div class="lock"><span>${ico('lock',12)} Keypad locked</span></div>`;
+      else if(S.activeSb){ const ev=nextEvents(); if(ev.length) h+='<div class="as">'+ev.map(e=>`<div>${e[0]}<span>${esc(e[1])}</span></div>`).join('')+'</div>' }
+      if(S.navIcons&&!locked) h+=`<svg class="nv" viewBox="0 0 56 56" fill="#fff"><path d="M28 4l6 8H22zM28 52l-6-8h12zM4 28l8-6v12zM52 28l-8 6V22z"/></svg>`;
+      el.innerHTML=h+'</div>' },
+    tick(){ render() },
+    soft(){ if(locked) return [{t:''},{t:'Unlock',f:()=>{ unlockAt=Date.now(); note('Now press *','info',1500) }},{t:''}];
+      return [scSoft(S.sc.L),{t:'Menu',f:()=>push(MainMenu())},scSoft(S.sc.R)] },
+    key(k,long){
+      if(locked){ if(k==='*'&&Date.now()-unlockAt<1600){ endNote(); if(S.phone.seckg) askCode(()=>{locked=false;render();note('Keypad unlocked','ok',900)}); else { locked=false; render(); note('Keypad unlocked','ok',900) } return true }
+        if(k==='M'||k==='L'||k==='R'){ return false } if(k==='END') return true; note('Press Unlock, then *','info',1300); return true }
+      if(/^\d$/.test(k)){
+        if(long){ if(k==='1'){ if(S.vmail) callNumber(S.vmail,'Voice mailbox'); else push(Editor({mode:'phone',title:'Voice mailbox',label:'Voice mailbox number:',done(t){S.vmail=t;save();pop();note('Saved')}})); return true }
+          if(k==='0'){ openUrl('start'); return true }
+          if(S.call.speed){ const id=S.speed[k]; const c=id&&S.contacts.find(x=>x.id===id); if(c){ callNumber(c.num,c.name); return true }
+            Ask('Assign a number to speed dialling key '+k+'?',()=>assignSpeed(k)); return true } }
+        Dialer(k); return true }
+      if(k==='*'||k==='#'){ if(k==='#'&&long){ if(S.profile==='silent'){ S.profile='general'; note('General profile activated','ok') } else { S.profile='silent'; note('Silent profile activated','ok') } save(); render(); return true }
+        Dialer(k); return true }
+      if(k==='CALL'){ LogList('Dialled numbers','dialled'); return true }
+      if(['U','D','LT','RT'].includes(k)){ runFeat(S.sc[k]); return true }
+      if(k==='VUP'||k==='VDN') return true;
+      return false } } }
+function lock(){ locked=true; home(); note('Keypad locked','info',1200) }
+function askCode(ok){ push(Editor({mode:'pass',title:'Security code',label:'Security code:',done(t){ pop(); if(t===S.sec.code) ok(); else note('Wrong code','warn') }})) }
+
+/* features for shortcuts */
+const FEAT={
+  goto:['Go to',()=>GoTo()], names:['Names',()=>NamesList()], newmsg:['Create message',()=>NewMessage()], inbox:['Inbox',()=>Folder('inbox')],
+  log:['Log',()=>LogMenu()], dialled:['Dialled numbers',()=>LogList('Dialled numbers','dialled')], calendar:['Calendar',()=>Calendar()], alarm:['Alarm clock',()=>AlarmMenu()],
+  notes:['Notes',()=>NotesMenu()], todo:['To-do list',()=>TodoList()], calc:['Calculator',()=>Calculator()], stopwatch:['Stopwatch',()=>Stopwatch()], timer:['Countdown timer',()=>TimerMenu()],
+  gallery:['Gallery',()=>GalleryMenu()], music:['Music player',()=>MusicPlayer()], radio:['Radio',()=>radio()], web:['Web',()=>WebMenu()], bookmarks:['Bookmarks',()=>Bookmarks()],
+  profiles:['Profiles',()=>ProfilesMenu()], themes:['Themes',()=>ThemesMenu()], settings:['Settings',()=>SettingsMenu()], snake:['Snake',()=>SnakeMenu()], collection:['Collection',()=>Collection()],
+  bt:['Bluetooth',()=>BtMenu()], emu:['Emulator',()=>EmulatorMenu()], menu:['Menu',()=>push(MainMenu())]
+};
+const scSoft=id=>FEAT[id]?{t:FEAT[id][0],f:FEAT[id][1]}:{t:''};
+const runFeat=id=>FEAT[id]&&FEAT[id][1]();
+function GoTo(){ push(List('Go to',()=>S.gotoList.filter(id=>FEAT[id]).map(id=>({t:FEAT[id][0],f:FEAT[id][1]})),{empty:'No shortcuts',
+  L:()=>({t:'Options',f:()=>menu('Options',[['Select options',()=>Checks('Select options',Object.keys(FEAT).filter(k=>k!=='goto'&&k!=='menu').map(k=>[k,FEAT[k][0]]),()=>S.gotoList,a=>S.gotoList=a)]],{nums:false})}),
+  M:it=>({t:'Select',f:()=>{ pop(); it.f() }}) })) }
+
+/* ---------------- main menu ---------------- */
+const MENU={
+  msg:{t:'Messaging',ic:'msg',f:()=>MessagingMenu(),h:'Write, send and read text messages.'},
+  contacts:{t:'Contacts',ic:'contacts',f:()=>ContactsMenu(),h:'Save names, numbers and other details.'},
+  log:{t:'Log',ic:'log',f:()=>LogMenu(),h:'Missed, received and dialled calls, and call timers.'},
+  settings:{t:'Settings',ic:'settings',f:()=>SettingsMenu(),h:'Profiles, tones, display, time and phone settings.'},
+  gallery:{t:'Gallery',ic:'gallery',f:()=>GalleryMenu(),h:'Images, tones, themes and received files.'},
+  media:{t:'Media',ic:'media',f:()=>MediaMenu(),h:'Music player, radio, recorder and equaliser.'},
+  org:{t:'Organiser',ic:'org',f:()=>OrganiserMenu(),h:'Alarm clock, calendar, notes, calculator and timers.'},
+  apps:{t:'Applications',ic:'apps',f:()=>AppsMenu(),h:'Games and installed Java applications.'},
+  web:{t:'Web',ic:'web',f:()=>WebMenu(),h:'Browse the web and manage bookmarks.'}
+};
+function MainMenu(){ const items=()=>S.menuOrder.map(k=>({k,...MENU[k]}));
+  return {name:'menu',i:0,opened:Date.now(),
+    hdText(){ return S.menuView==='list'?'Menu':items()[this.i].t }, hdRight(){ return S.menuView==='list'?`${this.i+1}/9`:'' },
+    draw(el){ const a=items();
+      if(S.menuView==='list'){ const v=List('',a.map(x=>({t:x.t,ic:ico(x.ic)}))); v.i=this.i; v.top=this.top||0; v.draw(el); this.top=v.top }
+      else { el.innerHTML=`<div class="gm${S.menuView==='glabel'?' lbl':''}">`+a.map((x,j)=>`<div class="gi${j===this.i?' on':''}" data-i="${j}"><div class="tile" style="background:linear-gradient(160deg,${TILES[S.menuOrder.indexOf(x.k)%9]}cc,${TILES[S.menuOrder.indexOf(x.k)%9]})">${ico(x.ic)}</div>${S.menuView==='glabel'?`<span>${esc(x.t)}</span>`:''}</div>`).join('')+'</div>' }
+      if(S.phone.help&&this.showHelp) el.insertAdjacentHTML('beforeend',`<div class="help">${esc(a[this.i].h)}</div>`) },
+    soft(){ return [{t:'Options',f:()=>MenuOptions()},{t:'Select',f:()=>this.select()},{t:'Exit',f:pop}] },
+    select(){ items()[this.i].f() },
+    tick(){ const show=Date.now()-this.moved>2500; if(show!==!!this.showHelp){ this.showHelp=show; render() } },
+    key(k){ if(k==='*'&&Date.now()-this.opened<1600&&V.length===2){ lock(); return true }
+      const n=9; let i=this.i;
+      if(S.menuView==='list'){ if(k==='U') i=(i+n-1)%n; else if(k==='D') i=(i+1)%n; else if(/^[1-9]$/.test(k)){ this.i=+k-1; this.select(); return true } else return false }
+      else { if(k==='U') i=(i+6)%9; else if(k==='D') i=(i+3)%9; else if(k==='LT') i=(i+8)%9; else if(k==='RT') i=(i+1)%9; else if(/^[1-9]$/.test(k)){ this.i=+k-1; this.select(); return true } else return false }
+      this.i=i; this.moved=Date.now(); this.showHelp=false; render(); return true },
+    pick(j){ this.i=j; this.select() } } }
+function MenuOptions(){ menu('Options',[['Menu view',()=>Radio('Menu view',[['list','List'],['grid','Grid'],['glabel','Grid with labels']],()=>S.menuView,v=>S.menuView=v,{after:()=>pop()})],['Organise',()=>Organise()]],{nums:false}) }
+function Organise(){ let moving=-1;
+  push(List('Organise',()=>S.menuOrder.map((k,j)=>({t:(j===moving?'↕ ':'')+MENU[k].t,ic:ico(MENU[k].ic)})),{count:false,
+    M:()=>({t:moving<0?'Move':'OK',f:function(){ const v=tv(); moving=moving<0?v.i:-1; save(); render() }}),
+    key(k){ if(moving<0||(k!=='U'&&k!=='D')) return false; const a=S.menuOrder, j=moving, t=k==='U'?j-1:j+1; if(t<0||t>=a.length) return true; [a[j],a[t]]=[a[t],a[j]]; moving=t; this.i=t; render(); return true } })) }
+
+/* ---------------- dialer & calls ---------------- */
+function Dialer(first){ const v={name:'dialer',full:true,num:first||'',mt:null,
+  draw(el){ const n=this.num; const fs=n.length>12?24:n.length>8?30:38; el.style.background='var(--tbg)'; el.innerHTML=`<div class="dial" style="font-size:${fs}px">${esc(n)}</div>` },
+  soft(){ return [{t:'Options',f:()=>menu('Options',[['Save',()=>{pop();AddContact(this.num)}],['Add to contact',()=>{pop();NamesList(c=>{ if(!c.home) c.home=this.num; else c.work=this.num; save(); popTo('dialer'); note('Saved') })}],['Send message',()=>{pop();NewMessage('',this.num)}]],{nums:false})},
+    {t:'Call',f:()=>callNumber(this.num)},{t:'Clear',f:()=>{ this.num=this.num.slice(0,-1); if(!this.num) pop(); else render() }}] },
+  key(k,long){ if(/^[\d#]$/.test(k)){ this.num+=k; render(); return true }
+    if(k==='*'){ const g='*+pw', t=Date.now(), last=this.num.slice(-1); if(this.mt&&t-this.mt.t<950&&g.includes(last)){ this.mt.i=(this.mt.i+1)%4; this.num=this.num.slice(0,-1)+g[this.mt.i] } else { this.mt={i:0}; this.num+='*' } this.mt.t=t; render(); return true }
+    if(k==='R'&&long){ pop(); return true }
+    if(k==='CALL'){ callNumber(this.num); return true } return false },
+  typeChar(ch){ if(/[\d*#+]/.test(ch)){ this.num+=ch; render() } } };
+  push(v) }
+let callObj=null, ringback=null;
+function stopRingback(){ if(ringback){ clearInterval(ringback.i); ringback.stop&&ringback.stop(); ringback=null } }
+function startRingback(){ stopRingback(); const g=volG(Math.max(1,Math.min(3,prof().vol||2)))*.6; const once=()=>beep([440,480],1.6,g||.02); once(); ringback={i:setInterval(once,4000)} }
+function callNumber(num,label){ num=String(num||'').trim(); if(!num) return;
+  if(S.profile==='flight'){ note('Flight profile is active','warn'); return }
+  S.logs.dialled.unshift({num,t:Date.now(),dur:0}); S.logs.dialled=S.logs.dialled.slice(0,30); save();
+  const name=label||nameFor(num);
+  if(Host&&Host.call){ Host.call(num).catch(()=>note('Could not place the call','warn')); home(); note('Calling '+name,'info',1600); return }
+  const a=document.createElement('a'); a.href='tel:'+num.replace(/[^\d+*#,;]/g,''); a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove();
+  home(); Info('Calling',`<p><b>${esc(name)}</b></p><p>${esc(num)}</p><p>The call was handed to this device's phone app. If nothing opened, this device can't place calls.</p>`) }
+window.LarchCallEnded=o=>{ const d=Math.round((o&&o.duration)||0); if(!d) return; S.dur.last=d; S.dur.dialled+=d; if(S.logs.dialled[0]) S.logs.dialled[0].dur=d; save(); if(S.call.summary&&S.on) note('Call duration '+fmtDur(d),'info',2200) };
+
+function answer(){ if(!callObj||callObj.state!=='ringing') return; stopRing(); clearTimeout(callObj.tm); callObj.state='active'; callObj.t0=Date.now();
+  S.logs.recv.unshift({num:callObj.num,t:Date.now(),dur:0}); S.logs.recv=S.logs.recv.slice(0,20); save(); render() }
+function endCall(silent){ if(!callObj) return; clearTimeout(callObj.tm); stopRing(); stopRingback();
+  const dur=callObj.state==='active'?Math.round((Date.now()-callObj.t0)/1000):0;
+  if(dur){ S.dur.last=dur; if(callObj.dir==='in'){ S.dur.recv+=dur; if(S.logs.recv[0]) S.logs.recv[0].dur=dur } else { S.dur.dialled+=dur; if(S.logs.dialled[0]) S.logs.dialled[0].dur=dur } save() }
+  callObj=null; home(); if(!silent){ if(dur&&S.call.summary) note('Call duration '+fmtDur(dur),'info',1800); else note('Call ended','info',900) } }
+function CallView(){ return {name:'call',full:true,noPower:true,cls:'',
+  draw(el){ const c=callObj; if(!c){ return } el.style.background='var(--tbg)';
+    const st=c.state==='calling'?'Calling':c.state==='ringing'?'Calling…':(c.mute?'Muted':'Active call')+(c.spk?' · Loudspeaker':'');
+    el.innerHTML=`<div class="call${c.state!=='active'?' ring':''}"><div class="av">${ico('person')}</div><div class="nm">${esc(c.name)}</div>${c.name!==c.num?`<div class="st">${esc(c.num)}</div>`:''}<div class="st">${st}</div>${c.state==='active'?`<div class="tm">${fmtDur((Date.now()-c.t0)/1000)}</div>`:''}</div>` },
+  tick(){ render() },
+  soft(){ const c=callObj; if(!c) return [{},{},{}];
+    if(c.state==='ringing') return [{t:'Options',f:()=>menu('Options',[['Answer',()=>{pop();answer()}],['Reject',()=>{pop();endCall()}]],{nums:false})},{t:'Answer',f:answer},{t:c.silenced?'Reject':'Silence',f:()=>{ if(c.silenced) endCall(); else { c.silenced=true; stopRing(); render() } }}];
+    if(c.state==='calling') return [{t:''},{t:''},{t:'End',f:()=>endCall()}];
+    return [{t:'Options',f:()=>menu('Options',[[c.mute?'Unmute':'Mute',()=>{c.mute=!c.mute;pop()}],['Hold',()=>{pop();note('Call on hold','info')}],['Contacts',()=>{pop();NamesList()}],['Menu',()=>{pop();push(MainMenu())}],['End call',()=>{pop();endCall()}]],{nums:false})},{t:''},{t:c.spk?'Normal':'Loudsp.',f:()=>{c.spk=!c.spk;render()}}] },
+  key(k){ const c=callObj; if(!c) return false;
+    if(k==='END'){ endCall(); return true }
+    if(k==='CALL'&&c.state==='ringing'){ answer(); return true }
+    if(c.state==='ringing'&&S.call.anykey&&!['R','END','PWR','VUP','VDN'].includes(k)){ answer(); return true }
+    if(c.state==='ringing'&&(k==='VUP'||k==='VDN')){ stopRing(); c.silenced=true; render(); return true }
+    if(c.state==='active'&&/^[\d*#]$/.test(k)) return true;
+    return false } } }
+function Notice(text,show){ push({name:'notice',full:true,
+  draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="dlgw"><div class="dlg"><div class="dq">${ico(text.includes('call')?'missed':'msg',18)}</div><p>${esc(text)}</p></div></div>` },
+  soft(){ return [{t:''},{t:'Show',f:()=>{pop();show()}},{t:'Exit',f:pop}] } }) }
+
+/* ---------------- messaging ---------------- */
+function MessagingMenu(){ const unread=S.msgs.inbox.filter(m=>!m.read).length;
+  menu('Messaging',[['Create message',()=>NewMessage()],['Inbox'+(unread?` (${unread})`:''),()=>Folder('inbox')],['Drafts',()=>Folder('drafts')],['Sent items',()=>Folder('sent')],['Saved items',()=>Folder('saved')],
+    ['Delete messages',()=>menu('Delete messages',[['By message',()=>Folder('inbox')],['By folder',()=>menu('By folder',[['Inbox',()=>delFolder('inbox')],['Drafts',()=>delFolder('drafts')],['Sent items',()=>delFolder('sent')],['Saved items',()=>delFolder('saved')]])],['All messages',()=>Ask('Delete all messages?',()=>{ for(const f in S.msgs) S.msgs[f]=[]; save(); note('Deleted') })]])],
+    ['Voice messages',()=>menu('Voice messages',[['Listen to voice messages',()=>{ if(S.vmail) callNumber(S.vmail,'Voice mailbox'); else note('Voice mailbox number not set','info') }],['Voice mailbox number',()=>push(Editor({mode:'phone',title:'Voice mailbox',label:'Voice mailbox number:',text:S.vmail,done(t){S.vmail=t;save();pop();note('Saved')}}))]])],
+    ['Info messages',()=>menu('Info messages',[['Info service',()=>OnOff('Info service',S,'info')],['Topics',()=>note('No topics','info')],['Language',()=>Radio('Language',[['all','All'],['en','English']],()=>'all',()=>{})]])],
+    ['Service commands',()=>push(Editor({mode:'phone',title:'Service command',label:'Command:',done(){ pop(); note('Not available without a network service','info') }}))],
+    ['Message settings',()=>MsgSettings()],
+    ['Message counter',()=>Info('Message counter',`<p><span class="lbl">Sent messages</span>${S.msgCount.sent}</p><p><span class="lbl">Received messages</span>${S.msgCount.recv}</p>`,{L:{t:'Clear',f:()=>{S.msgCount={sent:0,recv:0};save();pop();note('Counters cleared')}}})]
+  ]) }
+function delFolder(f){ Ask('Delete all messages in this folder?',()=>{ S.msgs[f]=[]; save(); note('Deleted') }) }
+function MsgSettings(){ const m=S.msgSet;
+  menu('Message settings',[
+    ['General settings',()=>menu('General settings',[['Save sent messages',()=>Radio('Save sent messages',[[true,'Yes'],[false,'No']],()=>m.saveSent,v=>m.saveSent=v)],['Overwriting in Sent items',()=>Radio('Overwriting',[['allowed','Allowed'],['no','Not allowed']],()=>m.overwrite,v=>m.overwrite=v)],['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.msg,v=>S.fs.msg=v)]])],
+    ['Text messages',()=>menu('Text messages',[['Delivery reports',()=>Radio('Delivery reports',[[true,'Yes'],[false,'No']],()=>m.reports,v=>m.reports=v)],['Message centres',()=>push(Editor({mode:'phone',title:'Message centre',label:'Message centre number:',text:m.centre,done(t){m.centre=t;save();pop();note('Saved')}}))],
+      ['Message validity',()=>Radio('Message validity',[['1h','1 hour'],['6h','6 hours'],['24h','24 hours'],['72h','72 hours'],['1w','1 week'],['max','Maximum']],()=>m.validity,v=>m.validity=v)],['Messages sent via',()=>Radio('Messages sent via',[['text','Text'],['paging','Paging'],['fax','Fax']],()=>m.type,v=>m.type=v)],
+      ['Character support',()=>Radio('Character support',[['full','Full'],['reduced','Reduced']],()=>m.charset,v=>m.charset=v)],['Reply via same centre',()=>Radio('Reply via same centre',[[true,'Yes'],[false,'No']],()=>m.replySame,v=>m.replySame=v)]])],
+    ['Other settings',()=>menu('Other settings',[['Packet data use',()=>Radio('Packet data use',[['gsm','Preferred: GSM'],['packet','Preferred: packet data']],()=>'gsm',()=>{})]])]
+  ]) }
+function msgItems(f){ return S.msgs[f].slice().sort((a,b)=>b.t-a.t).map(m=>({m,t:f==='inbox'||m.from?nameFor(m.from):nameFor(m.to||'(no recipient)'),s:m.text,bold:f==='inbox'&&!m.read,ic:ico(f==='inbox'?(m.read?'envopen':'envin'):'msg')})) }
+function Folder(f){ const names={inbox:'Inbox',drafts:'Drafts',sent:'Sent items',saved:'Saved items'};
+  push(List(names[f],()=>msgItems(f),{name:'folder',two:true,empty:'Folder empty',
+    M:it=>({t:f==='drafts'?'Edit':'Open',f:()=>f==='drafts'?editDraft(it.m):MsgView(it.m,f)}),
+    L:it=>it?{t:'Options',f:()=>menu('Options',[['Delete',()=>{pop();Ask('Delete message?',()=>{S.msgs[f]=S.msgs[f].filter(x=>x!==it.m);save();note('Deleted')})}],f==='inbox'?['Mark all as read',()=>{S.msgs.inbox.forEach(m=>m.read=true);save();pop()}]:null,['Delete all',()=>{pop();delFolder(f)}]],{nums:false})}:{t:''} })) }
+function editDraft(m){ NewMessage(m.text,m.to,m) }
+function MsgView(m,f){ if(f==='inbox'&&!m.read){ m.read=true; save() } const who=f==='inbox'?m.from:m.to;
+  push({name:'msgview',title:nameFor(who),hdRight(){ return fmtStamp(m.t) },
+    draw(el){ el.innerHTML=`<div class="txt fs-${S.fs.msg}"><span class="lbl">${f==='inbox'?'From':'To'}: ${esc(who)}</span>${esc(m.text)}</div>` },
+    soft(){ const items=[['Delete',()=>{pop();Ask('Delete message?',()=>{S.msgs[f]=S.msgs[f].filter(x=>x!==m);save();popTo('folder');note('Deleted')})}],
+        f==='inbox'?['Reply',()=>{pop();NewMessage('',m.from)}]:null,['Forward',()=>{pop();NewMessage(m.text)}],['Call',()=>{pop();callNumber(who)}],
+        f!=='saved'?['Move to Saved',()=>{S.msgs[f]=S.msgs[f].filter(x=>x!==m);S.msgs.saved.push(m);save();pop();popTo('folder');note('Moved')}]:null,
+        ['Use detail',()=>{pop();const nums=(m.text.match(/[+\d][\d\s-]{5,}\d/g)||[]).concat(who?[who]:[]);menu('Use detail',nums.map(n=>[n,()=>{pop();menu(n,[['Call',()=>callNumber(n)],['Save',()=>AddContact(n)]],{nums:false})}]),{nums:false})}]];
+      return [{t:'Options',f:()=>menu('Options',items,{nums:false})},{t:f==='inbox'?'Reply':'',f:f==='inbox'?()=>NewMessage('',m.from):null},{t:'Back',f:pop}] },
+    key(k){ if(k==='U'||k==='D'){ const t=SCR.querySelector('.txt'); if(t) t.scrollTop+=k==='D'?40:-40; return true } if(k==='CALL'){ callNumber(who); return true } return false } }) }
+function NewMessage(text,to,draft){
+  Editor({mode:'text',sms:true,text:text||'',
+    opts:(t,ed)=>[['Send',()=>{pop();sendFlow(ed,to,draft)}],['Send to many',()=>{pop();Checks('Recipients',sortedContacts().map(c=>[c.id,c.name]),()=>ed.many||[],a=>ed.many=a)}],['Save message',()=>{pop();saveDraft(ed.text,to,draft);popOut()}],['Insert contact',()=>{pop();NamesList(c=>{pop();ed.commit();ed.ins(c.name+' '+c.num);render()})}]],
+    midLabel:'Send', mid:(t,ed)=>sendFlow(ed,to,draft),
+    exit:t=>{ if(t.trim()) Ask('Save message to Drafts?',()=>{saveDraft(t,to,draft);popOut()},()=>popOut()); else popOut() } });
+  function popOut(){ while(V.length>1&&tv().name!=='editor') pop(); if(tv().name==='editor') pop() } }
+function saveDraft(t,to,draft){ if(draft){ draft.text=t; draft.t=Date.now() } else S.msgs.drafts.push({id:uid(),to:to||'',text:t,t:Date.now()}); save(); note('Message saved to Drafts') }
+function sendFlow(ed,to,draft){ ed.commit(); const text=ed.text; if(!text.trim()){ note('Message is empty','warn'); return }
+  const finish=(nums,how)=>{ nums.forEach(n=>{ if(S.msgSet.saveSent) S.msgs.sent.push({id:uid(),to:n,text,t:Date.now()}); S.msgCount.sent++; S.logs.msgTo.unshift({num:n,t:Date.now()}) });
+    if(draft) S.msgs.drafts=S.msgs.drafts.filter(x=>x!==draft); save(); while(V.length>1&&V.includes(ed)) pop(); note(how,'ok') };
+  const go=nums=>{ if(S.profile==='flight'){ note('Flight profile is active','warn'); return }
+    if(Host&&Host.sms){ Host.sms(nums,text).then(r=>{ if(r==='sent') finish(nums,'Message sent'); else if(r==='opened') finish(nums,'Opened in Messages'); else if(r==='cancelled') note('Message not sent','info'); else note('Message sending failed','warn') },()=>note('This device cannot send messages','warn')); return }
+    const a=document.createElement('a'); a.href='sms:'+nums.map(n=>n.replace(/[^\d+]/g,'')).join(',')+'?&body='+encodeURIComponent(text); a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); finish(nums,'Opened in Messages') };
+  if(ed.many&&ed.many.length){ go(ed.many.map(id=>S.contacts.find(c=>c.id===id)).filter(Boolean).map(c=>c.num)); return }
+  push(Editor({mode:'phone',title:'Send to',label:'Number:',text:to||'',opts:(t)=>[['Search',()=>{pop();NamesList(c=>{pop();const e=tv();e.text=c.num;e.caret=e.text.length;render()})}],['Send',()=>{pop();if(!tv().text.trim()){note('Enter a number','warn');return} go([tv().text])}]],
+    midLabel:'Send',mid:(t)=>{ if(!t.trim()){ note('Enter a number','warn'); return } go([t]) },exit:()=>pop()})) }
+
+/* ---------------- contacts ---------------- */
+function ContactsMenu(){ menu('Contacts',[['Names',()=>NamesList()],['Settings',()=>menu('Settings',[['Memory in use',()=>Radio('Memory in use',[['phone','Phone']],()=>'phone',()=>{})],['Contacts view',()=>Radio('Contacts view',[['name','Name list'],['both','Name and number']],()=>S.cview,v=>S.cview=v)],['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.contacts,v=>S.fs.contacts=v)],['Memory status',()=>Info('Memory status',`<p><span class="lbl">Phone</span>${S.contacts.length} used, ${Math.max(0,1000-S.contacts.length)} free</p>`)]])],
+  ['Groups',()=>Groups()],['Speed dials',()=>SpeedDials()],['My numbers',()=>push(Editor({mode:'phone',title:'My numbers',label:'My number:',text:S.myNum,done(t){S.myNum=t;save();pop();note('Saved')}}))],
+  ['Delete all contacts',()=>DEVC()?note('Delete contacts in the iPhone Contacts app','info',2200):Ask('Delete all contacts?',()=>askCode(()=>{S.contacts=[];S.speed={};save();note('Deleted')}))]]) }
+function NamesList(pick){ let q='';
+  const items=()=>sortedContacts().filter(c=>!q||c.name.toLowerCase().split(/\s+/).some(w=>t9of(w).startsWith(q))).map(c=>({t:c.name,s:S.cview==='both'?c.num:'',c,ic:ico('person')}));
+  push(List(pick?'Select contact':'Names',items,{name:'names',two:S.cview==='both',empty:pick?'No names':'No names. Press Add to make one.',
+    foot:function(){ if(!q) return 'Find: '; const f=this.items()[0]; return 'Find: '+esc(f?f.c.name.split(/\s+/).find(w=>t9of(w).startsWith(q)).slice(0,q.length):q) },
+    L:it=>pick?{t:''}:it?{t:'Options',f:()=>ContactOptions(it.c)}:{t:'Add',f:()=>AddContact()},
+    Mempty:pick?{t:''}:{t:'Add',f:()=>AddContact()},
+    M:it=>({t:pick?'Select':'Details',f:()=>pick?pick(it.c):ContactView(it.c)}),
+    R:()=>q?{t:'Clear',f:()=>{q=q.slice(0,-1);render()}}:{t:'Back',f:pop},
+    key(k){ if(/^[2-9]$/.test(k)){ q+=k; this.i=0; render(); return true } if(k==='CALL'){ const it=this.items()[this.i]; if(it) callNumber(it.c.num,it.c.name); return true } return false } })) }
+function AddContact(num){ push(Editor({mode:'text',title:'Add contact',label:'Name:',noPred:true,done(name){ if(!name.trim()){note('Enter a name','warn');return}
+    push(Editor({mode:'phone',title:'Add contact',label:'Number:',text:num||'',done(n){ const nc={id:uid(),name:name.trim(),num:n.trim()}; S.contacts.push(nc); pushContact(nc); save(); pop(2); note('Saved') }})) }})) }
+function ContactView(c){ const f=[['Mobile','num'],['Home','home'],['Work','work'],['E-mail','email'],['Note','note'],['Group','group']];
+  push(List(c.name,()=>f.filter(([,k])=>c[k]).map(([l,k])=>({t:c[k],s:l,k,ic:ico(['num','home','work'].includes(k)?'phone':k==='email'?'msg':'doc')})),{name:'cview',two:true,
+    L:()=>({t:'Options',f:()=>ContactOptions(c)}), M:it=>['num','home','work'].includes(it.k)?{t:'Call',f:()=>callNumber(it.t,c.name)}:{t:''},
+    key(k){ if(k==='CALL'){ callNumber(c.num,c.name); return true } return false } })) }
+function ContactOptions(c){ menu('Options',[['View',()=>{pop();ContactView(c)}],['Call',()=>{pop();callNumber(c.num,c.name)}],['Send message',()=>{pop();NewMessage('',c.num)}],['Edit',()=>{pop();EditContact(c)}],
+  ['Add detail',()=>{pop();menu('Add detail',[['Home number',()=>editField(c,'home','Home:','phone')],['Work number',()=>editField(c,'work','Work:','phone')],['E-mail',()=>editField(c,'email','E-mail:','text')],['Note',()=>editField(c,'note','Note:','text')]],{nums:false})}],
+  ['Add to group',()=>{pop();Radio('Group',[['','No group'],...S.groups.map(g=>[g,g])],()=>c.group||'',v=>c.group=v,{note:'Saved'})}],
+  ['Assign speed dial',()=>{pop();Radio('Speed dial key',['2','3','4','5','6','7','8','9'].map(k=>[k,k+(S.speed[k]?' · '+(S.contacts.find(x=>x.id===S.speed[k])||{}).name:'')]),()=>Object.keys(S.speed).find(k=>S.speed[k]===c.id),v=>S.speed[v]=c.id,{note:'Saved'})}],
+  ['Business card',()=>{pop();Info('Business card',`<p><b>${esc(c.name)}</b></p><p>${esc(c.num)}</p>${c.email?`<p>${esc(c.email)}</p>`:''}`)}],
+  ['Delete contact',()=>{pop();Ask('Delete '+c.name+'?',()=>{dropContact(c);S.contacts=S.contacts.filter(x=>x!==c);for(const k in S.speed) if(S.speed[k]===c.id) delete S.speed[k];save();popTo('names');note('Deleted')})}]],{nums:false}) }
+function editField(c,k,label,mode){ push(Editor({mode,noPred:true,title:c.name,label,text:c[k]||'',done(t){ c[k]=t.trim(); pushContact(c); save(); pop(); note('Saved') }})) }
+function EditContact(c){ menu('Edit',[['Name',()=>editField(c,'name','Name:','text')],['Mobile',()=>editField(c,'num','Mobile:','phone')],['Home',()=>editField(c,'home','Home:','phone')],['Work',()=>editField(c,'work','Work:','phone')],['E-mail',()=>editField(c,'email','E-mail:','text')],['Note',()=>editField(c,'note','Note:','text')]],{nums:false}) }
+function Groups(){ push(List('Groups',()=>S.groups.map(g=>({t:g,s:S.contacts.filter(c=>c.group===g).length+' names',g})),{two:true,
+  M:it=>({t:'View',f:()=>push(List(it.g,()=>S.contacts.filter(c=>c.group===it.g).map(c=>({t:c.name,c})),{empty:'No names in group',M:x=>({t:'Details',f:()=>ContactView(x.c)})}))}),
+  L:it=>({t:'Options',f:()=>menu('Options',[['Rename',()=>{pop();push(Editor({mode:'text',noPred:true,title:'Group name',text:it.g,done(t){ const i=S.groups.indexOf(it.g); S.contacts.forEach(c=>{if(c.group===it.g)c.group=t}); S.groups[i]=t; save(); pop(); note('Saved') }}))}]],{nums:false})}) })) }
+function assignSpeed(k){ NamesList(c=>{ S.speed[k]=c.id; save(); popTo('speed')||0; while(tv().name==='names') pop(); note('Saved') }) }
+function SpeedDials(){ push(List('Speed dials',()=>['1','2','3','4','5','6','7','8','9'].map(k=>{ if(k==='1') return {t:'1  Voice mailbox',k}; const c=S.contacts.find(x=>x.id===S.speed[k]); return {t:k+'  '+(c?c.name:'(empty)'),k,c} }),{name:'speed',count:false,
+  M:it=>({t:it.k==='1'?'View':it.c?'Options':'Assign',f:()=>{ if(it.k==='1'){ push(Editor({mode:'phone',title:'Voice mailbox',label:'Voice mailbox number:',text:S.vmail,done(t){S.vmail=t;save();pop();note('Saved')}})); return }
+    if(!it.c) return assignSpeed(it.k); menu('Options',[['View number',()=>{pop();ContactView(it.c)}],['Change',()=>{pop();assignSpeed(it.k)}],['Delete',()=>{pop();delete S.speed[it.k];save();note('Deleted')}]],{nums:false}) }}) })) }
+
+/* ---------------- log ---------------- */
+function LogMenu(){ menu('Log',[['Missed calls',()=>LogList('Missed calls','missed')],['Received calls',()=>LogList('Received calls','recv')],['Dialled numbers',()=>LogList('Dialled numbers','dialled')],['Message recipients',()=>LogList('Message recipients','msgTo')],
+  ['Clear log lists',()=>menu('Clear log lists',[['All',()=>Ask('Clear all log lists?',()=>{S.logs={missed:[],recv:[],dialled:[],msgTo:[]};save();note('Log lists cleared')})],['Missed',()=>{S.logs.missed=[];save();note('Cleared')}],['Received',()=>{S.logs.recv=[];save();note('Cleared')}],['Dialled',()=>{S.logs.dialled=[];save();note('Cleared')}],['Message recipients',()=>{S.logs.msgTo=[];save();note('Cleared')}]])],
+  ['Call duration',()=>Info('Call duration',`<p><span class="lbl">Last call</span>${fmtDur(S.dur.last)}</p><p><span class="lbl">Received calls</span>${fmtDur(S.dur.recv)}</p><p><span class="lbl">Dialled calls</span>${fmtDur(S.dur.dialled)}</p><p><span class="lbl">All calls</span>${fmtDur(S.dur.recv+S.dur.dialled)}</p>`,{L:{t:'Clear',f:()=>askCode(()=>{S.dur={last:0,recv:0,dialled:0};save();pop();note('Timers cleared')})}})],
+  ['Packet data counter',()=>Info('Packet data counter',`<p><span class="lbl">Data sent</span>${S.pdata.sent} kB</p><p><span class="lbl">Data received</span>${S.pdata.recv} kB</p>`)],
+  ['Packet data conn. timer',()=>Info('Connection timer',`<p><span class="lbl">Duration of last</span>00:00:00</p><p><span class="lbl">Duration of all</span>00:00:00</p>`)],
+  ['Message log',()=>Info('Message log',`<p><span class="lbl">Sent</span>${S.msgCount.sent}</p><p><span class="lbl">Received</span>${S.msgCount.recv}</p>`)]]) }
+function LogList(title,key){ if(key==='missed') { S.logs.missed.forEach(x=>x.seen=true); save() }
+  push(List(title,()=>S.logs[key].map(x=>({t:nameFor(x.num),s:fmtStamp(x.t),x,ic:ico(key==='missed'?'missed':key==='recv'?'inc':key==='msgTo'?'msg':'out')})),{two:true,empty:'No numbers',
+    M:it=>({t:key==='msgTo'?'Send':'Call',f:()=>key==='msgTo'?NewMessage('',it.x.num):callNumber(it.x.num)}),
+    L:it=>it?{t:'Options',f:()=>menu('Options',[['Time of call',()=>Info('Time',`<p>${esc(fmtStamp(it.x.t))}</p>${it.x.dur?`<p><span class="lbl">Duration</span>${fmtDur(it.x.dur)}</p>`:''}`)],['Send message',()=>{pop();NewMessage('',it.x.num)}],['Save',()=>{pop();AddContact(it.x.num)}],['Delete',()=>{S.logs[key]=S.logs[key].filter(y=>y!==it.x);save();pop()}]],{nums:false})}:{t:''},
+    key(k){ if(k==='CALL'){ const it=this.items()[this.i]; if(it) callNumber(it.x.num); return true } return false } })) }
+
+/* ---------------- settings ---------------- */
+function SettingsMenu(){ menu('Settings',[['Profiles',()=>ProfilesMenu()],['Themes',()=>ThemesMenu()],['Tones',()=>Personalise(S.profile,'Tones')],['Display',()=>DisplayMenu()],['Time and date',()=>TimeDateMenu()],['My shortcuts',()=>ShortcutsMenu()],
+  ['Sync and backup',()=>SyncMenu()],['Connectivity',()=>ConnMenu()],['Call',()=>CallMenu()],['Phone',()=>PhoneMenu()],['Enhancements',()=>EnhMenu()],['Configuration',()=>ConfigMenu()],['Security',()=>SecurityMenu()],['Restore factory settings',()=>RestoreFactory()],['Emulator',()=>EmulatorMenu()]]) }
+const PROF_ORDER=['general','silent','meeting','outdoor','pager','flight'];
+function ProfilesMenu(){ push(List('Profiles',()=>PROF_ORDER.map(id=>({t:S.profiles[id].name,id,radio:true,on:S.profile===id})),{count:false,
+  M:it=>({t:'Select',f:()=>menu(it.t,[['Activate',()=>{activateProfile(it.id)}],['Personalise',()=>Personalise(it.id)],['Timed',()=>{ if(it.id==='general'){ note('Not available for General','info'); return } TimeEntry('Profile expires',now().getHours(),now().getMinutes(),(h,m)=>{ const d=now(); d.setHours(h,m,0,0); if(d<=now()) d.setDate(d.getDate()+1); S.timedPrev='general'; activateProfile(it.id,true); S.timedUntil=d.getTime()-S.clock.off; save() }) }]])}) })) }
+function activateProfile(id,keep){ const go=()=>{ S.profile=id; if(!keep) S.timedUntil=0; save(); home(); note(S.profiles[id].name+' activated','ok') };
+  if(id==='flight'&&S.profile!=='flight') Ask('Activate Flight profile? Calls and messages will be blocked.',go); else go() }
+function ProfilesQuick(){ push(List('Profiles',()=>PROF_ORDER.map(id=>({t:S.profiles[id].name,id,radio:true,on:S.profile===id})).concat([{t:'Switch off',off:true}]),{count:false,onSel(it){ if(it.off){ pop(); powerOff(); return } pop(); activateProfile(it.id) }})) }
+function Personalise(id,title){ const p=S.profiles[id]; const ringNames=Object.keys(RING); let h=null; const stopH=()=>{h&&h.stop();h=null};
+  menu(title||p.name,[
+    ['Ringing tone',()=>Radio('Ringing tone',ringNames.map(n=>[n,n]),()=>p.tone,v=>p.tone=v,{onMove:it=>{stopH();h=playSeq(RING[it.val],{vol:volG(Math.max(1,p.vol))})},onPop:stopH})],
+    ['Ringing volume',()=>Level('Ringing volume',()=>Math.max(1,p.vol),v=>p.vol=v,5,v=>playSeq(RING[p.tone],{vol:volG(v)}))],
+    ['Incoming call alert',()=>Radio('Incoming call alert',[['ring','Ringing'],['asc','Ascending'],['once','Ring once'],['beep','Beep once'],['off','Off']],()=>p.alert,v=>p.alert=v)],
+    ['Vibrating alert',()=>OnOff('Vibrating alert',p,'vib')],
+    ['Message alert tone',()=>Radio('Message alert tone',Object.keys(MSGT).map(n=>[n,n]).concat([['Off','Off']]),()=>p.msg,v=>p.msg=v,{onMove:it=>{MSGT[it.val]&&playSeq(MSGT[it.val],{vol:.06})}})],
+    ['Keypad tones',()=>Radio('Keypad tones',[[0,'Off'],[1,'Level 1'],[2,'Level 2'],[3,'Level 3']],()=>p.keys,v=>p.keys=v)],
+    ['Warning tones',()=>OnOff('Warning tones',p,'warn')],
+    ['Alert for',()=>Radio('Alert for',[['all','All calls'],...S.groups.map(g=>[g,g])],()=>p.alertFor,v=>p.alertFor=v)],
+    id!=='general'&&id!=='flight'?['Profile name',()=>push(Editor({mode:'text',noPred:true,title:'Profile name',text:p.name,max:16,done(t){ if(t.trim()) p.name=t.trim(); save(); pop(); note('Saved') }}))]:null
+  ]) }
+function ThemesMenu(){ menu('Themes',[['Select theme',()=>SelectTheme()],['Theme downloads',()=>note('Add .nth theme files in Settings › Emulator › Add files','info',2600)]]) }
+function themeList(){ return Object.keys(THEMES).map(k=>({id:k,n:THEMES[k].n})).concat(S.themes.map(t=>({id:t.id,n:t.n,user:true}))) }
+function SelectTheme(){ push(List('Select theme',()=>themeList().map(t=>({t:t.n,id:t.id,radio:true,on:S.theme===t.id,ic:ico('theme')})),{count:false,M:()=>({t:'Apply',f:()=>tv().select()}),
+  onSel(it){ S.theme=it.id; const t=THEMES[it.id]; if(t){ S.wall={on:true,id:t.wall} } else { const u=S.themes.find(x=>x.id===it.id); if(u&&u.wall) S.wall={on:true,id:'t:'+u.id} } save(); render(); note('Theme applied') },
+  L:it=>it&&it.id&&!THEMES[it.id]?{t:'Delete',f:()=>Ask('Delete theme?',()=>{ S.themes=S.themes.filter(x=>x.id!==it.id); if(S.theme===it.id){S.theme='steel';S.wall={on:true,id:'w:dawn'}} save(); render() })}:{t:''} })) }
+function allImages(){ return Object.keys(WALLS).map(id=>({id,n:WALLS[id].n,src:WALLS[id].src,builtin:true})).concat(S.images.map(i=>({id:i.id,n:i.n,src:i.data}))) }
+function DisplayMenu(){ menu('Display',[
+  ['Wallpaper',()=>menu('Wallpaper',[['Wallpaper on or off',()=>OnOff('Wallpaper',S.wall,'on')],['Select image',()=>Images(true)]])],
+  ['Standby font colour',()=>Radio('Standby font colour',[['#ffffff','White'],['#111111','Black'],['#d6dde6','Silver'],['#ffe066','Yellow'],['#7fe7ff','Cyan'],['#a8ff7a','Lime'],['#ff9ecb','Pink'],['#ffb15c','Orange']],()=>S.sfont,v=>S.sfont=v)],
+  ['Navigation key icons',()=>OnOff('Navigation key icons',S,'navIcons')],
+  ['Active standby',()=>OnOff('Active standby',S,'activeSb')],
+  ['Screen saver',()=>menu('Screen saver',[['Screen saver',()=>OnOff('Screen saver',S.ss,'on')],['Screen savers',()=>Radio('Screen savers',[['digital','Digital clock'],['analog','Analogue clock'],['image','Wallpaper image']],()=>S.ss.type,v=>S.ss.type=v)],['Time-out',()=>Radio('Time-out',[[15,'15 seconds'],[30,'30 seconds'],[60,'1 minute'],[120,'2 minutes'],[300,'5 minutes'],[600,'10 minutes']],()=>S.ss.to,v=>S.ss.to=v)]])],
+  ['Power saver',()=>OnOff('Power saver',S,'psaver')],['Sleep mode',()=>OnOff('Sleep mode',S,'sleep')],
+  ['Font size',()=>menu('Font size',[['Messaging',()=>Radio('Messaging',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.msg,v=>S.fs.msg=v)],['Contacts',()=>Radio('Contacts',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.contacts,v=>S.fs.contacts=v)],['Web pages',()=>Radio('Web pages',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.web,v=>S.fs.web=v)]])],
+  ['Operator logo',()=>Radio('Operator logo',[[true,'Show'],[false,'Hide']],()=>S.opLogo,v=>S.opLogo=v)]]) }
+function TimeDateMenu(){ menu('Time and date',[
+  ['Clock',()=>menu('Clock',[[S.clock.show?'Hide clock':'Show clock',()=>{S.clock.show=!S.clock.show;save();pop();note(S.clock.show?'Clock shown':'Clock hidden')}],
+    ['Set the time',()=>{const d=now();TimeEntry('Set the time',d.getHours(),d.getMinutes(),(h,m)=>{const t=now();t.setHours(h,m,0,0);S.clock.off=t.getTime()-Date.now();save();pop();note('Time set')})}],
+    ['Time zone',()=>{ const opts=[]; for(let z=-12;z<=14;z+=.5){ if(z%1&&![-9.5,-3.5,3.5,4.5,5.5,5.75,6.5,9.5,10.5].includes(z)) continue; const s=(z<0?'-':'+')+pad2(Math.floor(Math.abs(z)))+':'+(z%1?'30':'00'); opts.push([z,'GMT'+s]) }
+      Radio('Time zone',opts,()=>S.clock.tz,v=>{ S.clock.off+=(v-S.clock.tz)*3600e3; S.clock.tz=v }) }],
+    ['Time format',()=>Radio('Time format',[[true,'24-hour'],[false,'12-hour']],()=>S.clock.h24,v=>S.clock.h24=v)]],{nums:true})],
+  ['Date',()=>menu('Date',[[S.date.show?'Hide date':'Show date',()=>{S.date.show=!S.date.show;save();pop();note(S.date.show?'Date shown':'Date hidden')}],
+    ['Set the date',()=>{const d=now();DigitInput('Set the date','##-##-####',pad2(d.getDate())+pad2(d.getMonth()+1)+d.getFullYear(),s=>{ const D=+s.slice(0,2),M=+s.slice(2,4),Y=+s.slice(4); const t=now(); const n=new Date(Y,M-1,D,t.getHours(),t.getMinutes(),t.getSeconds()); if(n.getDate()!==D||Y<2000||Y>2099) return false; S.clock.off=n.getTime()-Date.now(); save(); pop(); note('Date set') },{hint:'dd-mm-yyyy'})}],
+    ['Date format',()=>Radio('Date format',['DD-MM-YYYY','MM-DD-YYYY','YYYY-MM-DD','DD-MM-YY','MM-DD-YY','YY-MM-DD'].map(f=>[f,f]),()=>S.date.fmt,v=>S.date.fmt=v)],
+    ['Date separator',()=>Radio('Date separator',[['.','.'],['-','-'],['/','/']],()=>S.date.sep,v=>S.date.sep=v)]])],
+  ['Auto-update of date and time',()=>Radio('Auto-update',[['on','On'],['confirm','Confirm first'],['off','Off']],()=>S.autoTime,v=>{S.autoTime=v; if(v==='on'){S.clock.off=0;S.clock.tz=SYS_TZ}})]]) }
+function ShortcutsMenu(){ const opts=Object.keys(FEAT).filter(k=>k!=='menu').map(k=>[k,FEAT[k][0]]);
+  menu('My shortcuts',[['Left selection key',()=>Radio('Left selection key',opts,()=>S.sc.L,v=>S.sc.L=v)],['Right selection key',()=>Radio('Right selection key',opts,()=>S.sc.R,v=>S.sc.R=v)],
+    ['Navigation key',()=>menu('Navigation key',[['Up',()=>Radio('Up',opts,()=>S.sc.U,v=>S.sc.U=v)],['Down',()=>Radio('Down',opts,()=>S.sc.D,v=>S.sc.D=v)],['Left',()=>Radio('Left',opts,()=>S.sc.LT,v=>S.sc.LT=v)],['Right',()=>Radio('Right',opts,()=>S.sc.RT,v=>S.sc.RT=v)]])],
+    ['Voice commands',()=>note('Voice commands need a microphone','info')]]) }
+function SyncMenu(){ menu('Sync and backup',[['Phone switch',()=>{ if(!S.bt.on){ Ask('Switch Bluetooth on?',()=>{S.bt.on=true;save();btSearch()}) } else btSearch() }],
+  ['Create backup',()=>copyBackup()],
+  ['Restore backup',()=>restoreView()],
+  ['Data transfer',()=>note('No transfer contacts','info')]]) }
+function btSearch(){ note("Bluetooth is managed in this device's settings",'info',2000) }
+function BtMenu(){ btSearch() }
+function ConnMenu(){ menu('Connectivity',[['Bluetooth',()=>BtMenu()],
+  ['Packet data',()=>menu('Packet data',[['Packet data connection',()=>Radio('Packet data connection',[['needed','When needed'],['always','Always online']],()=>S.packet,v=>S.packet=v)],['Packet data settings',()=>menu('Packet data settings',[['Active access point',()=>Radio('Access point',[['Internet','Internet'],['WAP','WAP services']],()=>S.apn,v=>S.apn=v)]])],['Packet data counter',()=>Info('Packet data counter',`<p><span class="lbl">Data sent</span>${S.pdata.sent} kB</p><p><span class="lbl">Data received</span>${S.pdata.recv} kB</p>`)]])],
+  ['USB data cable',()=>Radio('USB data cable',[['ask','Ask on connection'],['pcsuite','PC Suite'],['print','Printing and media'],['storage','Data storage']],()=>S.usb,v=>S.usb=v)]]) }
+const netNote=()=>note('Network service not available','info',1600);
+function CallMenu(){ const c=S.call; menu('Call',[
+  ['Call divert',()=>menu('Call divert',['Divert all voice calls','Divert if busy','Divert if not answered','Divert if out of reach','Divert if not available','Cancel all diverts'].map(t=>[t,()=>menu(t,[['Activate',netNote],['Cancel',netNote],['Check status',netNote]],{nums:false})]))],
+  ['Anykey answer',()=>OnOff('Anykey answer',c,'anykey')],['Automatic redial',()=>OnOff('Automatic redial',c,'redial')],['Speed dialling',()=>OnOff('Speed dialling',c,'speed')],
+  ['Call waiting',()=>menu('Call waiting',[['Activate',netNote],['Cancel',netNote],['Check status',netNote]],{nums:false})],['Call summary',()=>OnOff('Summary after call',c,'summary')],
+  ['Send my caller ID',()=>Radio('Send my caller ID',[['net','Set by network'],['yes','Yes'],['no','No']],()=>c.cid,v=>c.cid=v)],['Line for outgoing calls',()=>Radio('Line',[[1,'Line 1'],[2,'Line 2']],()=>c.line,v=>c.line=v)]]) }
+function PhoneMenu(){ const p=S.phone; menu('Phone',[
+  ['Language settings',()=>menu('Language settings',[['Phone language',()=>Radio('Phone language',[['auto','Automatic'],['en','English']],()=>p.lang,v=>p.lang=v)],['Writing language',()=>Radio('Writing language',[['English','English']],()=>p.wlang,v=>p.wlang=v)]])],
+  ['Memory status',()=>{ let used=0; try{used=(localStorage.getItem('larchK7')||'').length}catch(e){} const kb=Math.round(used/1024); Info('Memory status',`<p><span class="lbl">Free memory</span>${Math.max(0,4800-kb)} kB</p><p><span class="lbl">Used memory</span>${kb} kB</p><p><span class="lbl">Contacts</span>${S.contacts.length}</p><p><span class="lbl">Messages</span>${S.msgs.inbox.length+S.msgs.sent.length+S.msgs.drafts.length+S.msgs.saved.length}</p><p><span class="lbl">Images</span>${S.images.length}</p><p><span class="lbl">Applications</span>${S.jars.length}</p>`) }],
+  ['Automatic keyguard',()=>Radio('Automatic keyguard',[[true,'On'],[false,'Off']],()=>p.akg.on,v=>{p.akg.on=v},{after:v=>{ if(v) DigitInput('Delay','##:##',pad2(Math.floor(p.akg.sec/60))+pad2(p.akg.sec%60),s=>{ const sec=+s.slice(0,2)*60+ +s.slice(2); if(sec<10) return false; p.akg.sec=sec; save(); pop(); note('Saved') },{hint:'mm:ss',bad:'Minimum 00:10'}) }})],
+  ['Security keyguard',()=>askCode(()=>OnOff('Security keyguard',p,'seckg'))],
+  ['Welcome note',()=>push(Editor({mode:'text',title:'Welcome note',text:p.welcome,max:40,done(t){p.welcome=t;save();pop();note('Saved')}}))],
+  ['Flight query',()=>OnOff('Flight query',p,'flightQ')],
+  ['Phone updates',()=>Info('Phone updates',`<p><span class="lbl">Current software</span>V 07.21 · Larch K7</p><p><span class="lbl">Shell build</span>${new Date().getFullYear()}.10</p><p>No updates available.</p>`)],
+  ['Help text activation',()=>OnOff('Help text activation',p,'help')],['Start-up tone',()=>OnOff('Start-up tone',p,'startTone')]]) }
+function EnhMenu(){ menu('Enhancements',[['Headset',()=>menu('Headset',[['Default profile',()=>Radio('Default profile',PROF_ORDER.map(id=>[id,S.profiles[id].name]),()=>S.profile,()=>{})],['Automatic answer',()=>note('Connect a compatible headset','info')]])],['Charger',()=>note('Charging','info')]]) }
+function ConfigMenu(){ menu('Configuration',[['Default configuration settings',()=>Radio('Default configuration',[['operator',S.net],['personal','Personal']],()=>S.cfg,v=>S.cfg=v)],['Activate default in all applications',()=>note('Default settings activated')],
+  ['Preferred access point',()=>Radio('Access point',[['Internet','Internet'],['WAP','WAP services']],()=>S.apn,v=>S.apn=v)],['Connect to service provider support',()=>note('Network service not available','info')],['Personal configuration settings',()=>note('No personal settings','info')]]) }
+function SecurityMenu(){ const s=S.sec; menu('Security',[
+  ['PIN code request',()=>askPin(()=>Radio('PIN code request',[[true,'On'],[false,'Off']],()=>s.pinReq,v=>s.pinReq=v))],
+  ['Call barring service',()=>menu('Call barring',['Outgoing calls','International calls','Incoming calls','Incoming calls when abroad','Cancel all barrings'].map(t=>[t,()=>menu(t,[['Activate',netNote],['Cancel',netNote],['Check status',netNote]],{nums:false})]))],
+  ['Fixed dialling',()=>note('Not supported by SIM card','info')],['Closed user group',()=>Radio('Closed user group',[['default','Default'],['on','On'],['off','Off']],()=>s.cug,v=>s.cug=v)],
+  ['Security level',()=>askCode(()=>Radio('Security level',[['none','None'],['memory','Memory']],()=>s.level,v=>s.level=v))],
+  ['Access codes',()=>menu('Access codes',[['Change security code',()=>changeCode('code','security code',5)],['Change PIN code',()=>changeCode('pin','PIN code',4)],['Change PIN2 code',()=>changeCode('pin2','PIN2 code',4)],['Change barring password',netNote]])],
+  ['Code in use',()=>Radio('Code in use',[['pin','PIN'],['upin','UPIN']],()=>s.inuse,v=>s.inuse=v)],
+  ['Authority certificates',()=>push(List('Authority certificates',[],{empty:'No certificates'}))],['User certificates',()=>push(List('User certificates',[],{empty:'No certificates'}))]]) }
+function askPin(ok){ push(Editor({mode:'pass',title:'PIN code',label:'Enter PIN code:',max:8,done(t){ pop(); if(t===S.sec.pin) ok(); else note('Wrong PIN code','warn') }})) }
+function changeCode(key,label,min){ push(Editor({mode:'pass',title:label,label:'Current '+label+':',max:10,done(t){ pop(); if(t!==S.sec[key]){ note('Wrong code','warn'); return }
+  push(Editor({mode:'pass',title:label,label:'New '+label+':',max:10,min,done(n){ pop(); push(Editor({mode:'pass',title:label,label:'Verify '+label+':',max:10,done(m){ pop(); if(m!==n){ note('Codes do not match','warn'); return } S.sec[key]=n; save(); note('Code changed') }})) }})) }})) }
+function RestoreFactory(){ menu('Restore factory settings',[['Restore settings only',()=>askCode(()=>Ask('Restore settings? Contacts, messages and files are kept.',()=>factory(false)))],['Restore all',()=>askCode(()=>Ask('Restore all? This deletes contacts, messages, notes and files.',()=>factory(true)))]],{nums:false}) }
+function factory(all){ const keep=all?{}:{contacts:S.contacts,msgs:S.msgs,logs:S.logs,cal:S.cal,todo:S.todo,notes:S.notes,jars:S.jars,images:S.images,themes:S.themes,words:S.words,speed:S.speed,groups:S.groups,snake:S.snake};
+  note('Restoring','wait',1500,()=>{ S=deepMerge(clone(DEF),keep); S.seeded=true; save(); powerOff(); setTimeout(powerOn,900) }) }
+
+/* ---------------- gallery & media ---------------- */
+function GalleryMenu(){ menu('Gallery',[['Images',()=>Images(false),'folder'],['Video clips',()=>push(List('Video clips',[],{empty:'Folder empty'})),'folder'],['Music files',()=>Tracks(),'folder'],['Themes',()=>SelectTheme(),'folder'],['Graphics',()=>Images(false,true),'folder'],['Tones',()=>Tones(),'folder'],['Recordings',()=>push(List('Recordings',[],{empty:'Folder empty'})),'folder'],['Received files',()=>Received(),'folder']]) }
+function Images(forWall,graphicsOnly){ const list=()=>{ const a=(graphicsOnly?allImages().filter(i=>i.builtin):allImages()).map(i=>({t:i.n,i,ic:`<img src="${i.src}" alt="">`,radio:forWall,on:forWall&&S.wall.id===i.id})); if(!graphicsOnly) a.unshift({t:forWall?'Choose from Photos…':'Add from Photos…',add:true,ic:ico('img')}); return a };
+  push(List(forWall?'Select image':graphicsOnly?'Graphics':'Images',list,{name:'images',empty:'Folder empty',count:!forWall,
+    M:it=>it.add?{t:'Open',f:()=>addPhotos(im=>{ if(!im) return; if(forWall){ S.wall={on:true,id:im.id}; save(); pop(); note('Wallpaper set') } else note('Image added') })}
+      :forWall?{t:'Set',f:()=>{S.wall={on:true,id:it.i.id};save();pop();note('Wallpaper set')}}:{t:'Open',f:()=>{ const l=list().filter(x=>!x.add); ImageView(l,l.findIndex(x=>x.i.id===it.i.id)) }},
+    L:it=>it&&!it.add?{t:'Options',f:()=>imgOptions(it.i)}:{t:''} })) }
+let photoCb=null;
+function addPhotos(cb){ photoCb=cb||null; if(Host&&Host.pickPhotos){ Host.pickPhotos().then(l=>storePhotos(l||[])).catch(()=>{}); return } try{ $('#pin').click() }catch(e){} }
+function takePhoto(){ photoCb=im=>{ if(im) Info('Camera','<p>Photo saved to Gallery › Images.</p>',{L:{t:'Images',f:()=>{pop();Images(false)}}}) };
+  if(Host&&Host.camera){ Host.camera().then(p=>storePhotos(p?[p]:[])).catch(()=>note('Camera not available','warn')); return } try{ $('#cin').click() }catch(e){} }
+async function storePhotos(list){ let last=null; for(const p of list){ const d=await shrink(p.data,480,640,.82); if(!d) continue; last={id:'i:'+uid(),n:p.name||('Photo '+fmtDate(now())),data:d}; S.images.push(last) }
+  save(); if(S.on&&V.length) render(); const cb=photoCb; photoCb=null; if(cb) cb(last); else if(last) note(list.length>1?list.length+' images added':'Image added') }
+function imgOptions(im){ menu('Options',[['Set as wallpaper',()=>{S.wall={on:true,id:im.id};save();pop();note('Wallpaper set')}],['Details',()=>{pop();Info('Details',`<p><span class="lbl">Name</span>${esc(im.n)}</p><p><span class="lbl">Format</span>${im.builtin?'Built-in':'Imported image'}</p><p><span class="lbl">Resolution</span>240x320</p>`)}],
+  !im.builtin?['Rename',()=>{pop();push(Editor({mode:'text',noPred:true,title:'Rename',text:im.n,done(t){ const x=S.images.find(y=>y.id===im.id); if(x&&t.trim()) x.n=t.trim(); save(); pop(); note('Saved') }}))}]:null,
+  !im.builtin?['Delete',()=>{pop();Ask('Delete image?',()=>{S.images=S.images.filter(y=>y.id!==im.id); if(S.wall.id===im.id) S.wall.id='w:dawn'; save(); note('Deleted') })}]:null],{nums:false}) }
+function ImageView(list,i){ push({name:'imgview',hdText(){ return list[i]?list[i].t:'' },hdRight(){ return `${i+1}/${list.length}` },
+  draw(el){ const it=list[i]; el.innerHTML=`<div class="img" style="background-image:url(${it.i.src})"></div>` },
+  soft(){ return [{t:'Options',f:()=>imgOptions(list[i].i)},{t:''},{t:'Back',f:pop}] },
+  key(k){ if(k==='LT'||k==='U'){ i=(i-1+list.length)%list.length; render(); return true } if(k==='RT'||k==='D'){ i=(i+1)%list.length; render(); return true } return false } }) }
+function Tones(){ let h=null; const stop=()=>{h&&h.stop();h=null};
+  push(List('Tones',()=>Object.keys(RING).map(n=>({t:n,s:'Ringing tone',n,ic:ico('tone')})).concat(Object.keys(MSGT).map(n=>({t:n,s:'Message tone',n,msg:true,ic:ico('tone')}))),{two:true,onPop:stop,
+    M:it=>({t:'Play',f:()=>{stop();h=playSeq(it.msg?MSGT[it.n]:RING[it.n],{vol:volG(Math.max(2,prof().vol))})}}),
+    L:it=>({t:'Options',f:()=>menu('Options',[it.msg?['Set as message tone',()=>{prof().msg=it.n;save();pop();note('Message tone set')}]:['Set as ring tone',()=>{prof().tone=it.n;save();pop();note('Ringing tone set')}]],{nums:false})}),
+    R:()=>({t:'Back',f:()=>{stop();pop()}}) })) }
+function Received(){ const items=S.images.map(i=>({t:i.n,ic:`<img src="${i.data}" alt="">`})).concat(S.jars.map(j=>({t:j.name,ic:j.icon?`<img src="${j.icon}" alt="">`:ico('java')}))).concat(S.themes.map(t=>({t:t.n,ic:ico('theme')})));
+  push(List('Received files',items,{empty:'Folder empty',M:()=>({t:''})})) }
+function MediaMenu(){ menu('Media',[['Camera',()=>takePhoto()],['Video',()=>note('Video recording is not available yet','info',1800)],['Music player',()=>MusicPlayer()],['Radio',()=>radio()],['Recorder',()=>note('Voice recording is not available yet','info',1800)],
+  ['Equaliser',()=>Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})]]) }
+function radio(){ note('FM radio is not available on this device','info',1800) }
+/* music player (tracks live for this session) */
+const music={tracks:[],cur:null,el:new Audio(),playing:false,vol:6,
+  applyEq(){ const a=ac(); if(!a) return; if(!this.node){ try{ this.node=a.createMediaElementSource(this.el); this.lo=a.createBiquadFilter(); this.lo.type='lowshelf'; this.lo.frequency.value=200; this.mid=a.createBiquadFilter(); this.mid.type='peaking'; this.mid.frequency.value=1200; this.mid.Q.value=.9; this.hi=a.createBiquadFilter(); this.hi.type='highshelf'; this.hi.frequency.value=4000; this.node.connect(this.lo).connect(this.mid).connect(this.hi).connect(a.destination) }catch(e){ return } }
+    const g={Normal:[0,0,0],Pop:[2,3,2],Rock:[5,-1,4],Jazz:[3,1,2],Classic:[3,0,3],'Bass boost':[8,0,0]}[S.eq]||[0,0,0]; this.lo.gain.value=g[0]; this.mid.gain.value=g[1]; this.hi.gain.value=g[2] },
+  play(t){ if(t){ this.cur=t; this.el.src=t.url } if(!this.cur) return; this.applyEq(); this.el.volume=this.vol/10; this.el.play().then(()=>{this.playing=true;render()}).catch(()=>{}) },
+  pause(){ this.el.pause(); this.playing=false; render() },
+  step(d){ if(!this.tracks.length) return; const i=this.tracks.indexOf(this.cur); this.play(this.tracks[(i+d+this.tracks.length)%this.tracks.length]) } };
+music.el.addEventListener('ended',()=>{ music.playing=false; music.step(1) });
+function Tracks(){ push(List('Music files',()=>music.tracks.map(t=>({t:t.name,tr:t,ic:ico('note')})),{empty:'No music files. Add audio in Settings › Emulator › Add files.',M:it=>({t:'Play',f:()=>{music.play(it.tr);MusicPlayer()}})})) }
+function MusicPlayer(){ push({name:'music',title:'Music player',
+  draw(el){ const t=music.cur; const e=music.el; const pr=e.duration?e.currentTime/e.duration*100:0;
+    el.innerHTML=t?`<div class="mp${music.playing?' play':''}"><div class="disc"></div><div class="ti">${esc(t.name)}</div><div class="pr"><i style="width:${pr}%"></i></div><div class="tm">${fmtDur(e.currentTime||0).slice(3)} / ${fmtDur(e.duration||0).slice(3)} · Vol ${music.vol}</div></div>`
+      :`<div class="empty">${music.tracks.length?'Select Play to start':'No music files. Add audio in Settings › Emulator › Add files.'}</div>` },
+  tick(){ render() },
+  soft(){ return [{t:'Options',f:()=>menu('Options',[['Track list',()=>{pop();Tracks()}],['Stop',()=>{music.pause();music.el.currentTime=0;pop()}]],{nums:false})},{t:music.playing?'Pause':'Play',f:()=>{ if(music.playing) music.pause(); else music.play(music.cur||music.tracks[0]) }},{t:'Back',f:pop}] },
+  key(k){ if(k==='LT'){music.step(-1);return true} if(k==='RT'){music.step(1);return true} if(k==='VUP'||k==='U'){music.vol=Math.min(10,music.vol+1);music.el.volume=music.vol/10;render();return true} if(k==='VDN'||k==='D'){music.vol=Math.max(0,music.vol-1);music.el.volume=music.vol/10;render();return true} return false } }) }
+
+/* ---------------- organiser ---------------- */
+function OrganiserMenu(){ menu('Organiser',[['Alarm clock',()=>AlarmMenu()],['Calendar',()=>Calendar()],['To-do list',()=>TodoList()],['Notes',()=>NotesMenu()],['Calculator',()=>Calculator()],['Countdown timer',()=>TimerMenu()],['Stopwatch',()=>Stopwatch()]]) }
+function AlarmMenu(){ const a=S.alarm; push(List('Alarm clock',()=>[
+  {t:'Alarm time: '+(a.on?fmtTime(new Date(2000,0,1,a.h,a.m)):'Off'),f:()=>Radio('Alarm',[[true,'On'],[false,'Off']],()=>a.on,v=>a.on=v,{after:v=>{ if(v) TimeEntry('Alarm time',a.h,a.m,(h,m)=>{a.h=h;a.m=m;a.fired='';save();pop();note('Alarm on')}) }})},
+  {t:'Repeat alarm: '+(a.rep?'On':'Off'),f:()=>Radio('Repeat alarm',[[true,'On'],[false,'Off']],()=>a.rep,v=>a.rep=v,{after:v=>{ if(v) Checks('Repeat on',[[1,'Monday'],[2,'Tuesday'],[3,'Wednesday'],[4,'Thursday'],[5,'Friday'],[6,'Saturday'],[0,'Sunday']],()=>a.days,x=>a.days=x) }})},
+  {t:'Alarm tone',f:()=>Radio('Alarm tone',Object.keys(ALARMT).map(n=>[n,n]),()=>a.tone,v=>a.tone=v,{onMove:it=>playSeq(ALARMT[it.val],{vol:.06,max:1})})},
+  {t:'Snooze time-out: '+a.snz+' min',f:()=>Radio('Snooze time-out',[1,5,10,15,20,30].map(n=>[n,n+' minutes']),()=>a.snz,v=>a.snz=v)}],{nums:true,count:false})) }
+let snoozeAt=0;
+function AlarmView(wasOff){ startRing('alarm'); push({name:'alarmv',full:true,noPower:true,
+  draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico('alarm',40)}<div class="t1">${fmtTime(now())}</div><div class="t2">Alarm</div></div>` },
+  tick(){ render() },
+  soft(){ return [{t:'Stop',f:()=>this.stop()},{t:''},{t:'Snooze',f:()=>{ stopRing(); snoozeAt=Date.now()+S.alarm.snz*60e3; save(); pop(); note('Snooze '+S.alarm.snz+' min','info'); if(wasOff) powerOff() }}] },
+  stop(){ stopRing(); snoozeAt=0; pop(); if(wasOff) Ask('Switch phone on?',()=>bootTail(),()=>powerOff(),{title:''}) },
+  key(k){ if(k==='END'){ this.stop(); return true } return false } }) }
+function Calendar(){ let sel=now();
+  push({name:'cal',hdText(){ return MON[sel.getMonth()]+' '+sel.getFullYear() },hdRight(){ return '' },
+    draw(el){ const y=sel.getFullYear(),m=sel.getMonth(); const first=new Date(y,m,1); const off=(first.getDay()-S.weekStart+7)%7; const today=dkey(now());
+      const has=new Set(S.cal.map(n=>n.type==='Birthday'?y+n.date.slice(4):n.date));
+      let h='<div class="cal"><table><tr>'; for(let i=0;i<7;i++) h+=`<th>${DAY[(i+S.weekStart)%7].slice(0,2)}</th>`; h+='</tr>';
+      const start=new Date(y,m,1-off); for(let r=0;r<6;r++){ h+='<tr>'; for(let c=0;c<7;c++){ const d=new Date(start); d.setDate(start.getDate()+r*7+c); const k=dkey(d);
+        h+=`<td class="${d.getMonth()!==m?'o ':''}${k===today?'today ':''}${k===dkey(sel)?'sel ':''}${has.has(k)?'has':''}" data-d="${k}"><span>${d.getDate()}</span></td>` } h+='</tr>' }
+      el.innerHTML=h+'</table></div>' },
+    soft(){ return [{t:'Options',f:()=>menu('Options',[['Make a note',()=>{pop();MakeNote(dkey(sel))}],['View day',()=>{pop();DayView(dkey(sel))}],['Go to date',()=>{pop();DigitInput('Go to date','##-##-####',pad2(sel.getDate())+pad2(sel.getMonth()+1)+sel.getFullYear(),s=>{ const d=new Date(+s.slice(4),+s.slice(2,4)-1,+s.slice(0,2)); if(isNaN(d)) return false; sel=d; pop() },{hint:'dd-mm-yyyy'})}],
+      ['Settings',()=>{pop();menu('Calendar settings',[['Week starts on',()=>Radio('Week starts on',[[1,'Monday'],[0,'Sunday'],[6,'Saturday']],()=>S.weekStart,v=>S.weekStart=v)]])}],['Go to to-do list',()=>{pop();TodoList()}],['Delete all notes',()=>{pop();Ask('Delete all calendar notes?',()=>{S.cal=[];save();note('Deleted')})}]],{nums:false})},
+      {t:'View',f:()=>DayView(dkey(sel))},{t:'Back',f:pop}] },
+    key(k){ const d={LT:-1,RT:1,U:-7,D:7}[k]; if(d){ sel=new Date(sel); sel.setDate(sel.getDate()+d); render(); return true } return false },
+    pickDate(k){ const [Y,M,D]=k.split('-').map(Number); if(dkey(sel)===k) DayView(k); else { sel=new Date(Y,M-1,D); render() } } }) }
+const NOTE_IC={Meeting:'person',Call:'phone',Birthday:'cal',Memo:'doc',Reminder:'alarm'};
+function DayView(k){ const notes=()=>S.cal.filter(n=>n.date===k||(n.type==='Birthday'&&n.date.slice(5)===k.slice(5))).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  push(List(k.split('-').reverse().join(S.date.sep),()=>notes().map(n=>({t:n.subject,s:n.type+(n.time?' · '+n.time:'')+(n.alarm?' · alarm':''),n,ic:ico(NOTE_IC[n.type])})),{name:'day',two:true,empty:'No notes for this day',
+    L:it=>({t:'Options',f:()=>menu('Options',[['Make a note',()=>{pop();MakeNote(k)}],it?['Delete',()=>{pop();Ask('Delete note?',()=>{S.cal=S.cal.filter(x=>x!==it.n);save();note('Deleted')})}]:null,it?['Edit',()=>{pop();push(Editor({mode:'text',title:'Edit note',text:it.n.subject,done(t){it.n.subject=t;save();pop();note('Saved')}}))}]:null],{nums:false})}),
+    Mempty:{t:'Note',f:()=>MakeNote(k)}, M:it=>({t:'View',f:()=>Info(it.n.type,`<p><b>${esc(it.n.subject)}</b></p><p><span class="lbl">Date</span>${esc(it.n.date)}</p>${it.n.time?`<p><span class="lbl">Time</span>${it.n.time}</p>`:''}${it.n.alarm?'<p>Alarm on</p>':''}`)}) })) }
+function MakeNote(k){ menu('Make a note',['Meeting','Call','Birthday','Memo','Reminder'].map(t=>[t,()=>{ pop(); push(Editor({mode:'text',title:t,label:t==='Call'?'Name:':'Subject:',done(sub){ if(!sub.trim()){note('Enter a subject','warn');return} pop();
+    const fin=(time,alarm)=>{ S.cal.push({id:uid(),date:k,type:t,subject:sub.trim(),time,alarm,fired:false}); save(); while(tv().name!=='day'&&tv().name!=='cal'&&V.length>1) pop(); note('Note saved') };
+    if(t==='Birthday'||t==='Memo') return fin('',false);
+    const d=now(); TimeEntry('Time',d.getHours(),d.getMinutes(),(h,m)=>{ pop(); const time=pad2(h)+':'+pad2(m); Radio('Alarm',[[true,'Alarm on'],[false,'No alarm']],()=>null,()=>{},{after:v=>fin(time,v)}) }) }})) },NOTE_IC[t]]),{nums:false}) }
+function TodoList(){ const pr={high:0,medium:1,low:2};
+  push(List('To-do list',()=>S.todo.slice().sort((a,b)=>(a.done-b.done)||(pr[a.pri]-pr[b.pri])).map(t=>({t:(t.done?'✓ ':'')+t.text,s:'Priority: '+t.pri,x:t,ic:ico(t.done?'check':'doc')})),{two:true,empty:'No notes',
+    Mempty:{t:'Add',f:()=>addTodo()},M:it=>({t:it.x.done?'Undone':'Done',f:()=>{it.x.done=!it.x.done;save();render()}}),
+    L:it=>({t:'Options',f:()=>menu('Options',[['Add',()=>{pop();addTodo()}],it?['Edit',()=>{pop();push(Editor({mode:'text',title:'To-do',text:it.x.text,done(t){it.x.text=t;save();pop();note('Saved')}}))}]:null,it?['Priority',()=>{pop();Radio('Priority',[['high','High'],['medium','Medium'],['low','Low']],()=>it.x.pri,v=>it.x.pri=v)}]:null,it?['Delete',()=>{pop();Ask('Delete note?',()=>{S.todo=S.todo.filter(y=>y!==it.x);save();note('Deleted')})}]:null,['Delete done notes',()=>{S.todo=S.todo.filter(y=>!y.done);save();pop();note('Deleted')}]],{nums:false})}) })) }
+function addTodo(){ push(Editor({mode:'text',title:'To-do',label:'Subject:',done(t){ if(!t.trim())return; pop(); Radio('Priority',[['high','High'],['medium','Medium'],['low','Low']],()=>'medium',v=>{S.todo.push({id:uid(),text:t.trim(),pri:v,done:false});note('Saved')}) }})) }
+function NotesMenu(){ push(List('Notes',()=>S.notes.slice().sort((a,b)=>b.t-a.t).map(n=>({t:n.text.split('\n')[0],s:fmtStamp(n.t),n,ic:ico('doc')})),{two:true,empty:'No notes',
+  Mempty:{t:'Add',f:()=>addNote()},M:it=>({t:'View',f:()=>Info('Note',`<p>${esc(it.n.text)}</p>`,{L:{t:'Edit',f:()=>{pop();editNote(it.n)}}})}),
+  L:it=>({t:'Options',f:()=>menu('Options',[['Make a note',()=>{pop();addNote()}],it?['Edit',()=>{pop();editNote(it.n)}]:null,it?['Send',()=>{pop();NewMessage(it.n.text)}]:null,it?['Delete',()=>{pop();Ask('Delete note?',()=>{S.notes=S.notes.filter(x=>x!==it.n);save();note('Deleted')})}]:null],{nums:false})}) })) }
+function addNote(){ push(Editor({mode:'text',title:'Note',done(t){ if(t.trim()){ S.notes.push({id:uid(),text:t,t:Date.now()}); save() } pop(); note('Saved') }})) }
+function editNote(n){ push(Editor({mode:'text',title:'Note',text:n.text,done(t){ n.text=t; n.t=Date.now(); save(); pop(); note('Saved') }})) }
+function Calculator(){ let cur='0',acc=null,op=null,fresh=true; const ops=['+','−','×','÷'];
+  const calc=(a,b,o)=>o==='+'?a+b:o==='−'?a-b:o==='×'?a*b:b===0?NaN:a/b;
+  const fmt=n=>{ if(!isFinite(n)) return 'Error'; let s=String(+n.toPrecision(12)); return s.length>14?n.toExponential(6):s };
+  const setOp=o=>{ if(op&&!fresh){ acc=calc(acc,+cur,op); cur=fmt(acc) } else if(acc==null) acc=+cur; op=o; fresh=true; render() };
+  const eq=()=>{ if(op==null) return; acc=calc(acc,+cur,op); cur=fmt(acc); acc=null; op=null; fresh=true; render() };
+  push({name:'calc',title:'Calculator',
+    draw(el){ el.innerHTML=`<div class="calc"><div class="h">* operator · # decimal · ↑ + ↓ − ← × → ÷</div><div class="a">${acc!=null?esc(fmt(acc)+' '+op):''}</div><div class="b">${esc(cur)}</div></div>` },
+    soft(){ return [{t:'Options',f:()=>menu('Options',[['Square',()=>{cur=fmt((+cur)**2);fresh=true;pop()}],['Square root',()=>{cur=fmt(Math.sqrt(+cur));fresh=true;pop()}],['Change sign',()=>{cur=cur.startsWith('-')?cur.slice(1):'-'+cur;pop()}],['Clear screen',()=>{cur='0';acc=null;op=null;fresh=true;pop()}]],{nums:false})},{t:'Equals',f:eq},{t:cur!=='0'?'Clear':'Back',f:()=>{ if(cur==='0'&&acc==null){pop();return} cur=fresh?'0':(cur.slice(0,-1)||'0'); if(cur==='-') cur='0'; render() }}] },
+    key(k){ if(/^\d$/.test(k)){ if(fresh||cur==='0'){ cur=k; fresh=false } else if(cur.length<14) cur+=k; render(); return true }
+      if(k==='#'){ if(fresh){cur='0.';fresh=false} else if(!cur.includes('.')) cur+='.'; render(); return true }
+      if(k==='*'){ const i=op?ops.indexOf(op):-1; if(fresh&&op){ op=ops[(i+1)%4]; render() } else setOp(ops[0]); return true }
+      const m={U:'+',D:'−',LT:'×',RT:'÷'}[k]; if(m){ setOp(m); return true } return false } }) }
+function TimerMenu(){ menu('Countdown timer',[['Normal timer',()=>DigitInput('Normal timer','##:##:##','000500',s=>{ const sec=+s.slice(0,2)*3600+ +s.slice(2,4)*60+ +s.slice(4); if(!sec) return false; pop(); push(Editor({mode:'text',title:'Timer note',label:'Note:',done(t){ S.timer={end:Date.now()+sec*1000,note:t}; save(); pop(); note('Timer started') }})) },{hint:'hh:mm:ss'})],
+  S.timer?['Stop timer',()=>{S.timer=null;save();pop();note('Timer stopped')}]:null,S.timer?['Change time',()=>{S.timer=null;save();pop();TimerMenu()}]:null]) }
+function Stopwatch(){ let t0=0, acc=0, run=false, laps=[], lapStart=0, mode='split';
+  const el=()=>acc+(run?Date.now()-t0:0); const f=ms=>{ const s=ms/1000; return pad2(Math.floor(s/60))+':'+pad2(Math.floor(s)%60)+'.'+Math.floor(ms%1000/100) };
+  push({name:'sw',title:'Stopwatch',
+    draw(e){ e.innerHTML=`<div class="big" style="justify-content:flex-start;padding-top:24px"><div class="t1">${f(el())}</div><div class="t2">${mode==='lap'?'Lap timing':'Split timing'}</div>${laps.slice(-5).map((l,i)=>`<div class="t2">${laps.length-Math.min(5,laps.length)+i+1}. ${f(l)}</div>`).join('')}</div>` },
+    tick(){ render() },
+    soft(){ if(run) return [{t:''},{t:mode==='lap'?'Lap':'Split',f:()=>{ const t=el(); laps.push(mode==='lap'?t-lapStart:t); lapStart=t; render() }},{t:'Stop',f:()=>{ acc=el(); run=false; render() }}];
+      return [{t:'Options',f:()=>menu('Options',[['Split timing',()=>{mode='split';pop()}],['Lap timing',()=>{mode='lap';pop()}],['Save',()=>{ S.swTimes.unshift({t:Date.now(),total:el(),laps}); S.swTimes=S.swTimes.slice(0,10); save(); pop(); note('Saved') }],['View times',()=>{pop();push(List('Saved times',S.swTimes.map(x=>({t:f(x.total),s:fmtStamp(x.t)})),{two:true,empty:'No times'}))}],['Reset',()=>{acc=0;laps=[];lapStart=0;pop()}]],{nums:false})},
+        {t:acc?'Continue':'Start',f:()=>{ t0=Date.now(); run=true; render() }},{t:'Back',f:pop}] },
+    tickFast:true }) }
+
+/* ---------------- applications & games ---------------- */
+function AppsMenu(){ menu('Applications',[['Games',()=>menu('Games',[['Snake',()=>SnakeMenu(),'game']].concat(S.jars.filter(j=>j.game).map(j=>[j.name,()=>openJar(j),'java'])),{nums:true})],['Collection',()=>Collection()],['Memory',()=>Info('Memory',`<p><span class="lbl">Installed applications</span>${S.jars.length}</p><p><span class="lbl">Used</span>${Math.round(S.jars.reduce((a,j)=>a+j.size,0)/1024)} kB</p>`)]]) }
+function Collection(){ push(List('Collection',()=>S.jars.map(j=>({t:j.name,s:j.vendor||'',j,ic:j.icon?`<img src="${j.icon}" alt="">`:ico('java')})),{name:'coll',two:true,empty:'No applications. Add .jar files in Settings › Emulator › Add files.',
+  M:it=>({t:'Open',f:()=>openJar(it.j)}),
+  L:it=>it?{t:'Options',f:()=>menu('Options',[['Open',()=>{pop();openJar(it.j)}],['Delete',()=>{pop();Ask('Delete '+it.j.name+'?',()=>{S.jars=S.jars.filter(x=>x!==it.j);save();note('Application deleted')})}],
+    ['Details',()=>{pop();Info('Details',`<p><b>${esc(it.j.name)}</b></p><p><span class="lbl">Vendor</span>${esc(it.j.vendor||'Unknown')}</p><p><span class="lbl">Version</span>${esc(it.j.ver||'—')}</p><p><span class="lbl">Size</span>${Math.round(it.j.size/1024)} kB</p><p><span class="lbl">Main class</span>${esc(it.j.main||'—')}</p><p><span class="lbl">Profile</span>${esc(it.j.profile||'MIDP-2.0')}</p>`)}],
+    ['Application access',()=>{pop();Radio('Network access',[['ask','Ask every time'],['first','Ask first time only'],['always','Always allowed'],['never','Not allowed']],()=>it.j.net||'ask',v=>it.j.net=v)}],
+    ['Mark as game',()=>{it.j.game=!it.j.game;save();pop();note(it.j.game?'Added to Games':'Removed from Games')}]],{nums:false})}:{t:''} })) }
+function openJar(j){ if(Host&&Host.runJar){ Host.runJar(j.id); return }
+  Info(j.name,`<p>${j.icon?`<img src="${j.icon}" alt="" style="width:32px;height:32px;float:left;margin:0 8px 4px 0">`:''}<b>${esc(j.name)}</b><br>${esc(j.vendor||'')} ${esc(j.ver||'')}</p><p style="clear:both">Java apps start in the Mac, iPhone and UTM builds of this phone, which include a Java ME runtime. This browser preview can install and list them only.</p>`) }
+function SnakeMenu(){ menu('Snake',[['New game',()=>Snake()],['Level',()=>Radio('Level',[1,2,3,4,5,6,7,8,9].map(n=>[n,'Level '+n]),()=>S.snake.lvl,v=>S.snake.lvl=v)],['Top score',()=>Info('Top score',`<p style="font-size:28px">${S.snake.best}</p>`)],['Instructions',()=>Info('Instructions','<p>Steer with the navigation key or 2, 4, 6 and 8. Eat food to grow. Avoid the walls and your own tail. Press 5 or the middle key to pause.</p>')]]) }
+function Snake(){ const W=20,H=21,C=12; let sn,dir,nd,food,score,dead,paused,timer;
+  const reset=()=>{ sn=[{x:6,y:10},{x:5,y:10},{x:4,y:10}]; dir={x:1,y:0}; nd=dir; food=spawn(); score=0; dead=false; paused=false; clearInterval(timer); timer=setInterval(step,300-S.snake.lvl*26) };
+  function spawn(){ let p; do{ p={x:Math.floor(Math.random()*W),y:Math.floor(Math.random()*H)} }while(sn&&sn.some(s=>s.x===p.x&&s.y===p.y)); return p }
+  function step(){ if(paused||dead||tv()!==v) return; dir=nd; const h={x:sn[0].x+dir.x,y:sn[0].y+dir.y};
+    if(h.x<0||h.y<0||h.x>=W||h.y>=H||sn.some(s=>s.x===h.x&&s.y===h.y)){ dead=true; clearInterval(timer); if(score>S.snake.best){S.snake.best=score;save()} beep([220],.3,.06,'square'); render(); return }
+    sn.unshift(h); if(h.x===food.x&&h.y===food.y){ score+=S.snake.lvl; food=spawn(); beep([1200],.05,.04,'square') } else sn.pop(); paint() }
+  function paint(){ const cv=SCR.querySelector('canvas'); if(!cv) return; const x=cv.getContext('2d'); x.fillStyle='#a9c47f'; x.fillRect(0,0,240,252);
+    x.fillStyle='#9ab86f'; for(let i=0;i<W;i++) for(let j=0;j<H;j++) if((i+j)%2) x.fillRect(i*C,j*C,C,C);
+    x.fillStyle='#1d2a12'; sn.forEach((s,i)=>{ x.fillRect(s.x*C+1,s.y*C+1,C-2,C-2) }); x.fillStyle='#5a1b12'; x.beginPath(); x.arc(food.x*C+C/2,food.y*C+C/2,C/2-2,0,7); x.fill();
+    const hd=SCR.querySelector('.hr'); if(hd) hd.textContent='Score '+score;
+    if(dead||paused){ x.fillStyle='rgba(29,42,18,.75)'; x.fillRect(30,100,180,52); x.fillStyle='#d8eab8'; x.font='600 18px Fira Sans,sans-serif'; x.textAlign='center'; x.fillText(dead?'Game over · '+score:'Paused',120,132) } }
+  const v={name:'snake',title:'Snake',hdRight(){ return 'Score '+score },
+    draw(el){ el.innerHTML='<canvas class="cv" width="240" height="252"></canvas>'; paint() },
+    soft(){ return dead?[{t:''},{t:'Again',f:()=>{reset();render()}},{t:'Back',f:pop}]:[{t:''},{t:paused?'Continue':'Pause',f:()=>{paused=!paused;render()}},{t:'Back',f:pop}] },
+    instant(k){ const m={U:[0,-1],'2':[0,-1],D:[0,1],'8':[0,1],LT:[-1,0],'4':[-1,0],RT:[1,0],'6':[1,0]}[k]; if(!m||dead||paused) return false; if(m[0]!==-dir.x||m[1]!==-dir.y) nd={x:m[0],y:m[1]}; return true },
+    key(k){ if(k==='5'){ if(!dead){paused=!paused;render()} return true } return false },
+    onPop(){ clearInterval(timer) } };
+  reset(); push(v) }
+
+/* ---------------- web ---------------- */
+function WebMenu(){ menu('Web',[['Home',()=>openUrl('start')],['Bookmarks',()=>Bookmarks()],['Download links',()=>menu('Download links',[['Tone downloads',()=>openUrl('start')],['Graphic downloads',()=>openUrl('start')],['Game downloads',()=>openUrl('start')],['Theme downloads',()=>openUrl('start')]])],
+  ['Last web address',()=>S.web.last?openUrl(S.web.last):note('No address','info')],['Service inbox',()=>push(List('Service inbox',[],{empty:'No service messages'}))],
+  ['Settings',()=>menu('Web settings',[['Appearance settings',()=>menu('Appearance',[['Text wrapping',()=>OnOff('Text wrapping',S.web,'wrap')],['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.web,v=>S.fs.web=v)],['Show images',()=>Radio('Show images',[[true,'Yes'],[false,'No']],()=>S.web.img,v=>S.web.img=v)]])],
+    ['Cookies',()=>Radio('Cookies',[[true,'Allow'],[false,'Reject']],()=>S.web.cookies,v=>S.web.cookies=v)],['Download settings',()=>Radio('Automatic saving',[['ask','Ask first'],['auto','Save to Gallery']],()=>S.web.dlsave,v=>S.web.dlsave=v)],['Security settings',()=>push(List('Certificates',[],{empty:'No certificates'}))]])],
+  ['Go to address',()=>goAddress()],['Clear the cache',()=>note('Cache cleared')]]) }
+function goAddress(){ push(Editor({mode:'text',noPred:true,lower:true,title:'Address',label:'Address:',text:S.web.last||'http://',done(t){ pop(); if(t.trim()&&t.trim()!=='http://') openUrl(t.trim()) }})) }
+function Bookmarks(){ push(List('Bookmarks',()=>S.web.bm.map(b=>({t:b.t,s:b.u,b,ic:ico('web')})),{two:true,empty:'No bookmarks',
+  M:it=>({t:'Go to',f:()=>openUrl(it.b.u)}),Mempty:{t:'Add',f:()=>addBm()},
+  L:it=>({t:'Options',f:()=>menu('Options',[['New bookmark',()=>{pop();addBm()}],it?['Edit',()=>{pop();addBm(it.b)}]:null,it?['Delete',()=>{pop();Ask('Delete bookmark?',()=>{S.web.bm=S.web.bm.filter(x=>x!==it.b);save();note('Deleted')})}]:null,it?['Send',()=>{pop();NewMessage(it.b.u)}]:null],{nums:false})}) })) }
+function addBm(b){ push(Editor({mode:'text',noPred:true,title:'Bookmark',label:'Name:',text:b?b.t:'',done(t){ push(Editor({mode:'text',noPred:true,lower:true,title:'Bookmark',label:'Address:',text:b?b.u:'http://',done(u){ if(b&&!b._new){b.t=t;b.u=u} else S.web.bm.push({t,u}); save(); pop(2); note('Bookmark saved') }})) }})) }
+function openUrl(u){ if(S.profile==='flight'){ note('Flight profile is active','warn'); return } if(!dev.online){ note('No network connection','warn'); return }
+  if(u!=='start'){ if(!/^https?:\/\//i.test(u)) u='http://'+u.replace(/^\/+/,''); S.web.last=u; save() }
+  if(Host&&Host.openUrl&&u!=='start'){ Host.openUrl(u); return }
+  note('Connecting','wait',600,()=>push(WebPage(u))) }
+function WebPage(u){ let i=0; const start=u==='start';
+  return {name:'web',title:start?'Larch home':u.replace(/^https?:\/\//,''),
+    draw(el){ const fsz={small:'12px',normal:'13px',large:'15px'}[S.fs.web];
+      if(start) el.innerHTML=`<div class="web" style="font-size:${fsz}"><h3>Larch home</h3><p>Bookmarks</p>${S.web.bm.map((b,j)=>`<div class="bmk${j===i?' on':''}" data-i="${j}">${esc(b.t)}<br><small style="color:#666">${esc(b.u)}</small></div>`).join('')}<p style="margin-top:8px;color:#666">Options › Go to address to type one.</p></div>`;
+      else el.innerHTML=`<div class="web" style="font-size:${fsz}"><h3>${esc(u.replace(/^https?:\/\//,'').split('/')[0])}</h3><p>Web pages open in a new browser tab in this preview. The Mac and iPhone builds show them on this screen.</p><p><a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a></p></div>` },
+    soft(){ return [{t:'Options',f:()=>menu('Options',[['Home',()=>{pop();pop();openUrl('start')}],['Go to address',()=>{pop();goAddress()}],['Add bookmark',()=>{pop();addBm(start?null:{t:u.replace(/^https?:\/\//,''),u,_new:true})}],['Bookmarks',()=>{pop();Bookmarks()}],['Reload',()=>{pop();render()}],['Exit',()=>{home()}]],{nums:false})},
+      {t:start&&S.web.bm.length?'Open':'',f:start?()=>openUrl(S.web.bm[i].u):null},{t:'Back',f:pop}] },
+    key(k){ if(start&&(k==='U'||k==='D')){ const n=S.web.bm.length; if(n){ i=(i+(k==='U'?-1:1)+n)%n; render() } return true } return false },
+    pick(j){ i=j; openUrl(S.web.bm[j].u) } } }
+
+/* ---------------- power, boot, screen saver ---------------- */
+let booting=false;
+function powerOn(){ if(S.on&&V.length) return; S.on=true; save(); V=[]; booting=true; locked=false; applyTheme();
+  SCR.className='full'; SCR.innerHTML='<div class="boot"><canvas width="240" height="320"></canvas></div>';
+  const cv=SCR.querySelector('canvas'), x=cv.getContext('2d'); const t0=performance.now();
+  if(S.phone.startTone) playSeq('E5 16,B5 16,E6 16,G#6 8,B6 4',{vol:.07,wave:'triangle'});
+  (function fr(){ const t=(performance.now()-t0)/1700; x.fillStyle='#000'; x.fillRect(0,0,240,320); const p=Math.min(1,t);
+    x.save(); x.translate(120,170); x.strokeStyle='#cfe3c0'; x.fillStyle='#cfe3c0'; x.lineWidth=2;
+    x.beginPath(); x.moveTo(0,40); x.lineTo(0,40-90*p); x.stroke();
+    for(let i=0;i<6;i++){ const q=Math.max(0,Math.min(1,p*6-i)); const y=30-i*14, w=(34-i*5)*q; x.beginPath(); x.moveTo(0,y-12); x.lineTo(-w,y); x.lineTo(w,y); x.closePath(); x.globalAlpha=.25+.12*i; x.fill() }
+    x.globalAlpha=Math.max(0,Math.min(1,(t-.6)*2)); x.font='600 16px Barlow Semi Condensed,Barlow,sans-serif'; x.textAlign='center'; x.fillText('L A R C H',0,78); x.restore();
+    if(t<1.45) requestAnimationFrame(fr); else bootTail() })() }
+function bootTail(){ booting=false; S.on=true; V=[Standby()];
+  const chain=[];
+  if(S.sec.pinReq) chain.push(next=>{ const ask=()=>push(Editor({mode:'pass',title:'PIN code',label:'Enter PIN code:',max:8,cancel:()=>{ powerOff() },done(t){ if(t===S.sec.pin){ pop(); next() } else { note('Wrong PIN code','warn'); const e=tv(); e.text=''; e.caret=0; render() } }})); ask() });
+  if(S.phone.flightQ) chain.push(next=>Ask('Activate phone?',()=>{ if(S.profile==='flight') S.profile='general'; save(); next() },()=>{ S.profile='flight'; save(); next() },{title:''}));
+  if(S.phone.welcome) chain.push(next=>{ render(); note(S.phone.welcome,'info',1600,next) });
+  const run=()=>{ const f=chain.shift(); if(f) f(run); else { home() } }; render(); run() }
+function powerOff(){ stopRing(); stopRingback(); if(callObj){ clearTimeout(callObj.tm); callObj=null } V.forEach(v=>v.onPop&&v.onPop()); V=[]; S.on=false; save(); music.pause(); locked=false; NOTE.hidden=true; render() }
+function ScreenSaver(){ let pos=[120,150];
+  return {name:'ss',full:true,noSoft:true,
+    draw(el){ const d=now(); const deep=S.sleep&&Date.now()-lastActivity>(S.ss.to+120)*1000;
+      if(deep){ el.innerHTML='<div class="ss"></div>'; return }
+      if(S.ss.type==='image'&&!S.psaver){ const w=wallSrc(S.wall.id); el.innerHTML=`<div class="ss" style="background:#000 url(${w}) center/cover"><div class="c" style="left:0;right:0;top:36px;text-shadow:0 2px 6px #000;color:#fff">${fmtTime(d)}</div></div>`; return }
+      if(S.ss.type==='analog'&&!S.psaver){ el.innerHTML='<div class="ss"><canvas width="240" height="320"></canvas></div>'; const x=el.querySelector('canvas').getContext('2d'); x.translate(120,150); x.strokeStyle='#8fa0b3'; x.lineWidth=2; x.beginPath(); x.arc(0,0,70,0,7); x.stroke();
+        for(let i=0;i<12;i++){ x.save(); x.rotate(i*Math.PI/6); x.fillStyle='#8fa0b3'; x.fillRect(-1,-66,2,i%3?6:10); x.restore() }
+        const hand=(a,l,w)=>{ x.save(); x.rotate(a); x.strokeStyle='#e3eaf2'; x.lineWidth=w; x.lineCap='round'; x.beginPath(); x.moveTo(0,8); x.lineTo(0,-l); x.stroke(); x.restore() };
+        hand((d.getHours()%12+d.getMinutes()/60)*Math.PI/6,38,4); hand(d.getMinutes()*Math.PI/30,56,3); return }
+      if(d.getSeconds()===0||!this.p) this.p=[30+Math.random()*100,40+Math.random()*200];
+      el.innerHTML=`<div class="ss"><div class="c" style="left:${this.p[0]-20}px;top:${this.p[1]}px;${S.psaver?'opacity:.6':''}">${fmtTime(d)}<small>${fmtDate(d)}</small></div></div>` },
+    tick(){ render() }, key(){ pop(); return true }, pick(){ pop() } } }
+
+/* ---------------- ticking ---------------- */
+let dimmed=false;
+function wake(){ lastActivity=Date.now(); if(dimmed){ dimmed=false; DIM.style.opacity=0 } }
+setInterval(()=>{
+  if(!S.on){ // alarm can switch the phone on
+    const d=now(); if(S.alarm.on&&d.getHours()===S.alarm.h&&d.getMinutes()===S.alarm.m&&S.alarm.fired!==dkey(d)+d.getHours()+d.getMinutes()&&(!S.alarm.rep||S.alarm.days.includes(d.getDay()))){
+      S.alarm.fired=dkey(d)+d.getHours()+d.getMinutes(); if(!S.alarm.rep) S.alarm.on=false; S.on=true; save(); V=[Standby()]; booting=false; AlarmView(true) } return }
+  if(booting) return;
+  const d=now(), v=tv();
+  // timed profile
+  if(S.timedUntil&&Date.now()>=S.timedUntil){ S.profile=S.timedPrev||'general'; S.timedUntil=0; save(); note('Timed profile expired','info') }
+  // alarm
+  const ak=dkey(d)+d.getHours()+d.getMinutes();
+  if(S.alarm.on&&d.getHours()===S.alarm.h&&d.getMinutes()===S.alarm.m&&S.alarm.fired!==ak&&(!S.alarm.rep||S.alarm.days.includes(d.getDay()))&&!callObj){ S.alarm.fired=ak; if(!S.alarm.rep) S.alarm.on=false; save(); wake(); AlarmView(false); return }
+  if(snoozeAt&&Date.now()>=snoozeAt&&!callObj){ snoozeAt=0; wake(); AlarmView(false); return }
+  // calendar reminders
+  const today=dkey(d), hm=pad2(d.getHours())+':'+pad2(d.getMinutes());
+  for(const n of S.cal){ if(n.alarm&&!n.fired&&n.date===today&&n.time<=hm&&!callObj){ n.fired=true; save(); wake(); startRing('alarm'); push({name:'remind',full:true,draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico(NOTE_IC[n.type],36)}<div class="t2">${esc(n.type)} · ${esc(n.time)}</div><div style="font-size:18px">${esc(n.subject)}</div></div>` },soft(){ return [{t:'Stop',f:()=>{stopRing();pop()}},{t:''},{t:'Exit',f:()=>{stopRing();pop()}}] },onPop(){stopRing()}}); return } }
+  // countdown timer
+  if(S.timer&&Date.now()>=S.timer.end){ const t=S.timer; S.timer=null; save(); wake(); startRing('alarm'); push({name:'timerdone',full:true,draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico('timer',36)}<div class="t1" style="font-size:24px">Timer expired</div><div class="t2">${esc(t.note||'')}</div></div>` },soft(){ return [{t:''},{t:'OK',f:()=>{stopRing();pop()}},{t:''}] },onPop(){stopRing()}}); return }
+  // idle: backlight, screen saver, keyguard
+  const idle=(Date.now()-lastActivity)/1000;
+  if(S.phone.akg.on&&!locked&&idle>S.phone.akg.sec&&v&&(v.name==='standby'||v.name==='ss')){ locked=true; if(v.name==='standby') render() }
+  if(S.ss.on&&idle>S.ss.to&&v&&v.name==='standby'){ push(ScreenSaver()) }
+  if(v&&v.tick) v.tick();
+},1000);
+setInterval(()=>{ const v=tv(); if(S.on&&v&&v.tickFast) render() },100);
+
+/* ---------------- input ---------------- */
+let downK=null,fired=false,lt=null,rpt=null,rptI=null;
+function dispatch(k,long){
+  if(!S.on){ if(long&&(k==='END'||k==='PWR')) powerOn(); return }
+  if(booting) return;
+  if(!NOTE.hidden){ endNote(); if(!(locked&&k==='*')) return }
+  const v=tv(); if(!v) return;
+  if(v.name==='ss'){ pop(); return }
+  if(long&&(k==='END'||k==='PWR')&&!v.noPower){ powerOff(); return }
+  if(k==='PWR'){ if(v.name==='standby'&&!locked) ProfilesQuick(); return }
+  if(k==='EMU'){ if(locked){ note('Press Unlock, then *','info',1300); return } if(v.name==='call'||v.name==='alarmv') return; if(v.name==='emu') { pop(); return } EmulatorMenu(); return }
+  if(v.key&&v.key(k,long)) return;
+  if(long&&k!=='END') return dispatch(k,false);
+  if(k==='END'){ if(v.name!=='standby') home(); return }
+  if(k==='L'||k==='M'||k==='R'){ const s=v.soft?v.soft():[]; const x=s[{L:0,M:1,R:2}[k]]; if(x&&x.f) x.f() }
+}
+function down(k){ ac(); wake(); if(downK) return; downK=k; fired=false; keyTone(k); if(Host&&Host.haptic&&S.on) Host.haptic('light');
+  const v=tv(); if(S.on&&!booting&&NOTE.hidden&&v&&v.instant&&v.instant(k)){ fired=true; return }
+  if(['U','D','LT','RT','VUP','VDN'].includes(k)&&S.on){ dispatch(k,false); fired=true; rpt=setTimeout(()=>{ rptI=setInterval(()=>dispatch(k,false),110) },450); return }
+  lt=setTimeout(()=>{ fired=true; dispatch(k,true) },650) }
+function up(k){ if(downK!==k) return; clearTimeout(lt); clearTimeout(rpt); clearInterval(rptI); downK=null; if(!fired) dispatch(k,false) }
+document.querySelectorAll('[data-k]').forEach(el=>{ const k=el.dataset.k;
+  el.addEventListener('pointerdown',e=>{ e.preventDefault(); el.setPointerCapture&&el.setPointerCapture(e.pointerId); el.classList.add('dn'); down(k) });
+  const u=()=>{ el.classList.remove('dn'); up(k) }; el.addEventListener('pointerup',u); el.addEventListener('pointercancel',u) });
+const KP=[['1','',''],['2','abc'],['3','def'],['4','ghi'],['5','jkl'],['6','mno'],['7','pqrs'],['8','tuv'],['9','wxyz'],['*','+'],['0','␣'],['#','⇧']];
+$('#kp').innerHTML=KP.map(([d,l])=>`<div class="kk" data-k="${d}"><b>${d}</b><small>${l||''}</small></div>`).join('');
+$('#kp').querySelectorAll('[data-k]').forEach(el=>{ const k=el.dataset.k; el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('dn');down(k)}); const u=()=>{el.classList.remove('dn');up(k)}; el.addEventListener('pointerup',u); el.addEventListener('pointerleave',()=>{ if(el.classList.contains('dn')) u() }); el.addEventListener('pointercancel',u) });
+const KMAP={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'LT',ArrowRight:'RT',Enter:'M','[':'L',']':'R',Backspace:'R','=':'CALL',Escape:'END',PageUp:'VUP',PageDown:'VDN','\\':'EMU'};
+const held=new Set();
+document.addEventListener('keydown',e=>{ if(e.target.closest('input,textarea')||e.metaKey||e.ctrlKey||e.altKey) return;
+  let k=KMAP[e.key]; if(!k&&/^[0-9*#]$/.test(e.key)) k=e.key;
+  const v=tv();
+  if(!k&&e.key.length===1&&S.on&&v&&v.typeChar&&NOTE.hidden){ e.preventDefault(); wake(); v.typeChar(e.key); return }
+  if(!k) return; e.preventDefault(); if(e.repeat||held.has(k)) return; held.add(k); down(k) });
+document.addEventListener('keyup',e=>{ let k=KMAP[e.key]; if(!k&&/^[0-9*#]$/.test(e.key)) k=e.key; if(!k||!held.has(k)) return; held.delete(k); up(k) });
+// clicks on the screen itself
+SCR.addEventListener('click',e=>{ if(!S.on||booting) return; wake(); if(!NOTE.hidden){ endNote(); return } const v=tv(); if(!v) return;
+  const s=e.target.closest('[data-s]'); if(s){ dispatch(s.dataset.s,false); return }
+  if(v.name==='ss'){ pop(); return }
+  const d=e.target.closest('[data-d]'); if(d&&v.pickDate){ v.pickDate(d.dataset.d); return }
+  const r=e.target.closest('[data-i]'); if(r){ const j=+r.dataset.i; if(v.pick) return v.pick(j); if(v.items){ v.i=j; render(); const m=v.soft()[1]; if(m&&m.f) m.f(); else v.select() } } });
+addEventListener('blur',()=>{ clearTimeout(lt); clearTimeout(rpt); clearInterval(rptI); downK=null; held.clear(); document.querySelectorAll('.dn').forEach(x=>x.classList.remove('dn')) });
+NOTE.addEventListener('click',()=>endNote());
+
+/* ---------------- Emulator section (Settings › Emulator) ---------------- */
+function EmulatorMenu(){ menu('Emulator',[
+  ['Add files',()=>pickFiles()],
+  ['Add photos',()=>addPhotos()],
+  ['Network name',()=>push(Editor({mode:'text',noPred:true,title:'Network name',label:'Shown on standby:',text:S.net,max:18,done(t){ S.net=t.trim()||'Larch Mobile'; save(); pop(); note('Saved') }}))],
+  ['Backup',()=>menu('Backup',[['Copy backup',()=>copyBackup()],['Restore backup',()=>restoreView()]])],
+  ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this browser'}</p><p><span class="lbl">Connection</span>${dev.online?'Online':'Offline'}</p><p><span class="lbl">Signal bars</span>${dev.sig} of 5</p><p><span class="lbl">Source</span>${dev.src==='host'?'This device':'Browser'}</p>`)],
+  Host&&Host.platform==='ios'?null:['Keyboard shortcuts',()=>Info('Keyboard shortcuts','<p><span class="lbl">Keypad</span>0–9, * and #</p><p><span class="lbl">Navigation key</span>Arrow keys</p><p><span class="lbl">Middle select key</span>Enter</p><p><span class="lbl">Left / right selection keys</span>[ and ]</p><p><span class="lbl">Clear / Back</span>Backspace</p><p><span class="lbl">Call key</span>=</p><p><span class="lbl">End key</span>Esc (hold to switch off or on)</p><p><span class="lbl">Emulator key</span>\\ (backslash), or the three-line key above the screen</p><p><span class="lbl">Text fields</span>Type letters directly, or paste with ⌘V</p>')],
+  ['About',()=>Info('About','<p><b>Larch K7</b></p><p>Series 40–style phone shell.</p><p>Contacts, messages, settings and files are stored on this device.</p>')]
+],{name:'emu'}) }
+
+function pickFiles(){ try{ $('#fin').click() }catch(e){ note('Could not open files','warn') } }
+function copyBackup(){ const txt=JSON.stringify(S); const fail=()=>note('Clipboard not available here','warn',1800);
+  try{ navigator.clipboard.writeText(txt).then(()=>note('Backup copied to clipboard','ok',1800),fail) }catch(e){ fail() } }
+function restoreView(){ push({name:'restore',title:'Restore backup',
+  draw(el){ el.innerHTML='<div class="txt"><p>Paste a backup now.</p><p><span class="lbl">On a Mac</span>Press ⌘V.</p><p>This replaces the contacts, messages, settings and files on this phone.</p></div>' },
+  soft(){ return [{t:''},{t:''},{t:'Back',f:pop}] },
+  onPaste(t){ let o=null; try{ o=JSON.parse(t) }catch(e){} if(!o||typeof o!=='object'||!o.profiles){ note('That text is not a Larch backup','warn'); return }
+    Ask('Replace this phone with the backup?',()=>{ S=deepMerge(clone(DEF),o); S.mig2=true; save(); note('Backup restored','ok',1200,()=>{ powerOff(); setTimeout(powerOn,600) }) }) } }) }
+document.addEventListener('paste',e=>{ const v=tv(); if(!S.on||!v||booting) return; const t=(e.clipboardData||window.clipboardData).getData('text'); if(!t) return;
+  if(v.onPaste){ e.preventDefault(); v.onPaste(t); return }
+  if(v.typeChar){ e.preventDefault(); if(v.ins){ if(v.commit) v.commit(); v.mt=null; v.ins(t.slice(0,2000)); render() } else t.split('').forEach(c=>v.typeChar(c)) } });
+['#pin','#cin'].forEach(sel=>$(sel).addEventListener('change',async e=>{ const files=[...e.target.files]; e.target.value=''; const list=[]; for(const f of files){ try{ list.push({name:f.name.replace(/\.[^.]+$/,''),data:await readAs(f,'readAsDataURL')}) }catch(err){} } storePhotos(list) }));
+$('#fin').addEventListener('change',async e=>{ const files=[...e.target.files]; e.target.value=''; if(!files.length) return; const done=[];
+  for(const f of files){ try{ done.push(await importFile(f)) }catch(err){ done.push(f.name+': could not be read') } }
+  if(S.on&&V.length){ render(); Info('Files added','<p>'+done.map(esc).join('</p><p>')+'</p>') } });
+function readAs(f,how){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r[how](f) }) }
+function shrink(src,w,h,q){ return new Promise(res=>{ const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); const s=Math.min(1,Math.max(w/im.width,h/im.height)); c.width=Math.round(im.width*s); c.height=Math.round(im.height*s); c.getContext('2d').drawImage(im,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',q||.85)) }; im.onerror=()=>res(null); im.src=src }) }
+async function unzip(file){ const buf=new Uint8Array(await file.arrayBuffer()); const dv=new DataView(buf.buffer); let e=-1;
+  for(let i=buf.length-22;i>=Math.max(0,buf.length-65557);i--){ if(dv.getUint32(i,true)===0x06054b50){ e=i; break } } if(e<0) throw new Error('not a zip');
+  const cnt=dv.getUint16(e+10,true); let p=dv.getUint32(e+16,true); const ents={}; const td=new TextDecoder();
+  for(let k=0;k<cnt;k++){ if(dv.getUint32(p,true)!==0x02014b50) break; const method=dv.getUint16(p+10,true), csize=dv.getUint32(p+20,true), nl=dv.getUint16(p+28,true), xl=dv.getUint16(p+30,true), cl=dv.getUint16(p+32,true), off=dv.getUint32(p+42,true);
+    ents[td.decode(buf.subarray(p+46,p+46+nl))]={method,csize,off}; p+=46+nl+xl+cl }
+  async function bytes(name){ const en=ents[name]; if(!en) return null; const o=en.off, nl=dv.getUint16(o+26,true), xl=dv.getUint16(o+28,true); const data=buf.subarray(o+30+nl+xl,o+30+nl+xl+en.csize);
+    if(en.method===0) return data; if(en.method!==8) throw new Error('compression'); const st=new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()) }
+  return {names:Object.keys(ents), text:async n=>{ const b=await bytes(n); return b?td.decode(b):'' },
+    b64:async n=>{ const b=await bytes(n); let s=''; for(let i=0;i<b.length;i+=0x8000) s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000)); return btoa(s) }} }
+async function importFile(f){ const n=f.name, ext=n.split('.').pop().toLowerCase();
+  if(f.type.startsWith('image/')){ const d=await shrink(await readAs(f,'readAsDataURL'),480,640,.82); if(!d) throw 0; S.images.push({id:'i:'+uid(),n:n.replace(/\.[^.]+$/,''),data:d}); save(); return n+' → Gallery' }
+  if(f.type.startsWith('audio/')){ music.tracks.push({name:n.replace(/\.[^.]+$/,''),url:URL.createObjectURL(f)}); return n+' → Music player (until the app closes)' }
+  if(ext==='jad'){ const t=await readAs(f,'readAsText'); const nm=(t.match(/MIDlet-Name:\s*(.+)/)||[])[1]; return n+': '+(nm?nm.trim()+' needs its .jar file':'needs its .jar file') }
+  if(ext==='jar'||ext==='nth'||ext==='zip'){ const z=await unzip(f); const mfn=z.names.find(x=>x.toUpperCase()==='META-INF/MANIFEST.MF');
+    if(ext==='jar'||mfn){ const mf=mfn?await z.text(mfn):''; const lines=mf.replace(/\r?\n /g,'').split(/\r?\n/); const get=k=>{ const l=lines.find(x=>x.toLowerCase().startsWith(k.toLowerCase()+':')); return l?l.slice(k.length+1).trim():'' };
+      const m1=get('MIDlet-1').split(',').map(x=>x.trim()); const ipath=(get('MIDlet-Icon')||m1[1]||'').replace(/^\//,''); const ip=ipath&&z.names.find(x=>x.toLowerCase()===ipath.toLowerCase()); const icon=ip?'data:image/png;base64,'+await z.b64(ip):null;
+      const j={id:uid(),name:get('MIDlet-Name')||m1[0]||n.replace(/\.jar$/i,''),vendor:get('MIDlet-Vendor'),ver:get('MIDlet-Version'),main:m1[2]||'',profile:get('MicroEdition-Profile'),size:f.size,icon,file:n,game:false};
+      S.jars.push(j); save(); return j.name+' installed' }
+    const imgs=z.names.filter(x=>/\.(png|jpe?g|gif|bmp)$/i.test(x)); const tx=z.names.find(x=>/\.xml$/i.test(x)); const xml=tx?await z.text(tx):'';
+    const pickBy=re=>imgs.find(x=>re.test(x.split('/').pop())); const wp=pickBy(/wall|wp|standby|idle/i)||imgs[0], bg=pickBy(/bg|back|main/i)||wp;
+    const toURL=async x=>x?await shrink('data:image/'+(/\.png$/i.test(x)?'png':'jpeg')+';base64,'+await z.b64(x),480,640,.8):null;
+    const th={id:'u'+uid(),n:((xml.match(/name="([^"]+)"/)||[])[1]||n.replace(/\.[^.]+$/,'')).slice(0,24),wall:await toURL(wp),bg:await toURL(bg)};
+    if(!th.wall&&!th.bg) throw 0; S.themes.push(th); save(); return th.n+' → Themes (wallpaper and background)' }
+  return n+': this file type is not supported' }
+/* ---------------- fit to window ---------------- */
+const EMBED=/embed/.test(location.hash+location.search); if(EMBED) document.documentElement.classList.add('embed');
+const FULL=!EMBED&&(!!Host||(matchMedia('(pointer: coarse)').matches&&Math.min(screen.width,screen.height)<600));
+if(FULL){ document.documentElement.classList.add('fsm'); PHONE.classList.add('fs') }
+function fit(){ const W=280,H=742, wr=$('#wrap'), inn=$('#inner');
+  if(FULL){ const vw=innerWidth, vh=innerHeight, s=Math.min(vw/W,vh/H), pw=vw/s, ph=vh/s;
+    PHONE.style.width=pw+'px'; PHONE.style.height=ph+'px'; PHONE.style.transform=`scale(${s})`; PHONE.style.setProperty('--sc',`scale(${s})`);
+    inn.style.left=(pw-W)/2+'px'; inn.style.top=(ph-H)/2+'px'; wr.style.width=vw+'px'; wr.style.height=vh+'px'; return }
+  const g=EMBED?4:32, availH=innerHeight-g, availW=innerWidth-g; const s=Math.max(.5,Math.min(1.4,availH/H,availW/W));
+  PHONE.style.transform=`scale(${s})`; PHONE.style.setProperty('--sc',`scale(${s})`); wr.style.width=W*s+'px'; wr.style.height=H*s+'px' }
+addEventListener('resize',fit); fit();
+
+/* ---------------- start ---------------- */
+applyTheme(); readNet(); refreshContacts();
+if(S.on){ S.on=false; powerOn() } else render();
+</script>

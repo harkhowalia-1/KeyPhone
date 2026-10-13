@@ -1,0 +1,84 @@
+name: Build apps
+
+# Push a tag like v1.0.0 to build both apps and publish them as a GitHub release.
+# "Run workflow" on the Actions tab builds them without publishing.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: brew install xcodegen create-dmg
+
+      - name: Version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="0.0.${GITHUB_RUN_NUMBER}"; fi
+          echo "VERSION=$V" >> "$GITHUB_ENV"
+
+      - name: Generate Xcode project
+        working-directory: apple
+        run: |
+          ./make_web.sh
+          xcodegen generate
+
+      - name: Build iPhone app (.ipa)
+        working-directory: apple
+        run: |
+          xcodebuild -project Larch.xcodeproj -target Larch -configuration Release -sdk iphoneos \
+            SYMROOT="$PWD/build" MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+          rm -rf Payload && mkdir Payload
+          cp -R build/Release-iphoneos/LarchK7.app Payload/
+          zip -qry ../LarchK7.ipa Payload
+
+      - name: Build Mac app
+        working-directory: apple
+        run: |
+          xcodebuild -project Larch.xcodeproj -target LarchMac -configuration Release \
+            SYMROOT="$PWD/build" MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+            ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO build
+          codesign --force --deep --sign - "build/Release/Larch K7.app"
+
+      - name: Make disk image (.dmg)
+        run: |
+          rm -rf dmg && mkdir dmg
+          cp -R "apple/build/Release/Larch K7.app" dmg/
+          if ! create-dmg \
+              --volname "Larch K7" \
+              --volicon "apple/macOS/Assets.xcassets/AppIcon.appiconset/icon-512@2x.png" \
+              --background "apple/dmg/background.png" \
+              --window-pos 200 120 --window-size 600 400 --icon-size 112 \
+              --icon "Larch K7.app" 165 195 --hide-extension "Larch K7.app" \
+              --app-drop-link 435 195 \
+              LarchK7.dmg dmg/; then
+            echo "Styled disk image failed; making a plain one"
+            rm -f LarchK7.dmg
+            ln -s /Applications dmg/Applications
+            hdiutil create -volname "Larch K7" -srcfolder dmg -ov -format UDZO LarchK7.dmg
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LarchK7-${{ env.VERSION }}
+          path: |
+            LarchK7.ipa
+            LarchK7.dmg
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Larch K7 ${{ env.VERSION }}
+          generate_release_notes: true
+          files: |
+            LarchK7.ipa
+            LarchK7.dmg
