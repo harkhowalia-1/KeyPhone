@@ -1,4 +1,4 @@
-// Larch K7 runner: runs one Java ME app inside the phone's screen.
+// KeyPhone runner: runs one Java ME app inside the phone's screen.
 // The phone (parent page) talks to this page with postMessage:
 //   phone → here: {t:'run', id, name, jar:ArrayBuffer} · {t:'key', code, down}
 //   here → phone: {t:'ready'} · {t:'status', text} · {t:'started'} · {t:'exit'} · {t:'error', text}

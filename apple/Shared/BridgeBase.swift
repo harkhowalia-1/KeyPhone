@@ -55,6 +55,7 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
     static var stateURL: URL {
         #if os(macOS)
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            // The folder keeps its first name so a saved phone carries over.
             .appendingPathComponent("Larch K7", isDirectory: true)
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
         return base.appendingPathComponent("state.json")
@@ -292,7 +293,7 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
                 for item in items {
                     guard let key = item["id"] as? String else { continue }
                     let content = UNMutableNotificationContent()
-                    content.title = item["title"] as? String ?? "Larch K7"
+                    content.title = item["title"] as? String ?? "KeyPhone"
                     content.body = item["body"] as? String ?? ""
                     content.sound = .default
                     var trigger: UNNotificationTrigger?

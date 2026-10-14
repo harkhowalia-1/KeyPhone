@@ -1,4 +1,4 @@
-<title>Larch K7 Phone</title>
+<title>KeyPhone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600&family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600&display=swap">
 <style>
@@ -310,7 +310,7 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 <script>
 'use strict';
 /* =========================================================
-   Larch K7 — S40-style phone shell
+   KeyPhone — S40-style phone shell
    One file so the same phone can be wrapped by a Mac app,
    an iPhone app, or a kiosk Linux image (window.PhoneHost).
    ========================================================= */
@@ -325,14 +325,14 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 /* ---------------- defaults & storage ---------------- */
 const SYS_TZ=-new Date().getTimezoneOffset()/60;
 const DEF={
-  on:true, net:'Larch Mobile', profile:'general', timedUntil:0, timedPrev:'general',
+  on:true, net:'', profile:'general', timedUntil:0, timedPrev:'general',
   profiles:{
-    general:{name:'General',tone:'Larch theme',vol:3,alert:'ring',vib:false,msg:'Twin',keys:2,warn:true,alertFor:'all'},
-    silent:{name:'Silent',tone:'Larch theme',vol:0,alert:'off',vib:true,msg:'Off',keys:0,warn:false,alertFor:'all'},
-    meeting:{name:'Meeting',tone:'Larch theme',vol:1,alert:'beep',vib:true,msg:'Beep',keys:0,warn:false,alertFor:'all'},
+    general:{name:'General',tone:'KeyPhone theme',vol:3,alert:'ring',vib:false,msg:'Twin',keys:2,warn:true,alertFor:'all'},
+    silent:{name:'Silent',tone:'KeyPhone theme',vol:0,alert:'off',vib:true,msg:'Off',keys:0,warn:false,alertFor:'all'},
+    meeting:{name:'Meeting',tone:'KeyPhone theme',vol:1,alert:'beep',vib:true,msg:'Beep',keys:0,warn:false,alertFor:'all'},
     outdoor:{name:'Outdoor',tone:'Old bell',vol:5,alert:'ring',vib:true,msg:'Rise',keys:3,warn:true,alertFor:'all'},
-    pager:{name:'Pager',tone:'Larch theme',vol:0,alert:'off',vib:true,msg:'Beep',keys:2,warn:false,alertFor:'all'},
-    flight:{name:'Flight',tone:'Larch theme',vol:0,alert:'off',vib:false,msg:'Off',keys:1,warn:true,alertFor:'all'}
+    pager:{name:'Pager',tone:'KeyPhone theme',vol:0,alert:'off',vib:true,msg:'Beep',keys:2,warn:false,alertFor:'all'},
+    flight:{name:'Flight',tone:'KeyPhone theme',vol:0,alert:'off',vib:false,msg:'Off',keys:1,warn:true,alertFor:'all'}
   },
   theme:'steel', wall:{on:true,id:'live:dawn'}, sfont:'#ffffff', navIcons:false, activeSb:true,
   ss:{on:false,type:'digital',to:60}, psaver:false, sleep:false,
@@ -340,7 +340,7 @@ const DEF={
   clock:{show:true,h24:true,off:0,tz:SYS_TZ}, date:{show:true,fmt:'DD-MM-YYYY',sep:'-'}, autoTime:'on',
   sc:{L:'goto',R:'names',U:'web',D:'names',LT:'newmsg',RT:'calendar'},
   gotoList:['newmsg','inbox','calendar','alarm','web','gallery','profiles','snake'],
-  bt:{on:false,vis:'all',name:'Larch K7',paired:[]}, packet:'needed', usb:'ask',
+  bt:{on:false,vis:'all',name:'KeyPhone',paired:[]}, packet:'needed', usb:'ask',
   call:{anykey:false,redial:false,speed:true,summary:true,cid:'net',line:1},
   phone:{lang:'auto',wlang:'English',akg:{on:false,sec:60},seckg:false,welcome:'',flightQ:false,help:true,startTone:true},
   sec:{pinReq:false,pin:'1234',pin2:'5678',code:'12345',level:'none',cug:'default',inuse:'pin'},
@@ -373,9 +373,10 @@ function syncSchedule(){ if(!Host||!Host.schedule) return; const items=[], off=S
   for(const n of S.cal) if(n.alarm&&!n.fired&&n.time){ const [Y,M,D]=n.date.split('-').map(Number), [h,m]=n.time.split(':').map(Number); const at=new Date(Y,M-1,D,h,m).getTime()-off; if(at>Date.now()) items.push({id:'cal-'+n.id,title:n.type,body:n.subject,at}) }
   const js=JSON.stringify(items); if(js===lastSched) return; lastSched=js; Host.schedule(items).catch(()=>{}) }
 load();
+if(!S.mig4){ S.mig4=true; for(const k in S.profiles) if(S.profiles[k].tone==='Larch theme') S.profiles[k].tone='KeyPhone theme'; if(S.alarm.tone==='Larch theme') S.alarm.tone='KeyPhone theme' }
 if(!S.mig3){ S.mig3=true; if(S.wall&&S.wall.id==='w:dawn') S.wall.id='live:dawn' }
 if(!S.mig2){ S.mig2=true; S.ss.on=false; S.psaver=false; S.sleep=false; save() }
-if(!S.seeded){ S.seeded=true; if(0) S.msgs.inbox.push({id:uid(),from:'Larch',text:'Welcome to your Larch K7. Press Menu to explore. Add Java apps, pictures and music in Settings › Emulator › Add files.',t:Date.now(),read:false}); save() }
+if(!S.seeded){ S.seeded=true; if(0) S.msgs.inbox.push({id:uid(),from:'KeyPhone',text:'Welcome to your KeyPhone. Press Menu to explore. Add Java apps, pictures and music in Settings › Emulator › Add files.',t:Date.now(),read:false}); save() }
 
 /* ---------------- time ---------------- */
 const now=()=>new Date(Date.now()+S.clock.off);
@@ -394,7 +395,7 @@ const fmtDur=s=>pad2(Math.floor(s/3600))+':'+pad2(Math.floor(s/60)%60)+':'+pad2(
 let AC=null;
 function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){AC=null} } if(AC&&AC.state==='suspended') AC.resume(); return AC }
 const RING={
-  'Larch theme':'E5 8,G5 8,B5 8,E6 4,D6 8,B5 8,G5 4,R 4,A5 8,B5 8,D6 8,B5 4,G5 4',
+  'KeyPhone theme':'E5 8,G5 8,B5 8,E6 4,D6 8,B5 8,G5 4,R 4,A5 8,B5 8,D6 8,B5 4,G5 4',
   'Spring':'C6 16,E6 16,G6 8,E6 16,C6 16,D6 8,R 8,C6 16,E6 16,G6 8,A6 8,G6 4',
   'Old bell':'A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,R 4,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32,A5 32,F5 32',
   'Pulse':'C5 16,R 16,C5 16,R 16,G5 8,R 8,C5 16,R 16,C5 16,R 16,A#5 8',
@@ -403,7 +404,7 @@ const RING={
   'Lantern':'D6 8,A5 8,F#5 8,A5 8,D6 8,E6 8,F#6 4,E6 8,D6 8,C#6 8,A5 8,B5 4'
 };
 const MSGT={'Beep':'A6 16','Twin':'E6 16,R 32,E6 16','Rise':'C6 16,E6 16,G6 16,C7 8','Drop':'G6 16,E6 16,C6 8','Chime':'G6 8,C7 8,E7 4'};
-const ALARMT={'Alarm':'A6 16,R 16,A6 16,R 16,A6 16,R 16,A6 16,R 4','Rooster':'C6 16,E6 16,G6 16,C7 4,R 8,C7 16,G6 16,E6 16,C6 4','Larch theme':RING['Larch theme']};
+const ALARMT={'Alarm':'A6 16,R 16,A6 16,R 16,A6 16,R 16,A6 16,R 4','Rooster':'C6 16,E6 16,G6 16,C7 4,R 8,C7 16,G6 16,E6 16,C6 4','KeyPhone theme':RING['KeyPhone theme']};
 function noteF(n){ const m=/^([A-G])(#?)(\d)$/.exec(n); const b={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]]+(m[2]?1:0); return 440*Math.pow(2,((+m[3]+1)*12+b-69)/12) }
 function parseSeq(s,bpm){ const q=60/(bpm||150); return s.split(',').map(x=>{const [n,d]=x.trim().split(' '); return {f:n==='R'?0:noteF(n),d:q*4/(+d)}}) }
 function playSeq(str,o={}){ const a=ac(); const vol=o.vol==null?.12:o.vol; if(!a||!vol||!str) return {stop(){}};
@@ -428,7 +429,7 @@ function startRing(kind){ stopRing(); const p=prof(); const v=volG(p.vol);
   if(kind==='alarm'){ ringH=playSeq(ALARMT[S.alarm.tone]||ALARMT.Alarm,{vol:Math.max(v,.08),loop:true}); return }
   if(p.alert==='off'||!v) return;
   if(p.alert==='beep'){ ringH=playSeq('A6 16',{vol:v}); return }
-  ringH=playSeq(RING[p.tone]||RING['Larch theme'],{vol:p.alert==='asc'?.02:v,step:p.alert==='asc'?.03:0,loop:p.alert!=='once'}) }
+  ringH=playSeq(RING[p.tone]||RING['KeyPhone theme'],{vol:p.alert==='asc'?.02:v,step:p.alert==='asc'?.03:0,loop:p.alert!=='once'}) }
 function stopRing(){ if(ringH){ringH.stop();ringH=null} clearInterval(vibI); vibI=null; PHONE.classList.remove('vib') }
 function msgAlert(){ const p=prof(); if(p.vib&&Host&&Host.haptic) Host.haptic('vibrate'); if(p.vib){PHONE.classList.add('vib');setTimeout(()=>{if(!ringH)PHONE.classList.remove('vib')},700)} if(p.msg!=='Off'&&MSGT[p.msg]) playSeq(MSGT[p.msg],{vol:Math.max(volG(p.vol),.04)}) }
 
@@ -489,7 +490,7 @@ const WALLS={};
 function mkWalls(){
   const W=240,H=320; const c=document.createElement('canvas'); c.width=W*3; c.height=H*3; const x=c.getContext('2d');
   const out=(id,n,fn)=>{ x.save(); x.setTransform(3,0,0,3,0,0); x.clearRect(0,0,W,H); fn(); x.restore(); WALLS[id]={n,src:c.toDataURL('image/jpeg',.9)} };
-  out('w:dawn','Larch dawn',()=>{ let g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2b2a63'); g.addColorStop(.45,'#c4577a'); g.addColorStop(.7,'#ffb07a'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  out('w:dawn','Dawn',()=>{ let g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2b2a63'); g.addColorStop(.45,'#c4577a'); g.addColorStop(.7,'#ffb07a'); x.fillStyle=g; x.fillRect(0,0,W,H);
     x.fillStyle='rgba(255,236,190,.9)'; x.beginPath(); x.arc(150,200,26,0,7); x.fill();
     const r=rng(7); [['#3a2848',215],['#241a33',245],['#120d1c',280]].forEach(([col,base],li)=>{ x.fillStyle=col; x.beginPath(); x.moveTo(0,H); for(let i=0;i<=W;i+=8) x.lineTo(i,base+Math.sin(i/40+li)*10); x.lineTo(W,H); x.fill();
       for(let i=0;i<14;i++){ const tx=r()*W, th=18+r()*30+li*10, ty=base+Math.sin(tx/40+li)*10+4; x.beginPath(); x.moveTo(tx,ty-th); x.lineTo(tx-th*.28,ty); x.lineTo(tx+th*.28,ty); x.fill() } }) });
@@ -531,7 +532,7 @@ const Live=(()=>{
   function drawStars(g,t,maxY,alpha){ for(const st of stars){ if(st.y>maxY) continue; const a=alpha*(1-st.y/maxY)*(.45+.55*Math.sin(t/900*st.v+st.p)); if(a<=0) continue; g.globalAlpha=a; g.fillStyle='#fff'; g.beginPath(); g.arc(st.x,st.y,st.s,0,7); g.fill() } g.globalAlpha=1 }
 
   const SCENES={
-    dawn:{n:'Larch dawn (live)',
+    dawn:{n:'Dawn (live)',
       build(){ layers={far:forest(280,214,9,.021,1.2,'#6b4a7c',18,18,48,3),mid:forest(290,244,11,.017,2.4,'#3c2752',16,28,58,5),near:forest(300,284,8,.013,.6,'#140c1f',14,38,68,9),
         c1:cloud(150,40,'rgba(255,200,190,.42)'),c2:cloud(120,32,'rgba(255,176,170,.32)'),c3:cloud(170,46,'rgba(210,160,200,.28)')} },
       draw(g,t){ const sky=g.createLinearGradient(0,0,0,320); sky.addColorStop(0,'#16163d'); sky.addColorStop(.28,'#3f2563'); sky.addColorStop(.52,'#b34f7d'); sky.addColorStop(.7,'#ff9f78'); sky.addColorStop(.86,'#ffd6a2'); g.fillStyle=sky; g.fillRect(0,0,240,320);
@@ -1574,9 +1575,9 @@ function WebPage(u){ let i=0; const start=u==='start'; const native=!!(Host&&Hos
       {t:''},{t:'Back',f:()=>{ if(native&&v.st.canBack) Host.web({op:'back'}); else pop() }}] },
     key(k){ if(k==='U'||k==='D'){ if(native) Host.web({op:'scroll',dy:k==='U'?-90:90}); return true } return false },
     onPop(){ if(native){ Host.web({op:'close'}).catch(()=>{}); webShown=false } else { WEBF.removeAttribute('src'); WEBL.hidden=true } } } }
-  return {name:'web',title:'Larch home',
+  return {name:'web',title:'Home',
     draw(el){ const fsz={small:'12px',normal:'13px',large:'15px'}[S.fs.web];
-      el.innerHTML=`<div class="web" style="font-size:${fsz}"><h3>Larch home</h3><p>Bookmarks</p>${S.web.bm.map((b,j)=>`<div class="bmk${j===i?' on':''}" data-i="${j}">${esc(b.t)}<br><small style="color:#666">${esc(b.u)}</small></div>`).join('')}<p style="margin-top:8px;color:#666">Options › Go to address to type one.</p></div>` },
+      el.innerHTML=`<div class="web" style="font-size:${fsz}"><h3>Home</h3><p>Bookmarks</p>${S.web.bm.map((b,j)=>`<div class="bmk${j===i?' on':''}" data-i="${j}">${esc(b.t)}<br><small style="color:#666">${esc(b.u)}</small></div>`).join('')}<p style="margin-top:8px;color:#666">Options › Go to address to type one.</p></div>` },
     soft(){ return [{t:'Options',f:()=>menu('Options',[['Go to address',()=>{pop();goAddress()}],['Bookmarks',()=>{pop();Bookmarks()}],['Exit',()=>{home()}]],{nums:false})},
       {t:S.web.bm.length?'Open':'',f:()=>S.web.bm.length&&openUrl(S.web.bm[i].u)},{t:'Back',f:pop}] },
     key(k){ if(k==='U'||k==='D'){ const n=S.web.bm.length; if(n){ i=(i+(k==='U'?-1:1)+n)%n; render() } return true } return false },
@@ -1587,12 +1588,21 @@ function powerOn(){ if(S.on&&V.length) return; S.on=true; save(); V=[]; booting=
   SCR.className='full'; SCR.innerHTML='<div class="boot"><canvas width="240" height="320"></canvas></div>';
   const cv=SCR.querySelector('canvas'), x=hiDPI(cv,240,320); const t0=performance.now();
   if(S.phone.startTone) playSeq('E5 16,B5 16,E6 16,G#6 8,B6 4',{vol:.07,wave:'triangle'});
-  (function fr(){ const t=(performance.now()-t0)/1700; x.fillStyle='#000'; x.fillRect(0,0,240,320); const p=Math.min(1,t);
-    x.save(); x.translate(120,170); x.strokeStyle='#cfe3c0'; x.fillStyle='#cfe3c0'; x.lineWidth=2;
-    x.beginPath(); x.moveTo(0,40); x.lineTo(0,40-90*p); x.stroke();
-    for(let i=0;i<6;i++){ const q=Math.max(0,Math.min(1,p*6-i)); const y=30-i*14, w=(34-i*5)*q; x.beginPath(); x.moveTo(0,y-12); x.lineTo(-w,y); x.lineTo(w,y); x.closePath(); x.globalAlpha=.25+.12*i; x.fill() }
-    x.globalAlpha=Math.max(0,Math.min(1,(t-.6)*2)); x.font='600 16px Barlow Semi Condensed,Barlow,sans-serif'; x.textAlign='center'; x.fillText('L A R C H',0,78); x.restore();
-    if(t<1.45) requestAnimationFrame(fr); else bootTail() })() }
+  const ease=u=>u<0?0:u>1?1:1-Math.pow(1-u,3);
+  (function fr(){ const t=(performance.now()-t0)/1000; x.fillStyle='#000'; x.fillRect(0,0,240,320);
+    phoneLogo(x,120,138,96,ease(t/.45));
+    const bw=92, bx=120-bw/2, by=232, p=ease((t-.35)/1.6);
+    x.globalAlpha=ease((t-.25)/.3); x.fillStyle='#3a3a3c'; rrect(x,bx,by,bw,3,1.5); x.fill(); x.fillStyle='#f5f5f7'; if(p>0){ rrect(x,bx,by,Math.max(3,bw*p),3,1.5); x.fill() } x.globalAlpha=1;
+    if(t<2.15) requestAnimationFrame(fr); else bootTail() })() }
+function rrect(x,X,Y,W,H,R){ R=Math.min(R,W/2,H/2); x.beginPath(); x.moveTo(X+R,Y); x.arcTo(X+W,Y,X+W,Y+H,R); x.arcTo(X+W,Y+H,X,Y+H,R); x.arcTo(X,Y+H,X,Y,R); x.arcTo(X,Y,X+W,Y,R); x.closePath() }
+// The phone's logo: the same keypad phone as the app icon, drawn in white.
+function phoneLogo(x,cx,cy,h,a){ const w=h*.49; x.save(); x.globalAlpha=a; x.translate(cx-w/2,cy-h/2);
+  x.fillStyle='#f5f5f7'; rrect(x,0,0,w,h,w*.27); x.fill();
+  x.fillStyle='#000'; rrect(x,w*.4,h*.05,w*.2,h*.015,h*.0075); x.fill();
+  rrect(x,w*.116,h*.103,w*.768,h*.366,w*.1); x.fill();
+  x.strokeStyle='#000'; x.lineWidth=w*.022; x.beginPath(); x.arc(w/2,h*.546,w*.074,0,7); x.stroke();
+  for(let r=0;r<4;r++) for(let c=0;c<3;c++){ x.beginPath(); x.arc(w/2+(c-1)*w*.238,h*(.671+r*.077),w*.038,0,7); x.fill() }
+  x.restore() }
 function bootTail(){ booting=false; S.on=true; V=[Standby()]; keyLight();
   const chain=[];
   if(S.sec.pinReq) chain.push(next=>{ const ask=()=>push(Editor({mode:'pass',title:'PIN code',label:'Enter PIN code:',max:8,cancel:()=>{ powerOff() },done(t){ if(t===S.sec.pin){ pop(); next() } else { note('Wrong PIN code','warn'); const e=tv(); e.text=''; e.caret=0; render() } }})); ask() });
@@ -1700,18 +1710,18 @@ function EmulatorMenu(){ menu('Emulator',[
   ['Keypad light',()=>KeyLightMenu()],
   ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this device'}</p><p><span class="lbl">Connection</span>${!dev.online?'Offline':({wifi:'Wi-Fi',cellular:'Cellular',wired:'Wired'}[dev.net]||'Online')}</p><p><span class="lbl">Signal strength</span>${dev.sig!=null?dev.sig+' of 5 bars':'Not reported by this device'}</p>`)],
   Host&&Host.platform==='ios'?null:['Keyboard shortcuts',()=>Info('Keyboard shortcuts','<p><span class="lbl">Keypad</span>0–9, * and #</p><p><span class="lbl">Navigation key</span>Arrow keys</p><p><span class="lbl">Middle select key</span>Enter</p><p><span class="lbl">Left / right selection keys</span>[ and ]</p><p><span class="lbl">Clear / Back</span>Backspace</p><p><span class="lbl">Call key</span>=</p><p><span class="lbl">End key</span>Esc (hold to switch off or on)</p><p><span class="lbl">Emulator key</span>\\ (backslash), or the three-line key above the screen</p><p><span class="lbl">Text fields</span>Type letters directly, or paste with ⌘V</p>')],
-  ['About',()=>Info('About',`<p><b>Larch K7</b> ${esc(window.LARCH_VERSION||'')}</p><p>Series 40–style phone shell.</p><p>Contacts, messages, settings and files are stored on this device.</p>`)]
+  ['About',()=>Info('About',`<p><b>KeyPhone</b> ${esc(window.LARCH_VERSION||'')}</p><p>Series 40–style phone shell.</p><p>Contacts, messages, settings and files are stored on this device.</p>`)]
 ],{name:'emu'}) }
 
 function pickFiles(){ try{ $('#fin').click() }catch(e){ note('Could not open files','warn') } }
-function backupName(){ const d=now(); return 'Larch K7 backup '+d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'.json' }
+function backupName(){ const d=now(); return 'KeyPhone backup '+d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'.json' }
 async function saveBackup(){ const txt=JSON.stringify(S), name=backupName();
   if(Host&&Host.saveFile){ try{ const r=await Host.saveFile(name,txt); if(r) note('Backup saved','ok',1600) }catch(e){ note('The backup was not saved','warn') } return }
   let dl=null; try{ if(window.claude&&window.claude.use) dl=await window.claude.use('downloads') }catch(e){}
   if(dl){ try{ await dl.save({filename:name,data:txt}); note('Backup saved','ok',1600) }catch(e){ if(!e||e.code!=='declined') note('The backup was not saved','warn') } return }
   try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); note('Backup downloaded','ok',1600) }catch(e){ note('The backup was not saved','warn') } }
 function restoreBackup(){ try{ $('#bin').click() }catch(e){ note('Could not open files','warn') } }
-function restoreFrom(t){ let o=null; try{ o=JSON.parse(t) }catch(e){} if(!o||typeof o!=='object'||!o.profiles){ note('That file is not a Larch backup','warn'); return }
+function restoreFrom(t){ let o=null; try{ o=JSON.parse(t) }catch(e){} if(!o||typeof o!=='object'||!o.profiles){ note('That file is not a KeyPhone backup','warn'); return }
   Ask('Replace this phone with the backup? Contacts, messages, settings and notes are replaced.',()=>{ S=deepMerge(clone(DEF),o); S.mig2=true; save(); note('Backup restored','ok',1200,()=>{ powerOff(); setTimeout(powerOn,600) }) }) }
 $('#bin').addEventListener('change',async e=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return; try{ restoreFrom(await readAs(f,'readAsText')) }catch(err){ note('Could not read the file','warn') } });
 document.addEventListener('paste',e=>{ const v=tv(); if(!S.on||!v||booting) return; const t=(e.clipboardData||window.clipboardData).getData('text'); if(!t) return;

@@ -73,7 +73,7 @@ final class HostBridge: BridgeBase {
         case "openUrl": openUrl(id, args["url"] as? String ?? "")
         case "haptic": haptic(id, args["kind"] as? String ?? "light")
         case "web": web(id, args)
-        case "saveFile": saveFile(id, args["name"] as? String ?? "Larch K7 backup.json", args["text"] as? String ?? "")
+        case "saveFile": saveFile(id, args["name"] as? String ?? "KeyPhone backup.json", args["text"] as? String ?? "")
         case "audioSession": audioSession(id, (args["on"] as? Bool) ?? false)
         default: return false
         }

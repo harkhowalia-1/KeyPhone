@@ -24,7 +24,7 @@ targets:
     info:
       path: iOS/Info.plist
       properties:
-        CFBundleDisplayName: Larch K7
+        CFBundleDisplayName: KeyPhone
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen: {}
@@ -33,11 +33,11 @@ targets:
         UIViewControllerBasedStatusBarAppearance: false
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
-        NSContactsUsageDescription: Larch K7 shows and edits your iPhone contacts in the phone's Names list.
-        NSCameraUsageDescription: Larch K7 uses the camera to take photos for its Gallery.
-        NSPhotoLibraryUsageDescription: Larch K7's Gallery shows your photos and videos, and its camera saves pictures to your library.
-        NSPhotoLibraryAddUsageDescription: Photos and videos taken with Larch K7's camera are saved to your library.
-        NSMicrophoneUsageDescription: Larch K7's Recorder and video camera record sound with the microphone.
+        NSContactsUsageDescription: KeyPhone shows and edits your iPhone contacts in the phone's Names list.
+        NSCameraUsageDescription: KeyPhone uses the camera to take photos for its Gallery.
+        NSPhotoLibraryUsageDescription: KeyPhone's Gallery shows your photos and videos, and its camera saves pictures to your library.
+        NSPhotoLibraryAddUsageDescription: Photos and videos taken with KeyPhone's camera are saved to your library.
+        NSMicrophoneUsageDescription: KeyPhone's Recorder and video camera record sound with the microphone.
         UIBackgroundModes:
           - audio
         NSAppTransportSecurity:
@@ -49,7 +49,7 @@ targets:
         ITSAppUsesNonExemptEncryption: false
     settings:
       base:
-        PRODUCT_NAME: LarchK7
+        PRODUCT_NAME: KeyPhone
         PRODUCT_BUNDLE_IDENTIFIER: io.github.larchk7.ios
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -65,22 +65,22 @@ targets:
     info:
       path: macOS/Info.plist
       properties:
-        CFBundleName: Larch K7
-        CFBundleDisplayName: Larch K7
+        CFBundleName: KeyPhone
+        CFBundleDisplayName: KeyPhone
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
-        NSContactsUsageDescription: Larch K7 shows and edits your Mac contacts in the phone's Names list.
-        NSCameraUsageDescription: Larch K7's camera uses your Mac's camera.
-        NSMicrophoneUsageDescription: Larch K7's Recorder and video camera record sound with the microphone.
-        NSPhotoLibraryUsageDescription: Larch K7's Gallery shows your photos and videos, and its camera saves pictures to your library.
-        NSHumanReadableCopyright: Larch K7
+        NSContactsUsageDescription: KeyPhone shows and edits your Mac contacts in the phone's Names list.
+        NSCameraUsageDescription: KeyPhone's camera uses your Mac's camera.
+        NSMicrophoneUsageDescription: KeyPhone's Recorder and video camera record sound with the microphone.
+        NSPhotoLibraryUsageDescription: KeyPhone's Gallery shows your photos and videos, and its camera saves pictures to your library.
+        NSHumanReadableCopyright: KeyPhone
         NSAppTransportSecurity:
           NSAllowsArbitraryLoadsInWebContent: true
           NSAllowsArbitraryLoadsForMedia: true
     settings:
       base:
-        PRODUCT_NAME: Larch K7
+        PRODUCT_NAME: KeyPhone
         PRODUCT_BUNDLE_IDENTIFIER: io.github.larchk7.mac
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_HARDENED_RUNTIME: NO

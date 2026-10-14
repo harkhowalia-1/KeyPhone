@@ -44,8 +44,8 @@ jobs:
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build 2>&1 | tee ios-build.log \
             || { grep -E "error:" ios-build.log | sort -u | head -40 | sed 's/^/::error::iOS /'; exit 1; }
           rm -rf Payload && mkdir Payload
-          cp -R build/Release-iphoneos/LarchK7.app Payload/
-          zip -qry ../LarchK7.ipa Payload
+          cp -R build/Release-iphoneos/KeyPhone.app Payload/
+          zip -qry ../KeyPhone.ipa Payload
 
       - name: Build Mac app
         working-directory: apple
@@ -55,42 +55,42 @@ jobs:
             SYMROOT="$PWD/build" MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
             ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO build 2>&1 | tee mac-build.log \
             || { grep -E "error:" mac-build.log | sort -u | head -40 | sed 's/^/::error::Mac /'; exit 1; }
-          codesign --force --deep --sign - "build/Release/Larch K7.app"
+          codesign --force --deep --sign - "build/Release/KeyPhone.app"
 
       - name: Make disk image (.dmg)
         run: |
           rm -rf dmg && mkdir dmg
-          cp -R "apple/build/Release/Larch K7.app" dmg/
+          cp -R "apple/build/Release/KeyPhone.app" dmg/
           if ! create-dmg \
-              --volname "Larch K7" \
+              --volname "KeyPhone" \
               --volicon "apple/macOS/Assets.xcassets/AppIcon.appiconset/icon-512@2x.png" \
               --background "apple/dmg/background.png" \
               --window-pos 200 120 --window-size 600 400 --icon-size 112 \
-              --icon "Larch K7.app" 165 195 --hide-extension "Larch K7.app" \
+              --icon "KeyPhone.app" 165 195 --hide-extension "KeyPhone.app" \
               --app-drop-link 435 195 \
-              LarchK7.dmg dmg/; then
+              KeyPhone.dmg dmg/; then
             echo "Styled disk image failed; making a plain one"
-            rm -f LarchK7.dmg
+            rm -f KeyPhone.dmg
             ln -s /Applications dmg/Applications
-            hdiutil create -volname "Larch K7" -srcfolder dmg -ov -format UDZO LarchK7.dmg
+            hdiutil create -volname "KeyPhone" -srcfolder dmg -ov -format UDZO KeyPhone.dmg
           fi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: LarchK7-${{ env.VERSION }}
+          name: KeyPhone-${{ env.VERSION }}
           path: |
-            LarchK7.ipa
-            LarchK7.dmg
+            KeyPhone.ipa
+            KeyPhone.dmg
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
           target_commitish: ${{ github.sha }}
-          name: Larch K7 ${{ env.VERSION }}
+          name: KeyPhone ${{ env.VERSION }}
           make_latest: true
           overwrite_files: true
           generate_release_notes: true
           files: |
-            LarchK7.ipa
-            LarchK7.dmg
+            KeyPhone.ipa
+            KeyPhone.dmg

@@ -69,7 +69,7 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
             }
             reply(id, true)
         case "web": web(id, args)
-        case "saveFile": saveFile(id, args["name"] as? String ?? "Larch K7 backup.json", args["text"] as? String ?? "")
+        case "saveFile": saveFile(id, args["name"] as? String ?? "KeyPhone backup.json", args["text"] as? String ?? "")
         default: return false
         }
         return true
