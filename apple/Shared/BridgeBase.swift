@@ -42,7 +42,10 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
           download:function(u){return send('download',{url:u})},
           media:function(o){return send('media',o)},
           library:function(o){return send('library',o)},
-          audio:function(o){return send('audio',o)}};
+          audio:function(o){return send('audio',o)},
+          saveFile:function(name,text){return send('saveFile',{name:name,text:text})},
+          storage:function(){return send('storage')},
+          audioSession:function(on){return send('audioSession',{on:!!on})}};
         })();
         """
     }
@@ -86,6 +89,8 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
         case "fileDel": fileDel(id, args["id"] as? String ?? "")
         case "download": download(id, args["url"] as? String ?? "")
         case "media", "library", "audio": media.handle(cmd, id, args)
+        case "storage": storage(id)
+        case "audioSession": reply(id, true)
         default: reply(id, "Not available on this device", ok: false)
         }
     }
@@ -105,6 +110,56 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
 
     func evaluate(_ js: String) {
         DispatchQueue.main.async { self.webView?.evaluateJavaScript(js) }
+    }
+
+    // MARK: free space on the device (Phone › Memory status)
+
+    private func storage(_ id: Int) {
+        DispatchQueue.global(qos: .utility).async {
+            let home = URL(fileURLWithPath: NSHomeDirectory())
+            let keys: Set<URLResourceKey> = [.volumeAvailableCapacityForImportantUsageKey, .volumeTotalCapacityKey]
+            var out: [String: Any] = [:]
+            if let v = try? home.resourceValues(forKeys: keys) {
+                if let free = v.volumeAvailableCapacityForImportantUsage { out["free"] = NSNumber(value: free) }
+                if let total = v.volumeTotalCapacity { out["total"] = NSNumber(value: total) }
+            }
+            self.reply(id, out)
+        }
+    }
+
+    // MARK: web page settings (Web › Settings): text size, pictures, cookies
+
+    private static var ruleLists: [String: WKContentRuleList] = [:]
+
+    /// Applies the phone's web settings to the page view, then runs `then`
+    /// (after any blocking rules are in place, so the next load obeys them).
+    func applyWebPrefs(_ view: WKWebView, _ a: [String: Any], then: @escaping () -> Void = {}) {
+        if let z = (a["zoom"] as? NSNumber)?.doubleValue, z > 0.3, z < 3 { view.pageZoom = CGFloat(z) }
+        guard a["cookies"] != nil || a["images"] != nil else { return then() }
+        let cookies = (a["cookies"] as? Bool) ?? true
+        let images = (a["images"] as? Bool) ?? true
+        let content = view.configuration.userContentController
+        content.removeAllContentRuleLists()
+        var rules: [String] = []
+        if !cookies { rules.append(#"{"trigger":{"url-filter":".*"},"action":{"type":"block-cookies"}}"#) }
+        if !images { rules.append(#"{"trigger":{"url-filter":".*","resource-type":["image"]},"action":{"type":"block"}}"#) }
+        guard !rules.isEmpty else { return then() }
+        let key = "larch-web-" + (cookies ? "c" : "nc") + "-" + (images ? "i" : "ni")
+        if let list = BridgeBase.ruleLists[key] { content.add(list); return then() }
+        WKContentRuleListStore.default().compileContentRuleList(forIdentifier: key, encodedContentRuleList: "[" + rules.joined(separator: ",") + "]") { list, _ in
+            DispatchQueue.main.async {
+                if let list = list { BridgeBase.ruleLists[key] = list; content.add(list) }
+                then()
+            }
+        }
+    }
+
+    /// Clears web pages' cache or cookies. The phone's own saved data is not touched.
+    func clearWebData(_ id: Int, _ what: String) {
+        let types: Set<String> = what == "cookies"
+            ? [WKWebsiteDataTypeCookies]
+            : [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache, WKWebsiteDataTypeFetchCache, WKWebsiteDataTypeOfflineWebApplicationCache]
+        WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: .distantPast) { self.reply(id, true) }
     }
 
     // MARK: Contacts

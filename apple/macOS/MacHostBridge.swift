@@ -69,6 +69,7 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
             }
             reply(id, true)
         case "web": web(id, args)
+        case "saveFile": saveFile(id, args["name"] as? String ?? "Larch K7 backup.json", args["text"] as? String ?? "")
         default: return false
         }
         return true
@@ -139,6 +140,22 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
         reply(id, NSWorkspace.shared.open(url))
     }
 
+    // MARK: files
+
+    /// Saves a file (a phone backup) where the user chooses.
+    private func saveFile(_ id: Int, _ name: String, _ text: String) {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = name
+        panel.canCreateDirectories = true
+        let done: (NSApplication.ModalResponse) -> Void = { response in
+            guard response == .OK, let url = panel.url else { return self.reply(id, false) }
+            do { try Data(text.utf8).write(to: url, options: .atomic); self.reply(id, true) }
+            catch { self.reply(id, error.localizedDescription, ok: false) }
+        }
+        if let window = webView?.window { panel.beginSheetModal(for: window, completionHandler: done) }
+        else { panel.begin(completionHandler: done) }
+    }
+
     // MARK: web pages shown on the phone's own screen
 
     private func makeOverlay() -> WKWebView {
@@ -163,9 +180,14 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
                 view.frame = NSRect(x: n("x"), y: y, width: n("w"), height: n("h"))
             }
             view.isHidden = false
-            if let s = a["url"] as? String, let url = URL(string: s) { view.load(URLRequest(url: url)) }
+            if let s = a["url"] as? String, let url = URL(string: s) { applyWebPrefs(view, a) { view.load(URLRequest(url: url)) } }
         case "load":
-            if let s = a["url"] as? String, let url = URL(string: s) { (overlay ?? makeOverlay()).load(URLRequest(url: url)) }
+            let view = overlay ?? makeOverlay()
+            if let s = a["url"] as? String, let url = URL(string: s) { applyWebPrefs(view, a) { view.load(URLRequest(url: url)) } }
+        case "prefs":
+            if let view = overlay { applyWebPrefs(view, a) }
+        case "clear":
+            return clearWebData(id, a["what"] as? String ?? "cache")
         case "hide": overlay?.isHidden = true
         case "close":
             overlay?.stopLoading()

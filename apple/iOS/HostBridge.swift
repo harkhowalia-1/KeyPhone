@@ -6,6 +6,7 @@ import SafariServices
 import CallKit
 import Network
 import AudioToolbox
+import AVFoundation
 
 /// iPhone side of the bridge: real calls, the Messages sheet, Photos, camera,
 /// Safari, vibration, and battery/network status. Contacts, notifications and
@@ -22,6 +23,9 @@ final class HostBridge: BridgeBase {
     private var cameraReply: Int?
     private var dialledFromPhone = false
     private var callStart: Date?
+    /// Calls the iPhone receives while the app runs: when each began and connected.
+    /// iOS never tells apps the caller's number, so only times are logged.
+    private var incoming: [UUID: (start: Date, connected: Date?)] = [:]
     private var overlay: WKWebView?
 
     init(webView: WKWebView, presenter: UIViewController) {
@@ -69,6 +73,8 @@ final class HostBridge: BridgeBase {
         case "openUrl": openUrl(id, args["url"] as? String ?? "")
         case "haptic": haptic(id, args["kind"] as? String ?? "light")
         case "web": web(id, args)
+        case "saveFile": saveFile(id, args["name"] as? String ?? "Larch K7 backup.json", args["text"] as? String ?? "")
+        case "audioSession": audioSession(id, (args["on"] as? Bool) ?? false)
         default: return false
         }
         return true
@@ -140,6 +146,38 @@ final class HostBridge: BridgeBase {
         reply(id, true)
     }
 
+    // MARK: files and sound
+
+    /// Saves a file (a phone backup) through the share sheet: Save to Files, AirDrop and so on.
+    private func saveFile(_ id: Int, _ name: String, _ text: String) {
+        let safe = name.replacingOccurrences(of: "/", with: "-")
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(safe)
+        do { try Data(text.utf8).write(to: url, options: .atomic) } catch {
+            return reply(id, error.localizedDescription, ok: false)
+        }
+        guard let presenter = presenter else { return reply(id, "No window", ok: false) }
+        let sheet = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        sheet.completionWithItemsHandler = { [weak self] _, completed, _, _ in self?.reply(id, completed) }
+        if let pop = sheet.popoverPresentationController {
+            pop.sourceView = presenter.view
+            pop.sourceRect = CGRect(x: presenter.view.bounds.midX, y: presenter.view.bounds.midY, width: 1, height: 1)
+        }
+        (presenter.presentedViewController ?? presenter).present(sheet, animated: true)
+    }
+
+    /// While the radio or music player is playing, sound keeps going with the
+    /// screen locked or another app open, like a phone's radio.
+    private func audioSession(_ id: Int, _ on: Bool) {
+        let session = AVAudioSession.sharedInstance()
+        if on {
+            try? session.setCategory(.playback, mode: .default)
+            try? session.setActive(true)
+        } else {
+            try? session.setCategory(.ambient, mode: .default)
+        }
+        reply(id, true)
+    }
+
     // MARK: web pages shown on the phone's own screen
 
     private func makeOverlay() -> WKWebView {
@@ -166,9 +204,14 @@ final class HostBridge: BridgeBase {
                 view.frame = CGRect(x: n("x"), y: n("y"), width: n("w"), height: n("h"))
             }
             view.isHidden = false
-            if let s = a["url"] as? String, let url = URL(string: s) { view.load(URLRequest(url: url)) }
+            if let s = a["url"] as? String, let url = URL(string: s) { applyWebPrefs(view, a) { view.load(URLRequest(url: url)) } }
         case "load":
-            if let s = a["url"] as? String, let url = URL(string: s) { (overlay ?? makeOverlay()).load(URLRequest(url: url)) }
+            let view = overlay ?? makeOverlay()
+            if let s = a["url"] as? String, let url = URL(string: s) { applyWebPrefs(view, a) { view.load(URLRequest(url: url)) } }
+        case "prefs":
+            if let view = overlay { applyWebPrefs(view, a) }
+        case "clear":
+            return clearWebData(id, a["what"] as? String ?? "cache")
         case "hide": overlay?.isHidden = true
         case "close":
             overlay?.stopLoading()
@@ -209,13 +252,28 @@ final class HostBridge: BridgeBase {
 
 extension HostBridge: CXCallObserverDelegate {
     func callObserver(_ observer: CXCallObserver, callChanged call: CXCall) {
-        guard call.isOutgoing, dialledFromPhone else { return }
+        if !call.isOutgoing { return incomingChanged(call) }
+        guard dialledFromPhone else { return }
         if call.hasConnected && !call.hasEnded && callStart == nil { callStart = Date() }
         if call.hasEnded {
             let seconds = callStart.map { Int(Date().timeIntervalSince($0)) } ?? 0
             callStart = nil
             dialledFromPhone = false
             evaluate("window.LarchCallEnded&&LarchCallEnded({duration:\(seconds)})")
+        }
+    }
+
+    private func incomingChanged(_ call: CXCall) {
+        var entry = incoming[call.uuid] ?? (start: Date(), connected: nil)
+        if call.hasConnected && entry.connected == nil { entry.connected = Date() }
+        guard call.hasEnded else { incoming[call.uuid] = entry; return }
+        incoming[call.uuid] = nil
+        let t = Int(entry.start.timeIntervalSince1970 * 1000)
+        if let connected = entry.connected {
+            let seconds = Int(Date().timeIntervalSince(connected))
+            evaluate("window.LarchCallIn&&LarchCallIn({t:\(t),duration:\(seconds)})")
+        } else {
+            evaluate("window.LarchCallMissed&&LarchCallMissed({t:\(t)})")
         }
     }
 }

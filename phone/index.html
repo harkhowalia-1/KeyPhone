@@ -246,6 +246,14 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 .mp .pr{width:100%;height:4px;background:rgba(127,127,127,.3);border-radius:2px;overflow:hidden}
 .mp .pr i{display:block;height:100%;background:var(--thl)}
 .mp .tm{font-size:12px;color:var(--tsub);font-variant-numeric:tabular-nums}
+.rad{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 14px;text-align:center}
+.rad .rdial{width:100%;height:64px;box-sizing:border-box;border-radius:8px;background:linear-gradient(#0d1318,#1b252e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 2px 8px rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:9px 10px}
+.rad .rdial i{flex:1;max-width:7px;height:10%;border-radius:2px;background:var(--thl);opacity:.45}
+.rad.play .rdial i{opacity:1;animation:rbar .8s ease-in-out infinite alternate}
+@keyframes rbar{0%{height:10%}100%{height:92%}}
+.rad .ti{font-size:16px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rad .st{font-size:12px;color:var(--tsub);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rad .tm{font-size:12px;color:var(--tsub);font-variant-numeric:tabular-nums}
 .web{position:absolute;inset:0;overflow:hidden;padding:8px 10px;font-size:13px;line-height:1.35;background:#fff;color:#111}
 .web h3{margin:0 0 6px;font-size:15px;color:#164a8a}
 .web a{color:#1a5fb4;word-break:break-all}
@@ -260,8 +268,10 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 <style id="skincss"></style>
 
 <div class="stage">
-  <input type="file" id="fin" multiple hidden accept="image/*,audio/*,.jar,.jad,.nth,.zip">
+  <input type="file" id="fin" multiple hidden accept="image/*,audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.flac,.jar,.jad,.nth,.zip">
   <input type="file" id="pin" multiple hidden accept="image/*">
+  <input type="file" id="mus" multiple hidden accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.flac">
+  <input type="file" id="bin" hidden accept=".json,application/json,text/plain">
   <input type="file" id="cin" hidden accept="image/*" capture="environment">
   <input type="file" id="ain" multiple hidden accept=".jar,.jad,application/java-archive">
   <div class="wrap" id="wrap">
@@ -347,7 +357,7 @@ const DEF={
   timer:null, swTimes:[],
   web:{home:'start',last:'',bm:[{t:'Wikipedia (mobile)',u:'https://en.m.wikipedia.org'},{t:'Weather',u:'https://wttr.in'},{t:'Hacker News',u:'https://news.ycombinator.com'}],wrap:true,img:true,cookies:true,dlsave:'ask'},
   skin:{body:'midnight',keys:'black',btns:'black'}, kpLight:'auto',
-  jars:[], images:[], themes:[], snake:{lvl:5,best:0}, eq:'Normal', widen:false, t9:true, words:[], seeded:false
+  jars:[], images:[], themes:[], music:[], radio:{ch:[],last:null}, snake:{lvl:5,best:0}, eq:'Normal', widen:false, t9:true, words:[], seeded:false
 };
 let S;
 function deepMerge(base,over){ if(Array.isArray(base)||typeof base!=='object'||base===null) return over===undefined?base:over;
@@ -834,14 +844,14 @@ function netSVG(){ const fl=S.profile==='flight';
 let locked=false, unlockAt=0, lastActivity=Date.now();
 function statusIcons(){ const out=[]; const unread=S.msgs.inbox.filter(m=>!m.read).length;
   if(unread) out.push(ico('msg')); if(S.logs.missed.some(x=>!x.seen)) out.push(ico('missed'));
-  if(S.alarm.on) out.push(ico('alarm')); if(S.bt.on) out.push(ico('bt')); if(S.timer) out.push(ico('timer'));
-  if(music.playing) out.push(ico('note')); if(prof().alert==='off'&&!prof().vol) out.push(ico('silent')); if(locked) out.push(ico('lock')); return out.join('') }
+  if(S.alarm.on) out.push(ico('alarm')); if(S.timer) out.push(ico('timer'));
+  if(music.playing||radioP.playing) out.push(ico('note')); if(prof().alert==='off'&&!prof().vol) out.push(ico('silent')); if(locked) out.push(ico('lock')); return out.join('') }
 function nextEvents(){ const out=[]; const d=now();
   if(S.alarm.on) out.push([ico('alarm'),'Alarm '+fmtTime(new Date(2000,0,1,S.alarm.h,S.alarm.m))]);
   const today=dkey(d); const evs=S.cal.filter(n=>n.date>=today||n.type==='Birthday').sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
   const e=evs.find(n=>n.type!=='Birthday')||evs[0]; if(e) out.push([ico('cal'),(e.date===today?'Today':e.date.slice(5).replace('-','/'))+(e.time?' '+e.time:'')+' · '+e.subject]);
   if(S.timer){ const left=Math.max(0,Math.round((S.timer.end-Date.now())/1000)); out.push([ico('timer'),'Timer '+fmtDur(left)]) }
-  if(music.playing&&music.cur) out.push([ico('note'),music.cur.name]);
+  if(music.playing&&music.cur) out.push([ico('note'),music.cur.name]); else if(radioP.playing&&radioP.cur) out.push([ico('note'),radioP.cur.name]);
   return out.slice(0,3) }
 function Standby(){
   return {name:'standby',full:true,ovSoft:true,
@@ -882,9 +892,9 @@ const FEAT={
   goto:['Go to',()=>GoTo()], names:['Names',()=>NamesList()], newmsg:['Create message',()=>NewMessage()], inbox:['Inbox',()=>Folder('inbox')],
   log:['Log',()=>LogMenu()], dialled:['Dialled numbers',()=>LogList('Dialled numbers','dialled')], calendar:['Calendar',()=>Calendar()], alarm:['Alarm clock',()=>AlarmMenu()],
   notes:['Notes',()=>NotesMenu()], todo:['To-do list',()=>TodoList()], calc:['Calculator',()=>Calculator()], stopwatch:['Stopwatch',()=>Stopwatch()], timer:['Countdown timer',()=>TimerMenu()],
-  gallery:['Gallery',()=>GalleryMenu()], music:['Music player',()=>MusicPlayer()], radio:['Radio',()=>radio()], web:['Web',()=>WebMenu()], bookmarks:['Bookmarks',()=>Bookmarks()],
+  gallery:['Gallery',()=>GalleryMenu()], music:['Music player',()=>MusicPlayer()], radio:['Radio',()=>RadioApp()], web:['Web',()=>WebMenu()], bookmarks:['Bookmarks',()=>Bookmarks()],
   profiles:['Profiles',()=>ProfilesMenu()], themes:['Themes',()=>ThemesMenu()], settings:['Settings',()=>SettingsMenu()], snake:['Snake',()=>SnakeMenu()], collection:['Collection',()=>Collection()],
-  camera:['Camera',()=>CameraApp('photo')], recorder:['Recorder',()=>Recorder()], bt:['Bluetooth',()=>BtMenu()], emu:['Emulator',()=>EmulatorMenu()], menu:['Menu',()=>push(MainMenu())]
+  camera:['Camera',()=>CameraApp('photo')], recorder:['Recorder',()=>Recorder()], emu:['Emulator',()=>EmulatorMenu()], menu:['Menu',()=>push(MainMenu())]
 };
 const scSoft=id=>FEAT[id]?{t:FEAT[id][0],f:FEAT[id][1]}:{t:''};
 const runFeat=id=>FEAT[id]&&FEAT[id][1]();
@@ -947,6 +957,9 @@ function callNumber(num,label){ num=String(num||'').trim(); if(!num) return;
   if(Host&&Host.call){ Host.call(num).catch(()=>note('Could not place the call','warn')); home(); note('Calling '+name,'info',1600); return }
   const a=document.createElement('a'); a.href='tel:'+num.replace(/[^\d+*#,;]/g,''); a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove();
   home(); Info('Calling',`<p><b>${esc(name)}</b></p><p>${esc(num)}</p><p>The call was handed to this device's phone app. If nothing opened, this device can't place calls.</p>`) }
+window.LarchCallIn=o=>{ const d=Math.round((o&&o.duration)||0); S.logs.recv.unshift({num:'',t:(o&&o.t)||Date.now(),dur:d}); S.logs.recv=S.logs.recv.slice(0,30); if(d){ S.dur.last=d; S.dur.recv+=d } save(); if(S.on&&V.length) render() };
+window.LarchCallMissed=o=>{ S.logs.missed.unshift({num:'',t:(o&&o.t)||Date.now(),seen:false}); S.logs.missed=S.logs.missed.slice(0,30); save();
+  if(!S.on||!V.length) return; if(tv().name==='notice') pop(); render(); if(tv().name==='standby'){ const n=S.logs.missed.filter(x=>!x.seen).length; Notice(n+' missed call'+(n>1?'s':''),()=>LogList('Missed calls','missed')) } };
 window.LarchCallEnded=o=>{ const d=Math.round((o&&o.duration)||0); if(!d) return; S.dur.last=d; S.dur.dialled+=d; if(S.logs.dialled[0]) S.logs.dialled[0].dur=d; save(); if(S.call.summary&&S.on) note('Call duration '+fmtDur(d),'info',2200) };
 
 function answer(){ if(!callObj||callObj.state!=='ringing') return; stopRing(); clearTimeout(callObj.tm); callObj.state='active'; callObj.t0=Date.now();
@@ -976,24 +989,17 @@ function Notice(text,show){ push({name:'notice',full:true,
   soft(){ return [{t:''},{t:'Show',f:()=>{pop();show()}},{t:'Exit',f:pop}] } }) }
 
 /* ---------------- messaging ---------------- */
-function MessagingMenu(){ const unread=S.msgs.inbox.filter(m=>!m.read).length;
-  menu('Messaging',[['Create message',()=>NewMessage()],['Inbox'+(unread?` (${unread})`:''),()=>Folder('inbox')],['Drafts',()=>Folder('drafts')],['Sent items',()=>Folder('sent')],['Saved items',()=>Folder('saved')],
-    ['Delete messages',()=>menu('Delete messages',[['By message',()=>Folder('inbox')],['By folder',()=>menu('By folder',[['Inbox',()=>delFolder('inbox')],['Drafts',()=>delFolder('drafts')],['Sent items',()=>delFolder('sent')],['Saved items',()=>delFolder('saved')]])],['All messages',()=>Ask('Delete all messages?',()=>{ for(const f in S.msgs) S.msgs[f]=[]; save(); note('Deleted') })]])],
+function MessagingMenu(){ const unread=S.msgs.inbox.filter(m=>!m.read).length, hasIn=S.msgs.inbox.length>0;
+  menu('Messaging',[['Create message',()=>NewMessage()],hasIn?['Inbox'+(unread?` (${unread})`:''),()=>Folder('inbox')]:null,['Drafts',()=>Folder('drafts')],['Sent items',()=>Folder('sent')],['Saved items',()=>Folder('saved')],
+    ['Delete messages',()=>menu('Delete messages',[hasIn?['Inbox',()=>delFolder('inbox')]:null,['Drafts',()=>delFolder('drafts')],['Sent items',()=>delFolder('sent')],['Saved items',()=>delFolder('saved')],['All messages',()=>Ask('Delete all messages?',()=>{ for(const f in S.msgs) S.msgs[f]=[]; save(); note('Deleted') })]])],
     ['Voice messages',()=>menu('Voice messages',[['Listen to voice messages',()=>{ if(S.vmail) callNumber(S.vmail,'Voice mailbox'); else note('Voice mailbox number not set','info') }],['Voice mailbox number',()=>push(Editor({mode:'phone',title:'Voice mailbox',label:'Voice mailbox number:',text:S.vmail,done(t){S.vmail=t;save();pop();note('Saved')}}))]])],
-    ['Info messages',()=>menu('Info messages',[['Info service',()=>OnOff('Info service',S,'info')],['Topics',()=>note('No topics','info')],['Language',()=>Radio('Language',[['all','All'],['en','English']],()=>'all',()=>{})]])],
-    ['Service commands',()=>push(Editor({mode:'phone',title:'Service command',label:'Command:',done(){ pop(); note('Not available without a network service','info') }}))],
     ['Message settings',()=>MsgSettings()],
-    ['Message counter',()=>Info('Message counter',`<p><span class="lbl">Sent messages</span>${S.msgCount.sent}</p><p><span class="lbl">Received messages</span>${S.msgCount.recv}</p>`,{L:{t:'Clear',f:()=>{S.msgCount={sent:0,recv:0};save();pop();note('Counters cleared')}}})]
+    ['Message counter',()=>Info('Message counter',`<p><span class="lbl">Sent messages</span>${S.msgCount.sent}</p>`,{L:{t:'Clear',f:()=>{S.msgCount={sent:0,recv:0};save();pop();note('Counter cleared')}}})]
   ]) }
 function delFolder(f){ Ask('Delete all messages in this folder?',()=>{ S.msgs[f]=[]; save(); note('Deleted') }) }
 function MsgSettings(){ const m=S.msgSet;
-  menu('Message settings',[
-    ['General settings',()=>menu('General settings',[['Save sent messages',()=>Radio('Save sent messages',[[true,'Yes'],[false,'No']],()=>m.saveSent,v=>m.saveSent=v)],['Overwriting in Sent items',()=>Radio('Overwriting',[['allowed','Allowed'],['no','Not allowed']],()=>m.overwrite,v=>m.overwrite=v)],['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.msg,v=>S.fs.msg=v)]])],
-    ['Text messages',()=>menu('Text messages',[['Delivery reports',()=>Radio('Delivery reports',[[true,'Yes'],[false,'No']],()=>m.reports,v=>m.reports=v)],['Message centres',()=>push(Editor({mode:'phone',title:'Message centre',label:'Message centre number:',text:m.centre,done(t){m.centre=t;save();pop();note('Saved')}}))],
-      ['Message validity',()=>Radio('Message validity',[['1h','1 hour'],['6h','6 hours'],['24h','24 hours'],['72h','72 hours'],['1w','1 week'],['max','Maximum']],()=>m.validity,v=>m.validity=v)],['Messages sent via',()=>Radio('Messages sent via',[['text','Text'],['paging','Paging'],['fax','Fax']],()=>m.type,v=>m.type=v)],
-      ['Character support',()=>Radio('Character support',[['full','Full'],['reduced','Reduced']],()=>m.charset,v=>m.charset=v)],['Reply via same centre',()=>Radio('Reply via same centre',[[true,'Yes'],[false,'No']],()=>m.replySame,v=>m.replySame=v)]])],
-    ['Other settings',()=>menu('Other settings',[['Packet data use',()=>Radio('Packet data use',[['gsm','Preferred: GSM'],['packet','Preferred: packet data']],()=>'gsm',()=>{})]])]
-  ]) }
+  menu('Message settings',[['Save sent messages',()=>Radio('Save sent messages',[[true,'Yes'],[false,'No']],()=>m.saveSent,v=>m.saveSent=v)],
+    ['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.msg,v=>S.fs.msg=v)]]) }
 function msgItems(f){ return S.msgs[f].slice().sort((a,b)=>b.t-a.t).map(m=>({m,t:f==='inbox'||m.from?nameFor(m.from):nameFor(m.to||'(no recipient)'),s:m.text,bold:f==='inbox'&&!m.read,ic:ico(f==='inbox'?(m.read?'envopen':'envin'):'msg')})) }
 function Folder(f){ const names={inbox:'Inbox',drafts:'Drafts',sent:'Sent items',saved:'Saved items'};
   push(List(names[f],()=>msgItems(f),{name:'folder',two:true,empty:'Folder empty',
@@ -1018,7 +1024,7 @@ function NewMessage(text,to,draft){
 function saveDraft(t,to,draft){ if(draft){ draft.text=t; draft.t=Date.now() } else S.msgs.drafts.push({id:uid(),to:to||'',text:t,t:Date.now()}); save(); note('Message saved to Drafts') }
 function sendFlow(ed,to,draft){ ed.commit(); const text=ed.text; if(!text.trim()){ note('Message is empty','warn'); return }
   const finish=(nums,how)=>{ nums.forEach(n=>{ if(S.msgSet.saveSent) S.msgs.sent.push({id:uid(),to:n,text,t:Date.now()}); S.msgCount.sent++; S.logs.msgTo.unshift({num:n,t:Date.now()}) });
-    if(draft) S.msgs.drafts=S.msgs.drafts.filter(x=>x!==draft); save(); while(V.length>1&&V.includes(ed)) pop(); note(how,'ok') };
+    if(draft) S.msgs.drafts=S.msgs.drafts.filter(x=>x!==draft); save(); while(V.length>1&&V.includes(ed)) pop(); note(how,'ok'); const p=prof(); if(p.msg!=='Off'&&MSGT[p.msg]) playSeq(MSGT[p.msg],{vol:Math.max(volG(p.vol),.04)}) };
   const go=nums=>{ if(S.profile==='flight'){ note('Flight profile is active','warn'); return }
     if(Host&&Host.sms){ Host.sms(nums,text).then(r=>{ if(r==='sent') finish(nums,'Message sent'); else if(r==='opened') finish(nums,'Opened in Messages'); else if(r==='cancelled') note('Message not sent','info'); else note('Message sending failed','warn') },()=>note('This device cannot send messages','warn')); return }
     const a=document.createElement('a'); a.href='sms:'+nums.map(n=>n.replace(/[^\d+]/g,'')).join(',')+'?&body='+encodeURIComponent(text); a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); finish(nums,'Opened in Messages') };
@@ -1027,9 +1033,10 @@ function sendFlow(ed,to,draft){ ed.commit(); const text=ed.text; if(!text.trim()
     midLabel:'Send',mid:(t)=>{ if(!t.trim()){ note('Enter a number','warn'); return } go([t]) },exit:()=>pop()})) }
 
 /* ---------------- contacts ---------------- */
-function ContactsMenu(){ menu('Contacts',[['Names',()=>NamesList()],['Settings',()=>menu('Settings',[['Memory in use',()=>Radio('Memory in use',[['phone','Phone']],()=>'phone',()=>{})],['Contacts view',()=>Radio('Contacts view',[['name','Name list'],['both','Name and number']],()=>S.cview,v=>S.cview=v)],['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.contacts,v=>S.fs.contacts=v)],['Memory status',()=>Info('Memory status',`<p><span class="lbl">Phone</span>${S.contacts.length} used, ${Math.max(0,1000-S.contacts.length)} free</p>`)]])],
+function ContactsMenu(){ const where=DEVC()?(Host.platform==='ios'?'iPhone Contacts':'Mac Contacts'):'This phone';
+  menu('Contacts',[['Names',()=>NamesList()],['Settings',()=>menu('Settings',[['Contacts view',()=>Radio('Contacts view',[['name','Name list'],['both','Name and number']],()=>S.cview,v=>S.cview=v)],['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.contacts,v=>S.fs.contacts=v)],['Memory status',()=>Info('Memory status',`<p><span class="lbl">Names</span>${S.contacts.length}</p><p><span class="lbl">Stored in</span>${where}</p>`)]])],
   ['Groups',()=>Groups()],['Speed dials',()=>SpeedDials()],['My numbers',()=>push(Editor({mode:'phone',title:'My numbers',label:'My number:',text:S.myNum,done(t){S.myNum=t;save();pop();note('Saved')}}))],
-  ['Delete all contacts',()=>DEVC()?note('Delete contacts in the iPhone Contacts app','info',2200):Ask('Delete all contacts?',()=>askCode(()=>{S.contacts=[];S.speed={};save();note('Deleted')}))]]) }
+  ['Delete all contacts',()=>DEVC()?note('Delete contacts in the '+(Host.platform==='ios'?'iPhone':'Mac')+' Contacts app','info',2200):Ask('Delete all contacts?',()=>askCode(()=>{S.contacts=[];S.speed={};save();note('Deleted')}))]]) }
 function NamesList(pick){ let q='';
   const items=()=>sortedContacts().filter(c=>!q||c.name.toLowerCase().split(/\s+/).some(w=>t9of(w).startsWith(q))).map(c=>({t:c.name,s:S.cview==='both'?c.num:'',c,ic:ico('person')}));
   push(List(pick?'Select contact':'Names',items,{name:'names',two:S.cview==='both',empty:pick?'No names':'No names. Press Add to make one.',
@@ -1062,19 +1069,20 @@ function SpeedDials(){ push(List('Speed dials',()=>['1','2','3','4','5','6','7',
     if(!it.c) return assignSpeed(it.k); menu('Options',[['View number',()=>{pop();ContactView(it.c)}],['Change',()=>{pop();assignSpeed(it.k)}],['Delete',()=>{pop();delete S.speed[it.k];save();note('Deleted')}]],{nums:false}) }}) })) }
 
 /* ---------------- log ---------------- */
-function LogMenu(){ menu('Log',[['Missed calls',()=>LogList('Missed calls','missed')],['Received calls',()=>LogList('Received calls','recv')],['Dialled numbers',()=>LogList('Dialled numbers','dialled')],['Message recipients',()=>LogList('Message recipients','msgTo')],
-  ['Clear log lists',()=>menu('Clear log lists',[['All',()=>Ask('Clear all log lists?',()=>{S.logs={missed:[],recv:[],dialled:[],msgTo:[]};save();note('Log lists cleared')})],['Missed',()=>{S.logs.missed=[];save();note('Cleared')}],['Received',()=>{S.logs.recv=[];save();note('Cleared')}],['Dialled',()=>{S.logs.dialled=[];save();note('Cleared')}],['Message recipients',()=>{S.logs.msgTo=[];save();note('Cleared')}]])],
-  ['Call duration',()=>Info('Call duration',`<p><span class="lbl">Last call</span>${fmtDur(S.dur.last)}</p><p><span class="lbl">Received calls</span>${fmtDur(S.dur.recv)}</p><p><span class="lbl">Dialled calls</span>${fmtDur(S.dur.dialled)}</p><p><span class="lbl">All calls</span>${fmtDur(S.dur.recv+S.dur.dialled)}</p>`,{L:{t:'Clear',f:()=>askCode(()=>{S.dur={last:0,recv:0,dialled:0};save();pop();note('Timers cleared')})}})],
-  ['Message log',()=>Info('Message log',`<p><span class="lbl">Sent</span>${S.msgCount.sent}</p><p><span class="lbl">Received</span>${S.msgCount.recv}</p>`)]]) }
+const inLog=()=>!!(Host&&Host.platform==='ios')||S.logs.missed.length>0||S.logs.recv.length>0;
+function LogMenu(){ const io=inLog();
+  menu('Log',[io?['Missed calls',()=>LogList('Missed calls','missed')]:null,io?['Received calls',()=>LogList('Received calls','recv')]:null,['Dialled numbers',()=>LogList('Dialled numbers','dialled')],['Message recipients',()=>LogList('Message recipients','msgTo')],
+  ['Clear log lists',()=>menu('Clear log lists',[['All',()=>Ask('Clear all log lists?',()=>{S.logs={missed:[],recv:[],dialled:[],msgTo:[]};save();note('Log lists cleared')})],io?['Missed',()=>{S.logs.missed=[];save();note('Cleared')}]:null,io?['Received',()=>{S.logs.recv=[];save();note('Cleared')}]:null,['Dialled',()=>{S.logs.dialled=[];save();note('Cleared')}],['Message recipients',()=>{S.logs.msgTo=[];save();note('Cleared')}]])],
+  ['Call duration',()=>Info('Call duration',`<p><span class="lbl">Last call</span>${fmtDur(S.dur.last)}</p>${io?`<p><span class="lbl">Received calls</span>${fmtDur(S.dur.recv)}</p>`:''}<p><span class="lbl">Dialled calls</span>${fmtDur(S.dur.dialled)}</p><p><span class="lbl">All calls</span>${fmtDur(S.dur.recv+S.dur.dialled)}</p>${Host&&Host.platform==='ios'?'':'<p>Durations are measured by the iPhone app. On this device calls are handed to another app.</p>'}`,{L:{t:'Clear',f:()=>askCode(()=>{S.dur={last:0,recv:0,dialled:0};save();pop();note('Timers cleared')})}})]]) }
 function LogList(title,key){ if(key==='missed') { S.logs.missed.forEach(x=>x.seen=true); save() }
-  push(List(title,()=>S.logs[key].map(x=>({t:nameFor(x.num),s:fmtStamp(x.t),x,ic:ico(key==='missed'?'missed':key==='recv'?'inc':key==='msgTo'?'msg':'out')})),{two:true,empty:'No numbers',
-    M:it=>({t:key==='msgTo'?'Send':'Call',f:()=>key==='msgTo'?NewMessage('',it.x.num):callNumber(it.x.num)}),
-    L:it=>it?{t:'Options',f:()=>menu('Options',[['Time of call',()=>Info('Time',`<p>${esc(fmtStamp(it.x.t))}</p>${it.x.dur?`<p><span class="lbl">Duration</span>${fmtDur(it.x.dur)}</p>`:''}`)],['Send message',()=>{pop();NewMessage('',it.x.num)}],['Save',()=>{pop();AddContact(it.x.num)}],['Delete',()=>{S.logs[key]=S.logs[key].filter(y=>y!==it.x);save();pop()}]],{nums:false})}:{t:''},
-    key(k){ if(k==='CALL'){ const it=this.items()[this.i]; if(it) callNumber(it.x.num); return true } return false } })) }
-
+  const label=x=>x.num?nameFor(x.num):'Number not shared';
+  push(List(title,()=>S.logs[key].map(x=>({t:label(x),s:fmtStamp(x.t)+(x.dur?' · '+fmtDur(x.dur):''),x,ic:ico(key==='missed'?'missed':key==='recv'?'inc':key==='msgTo'?'msg':'out')})),{two:true,empty:'No numbers',
+    M:it=>it.x.num?{t:key==='msgTo'?'Send':'Call',f:()=>key==='msgTo'?NewMessage('',it.x.num):callNumber(it.x.num)}:{t:''},
+    L:it=>it?{t:'Options',f:()=>menu('Options',[['Time of call',()=>Info('Time',`<p>${esc(fmtStamp(it.x.t))}</p>${it.x.dur?`<p><span class="lbl">Duration</span>${fmtDur(it.x.dur)}</p>`:''}${it.x.num?'':'<p>The iPhone does not share the caller\'s number with apps.</p>'}`)],it.x.num?['Send message',()=>{pop();NewMessage('',it.x.num)}]:null,it.x.num?['Save',()=>{pop();AddContact(it.x.num)}]:null,['Delete',()=>{S.logs[key]=S.logs[key].filter(y=>y!==it.x);save();pop()}]],{nums:false})}:{t:''},
+    key(k){ if(k==='CALL'){ const it=this.items()[this.i]; if(it&&it.x.num) callNumber(it.x.num); return true } return false } })) }
 /* ---------------- settings ---------------- */
 function SettingsMenu(){ menu('Settings',[['Profiles',()=>ProfilesMenu()],['Themes',()=>ThemesMenu()],['Tones',()=>Personalise(S.profile,'Tones')],['Display',()=>DisplayMenu()],['Time and date',()=>TimeDateMenu()],['My shortcuts',()=>ShortcutsMenu()],
-  ['Sync and backup',()=>SyncMenu()],['Connectivity',()=>ConnMenu()],['Call',()=>CallMenu()],['Phone',()=>PhoneMenu()],['Enhancements',()=>EnhMenu()],['Configuration',()=>ConfigMenu()],['Security',()=>SecurityMenu()],['Restore factory settings',()=>RestoreFactory()],['Emulator',()=>EmulatorMenu()]]) }
+  ['Sync and backup',()=>SyncMenu()],['Call',()=>CallMenu()],['Phone',()=>PhoneMenu()],['Security',()=>SecurityMenu()],['Restore factory settings',()=>RestoreFactory()],['Emulator',()=>EmulatorMenu()]]) }
 const PROF_ORDER=['general','silent','meeting','outdoor','pager','flight'];
 function ProfilesMenu(){ push(List('Profiles',()=>PROF_ORDER.map(id=>({t:S.profiles[id].name,id,radio:true,on:S.profile===id})),{count:false,
   M:it=>({t:'Select',f:()=>menu(it.t,[['Activate',()=>{activateProfile(it.id)}],['Personalise',()=>Personalise(it.id)],['Timed',()=>{ if(it.id==='general'){ note('Not available for General','info'); return } TimeEntry('Profile expires',now().getHours(),now().getMinutes(),(h,m)=>{ const d=now(); d.setHours(h,m,0,0); if(d<=now()) d.setDate(d.getDate()+1); S.timedPrev='general'; activateProfile(it.id,true); S.timedUntil=d.getTime()-S.clock.off; save() }) }]])}) })) }
@@ -1090,7 +1098,6 @@ function Personalise(id,title){ const p=S.profiles[id]; const ringNames=Object.k
     ['Message alert tone',()=>Radio('Message alert tone',Object.keys(MSGT).map(n=>[n,n]).concat([['Off','Off']]),()=>p.msg,v=>p.msg=v,{onMove:it=>{MSGT[it.val]&&playSeq(MSGT[it.val],{vol:.06})}})],
     ['Keypad tones',()=>Radio('Keypad tones',[[0,'Off'],[1,'Level 1'],[2,'Level 2'],[3,'Level 3']],()=>p.keys,v=>p.keys=v)],
     ['Warning tones',()=>OnOff('Warning tones',p,'warn')],
-    ['Alert for',()=>Radio('Alert for',[['all','All calls'],...S.groups.map(g=>[g,g])],()=>p.alertFor,v=>p.alertFor=v)],
     id!=='general'&&id!=='flight'?['Profile name',()=>push(Editor({mode:'text',noPred:true,title:'Profile name',text:p.name,max:16,done(t){ if(t.trim()) p.name=t.trim(); save(); pop(); note('Saved') }}))]:null
   ]) }
 function ThemesMenu(){ menu('Themes',[['Select theme',()=>SelectTheme()],['Phone skin',()=>SkinMenu()],['Theme downloads',()=>note('Add .nth theme files in Settings › Emulator › Add files','info',2600)]]) }
@@ -1121,43 +1128,37 @@ function TimeDateMenu(){ menu('Time and date',[
   ['Auto-update of date and time',()=>Radio('Auto-update',[['on','On'],['confirm','Confirm first'],['off','Off']],()=>S.autoTime,v=>{S.autoTime=v; if(v==='on'){S.clock.off=0;S.clock.tz=SYS_TZ}})]]) }
 function ShortcutsMenu(){ const opts=Object.keys(FEAT).filter(k=>k!=='menu').map(k=>[k,FEAT[k][0]]);
   menu('My shortcuts',[['Left selection key',()=>Radio('Left selection key',opts,()=>S.sc.L,v=>S.sc.L=v)],['Right selection key',()=>Radio('Right selection key',opts,()=>S.sc.R,v=>S.sc.R=v)],
-    ['Navigation key',()=>menu('Navigation key',[['Up',()=>Radio('Up',opts,()=>S.sc.U,v=>S.sc.U=v)],['Down',()=>Radio('Down',opts,()=>S.sc.D,v=>S.sc.D=v)],['Left',()=>Radio('Left',opts,()=>S.sc.LT,v=>S.sc.LT=v)],['Right',()=>Radio('Right',opts,()=>S.sc.RT,v=>S.sc.RT=v)]])],
-    ['Voice commands',()=>note('Voice commands need a microphone','info')]]) }
-function SyncMenu(){ menu('Sync and backup',[['Phone switch',()=>{ if(!S.bt.on){ Ask('Switch Bluetooth on?',()=>{S.bt.on=true;save();btSearch()}) } else btSearch() }],
-  ['Create backup',()=>copyBackup()],
-  ['Restore backup',()=>restoreView()],
-  ['Data transfer',()=>note('No transfer contacts','info')]]) }
-function btSearch(){ note("Bluetooth is managed in this device's settings",'info',2000) }
-function BtMenu(){ btSearch() }
-function ConnMenu(){ menu('Connectivity',[['Bluetooth',()=>BtMenu()],
-  ['Packet data',()=>menu('Packet data',[['Packet data connection',()=>Radio('Packet data connection',[['needed','When needed'],['always','Always online']],()=>S.packet,v=>S.packet=v)],['Packet data settings',()=>menu('Packet data settings',[['Active access point',()=>Radio('Access point',[['Internet','Internet'],['WAP','WAP services']],()=>S.apn,v=>S.apn=v)]])]])],
-  ['USB data cable',()=>Radio('USB data cable',[['ask','Ask on connection'],['pcsuite','PC Suite'],['print','Printing and media'],['storage','Data storage']],()=>S.usb,v=>S.usb=v)]]) }
-const netNote=()=>note('Network service not available','info',1600);
-function CallMenu(){ const c=S.call; menu('Call',[
-  ['Call divert',()=>menu('Call divert',['Divert all voice calls','Divert if busy','Divert if not answered','Divert if out of reach','Divert if not available','Cancel all diverts'].map(t=>[t,()=>menu(t,[['Activate',netNote],['Cancel',netNote],['Check status',netNote]],{nums:false})]))],
-  ['Anykey answer',()=>OnOff('Anykey answer',c,'anykey')],['Automatic redial',()=>OnOff('Automatic redial',c,'redial')],['Speed dialling',()=>OnOff('Speed dialling',c,'speed')],
-  ['Call waiting',()=>menu('Call waiting',[['Activate',netNote],['Cancel',netNote],['Check status',netNote]],{nums:false})],['Call summary',()=>OnOff('Summary after call',c,'summary')],
-  ['Send my caller ID',()=>Radio('Send my caller ID',[['net','Set by network'],['yes','Yes'],['no','No']],()=>c.cid,v=>c.cid=v)],['Line for outgoing calls',()=>Radio('Line',[[1,'Line 1'],[2,'Line 2']],()=>c.line,v=>c.line=v)]]) }
+    ['Navigation key',()=>menu('Navigation key',[['Up',()=>Radio('Up',opts,()=>S.sc.U,v=>S.sc.U=v)],['Down',()=>Radio('Down',opts,()=>S.sc.D,v=>S.sc.D=v)],['Left',()=>Radio('Left',opts,()=>S.sc.LT,v=>S.sc.LT=v)],['Right',()=>Radio('Right',opts,()=>S.sc.RT,v=>S.sc.RT=v)]])]]) }
+function SyncMenu(){ menu('Sync and backup',[['Create backup',()=>saveBackup()],['Restore backup',()=>restoreBackup()]]) }
+function CallMenu(){ const c=S.call; menu('Call',[['Speed dialling',()=>OnOff('Speed dialling',c,'speed')],
+  Host&&Host.platform==='ios'?['Call summary',()=>OnOff('Summary after call',c,'summary')]:null,
+  ['Voice mailbox number',()=>push(Editor({mode:'phone',title:'Voice mailbox',label:'Voice mailbox number:',text:S.vmail,done(t){S.vmail=t;save();pop();note('Saved')}}))]]) }
 function PhoneMenu(){ const p=S.phone; menu('Phone',[
-  ['Language settings',()=>menu('Language settings',[['Phone language',()=>Radio('Phone language',[['auto','Automatic'],['en','English']],()=>p.lang,v=>p.lang=v)],['Writing language',()=>Radio('Writing language',[['English','English']],()=>p.wlang,v=>p.wlang=v)]])],
-  ['Memory status',()=>{ let used=0; try{used=(localStorage.getItem('larchK7')||'').length}catch(e){} const kb=Math.round(used/1024); Info('Memory status',`<p><span class="lbl">Free memory</span>${Math.max(0,4800-kb)} kB</p><p><span class="lbl">Used memory</span>${kb} kB</p><p><span class="lbl">Contacts</span>${S.contacts.length}</p><p><span class="lbl">Messages</span>${S.msgs.inbox.length+S.msgs.sent.length+S.msgs.drafts.length+S.msgs.saved.length}</p><p><span class="lbl">Images</span>${S.images.length}</p><p><span class="lbl">Applications</span>${S.jars.length}</p>`) }],
+  ['Memory status',()=>MemoryStatus()],
   ['Automatic keyguard',()=>Radio('Automatic keyguard',[[true,'On'],[false,'Off']],()=>p.akg.on,v=>{p.akg.on=v},{after:v=>{ if(v) DigitInput('Delay','##:##',pad2(Math.floor(p.akg.sec/60))+pad2(p.akg.sec%60),s=>{ const sec=+s.slice(0,2)*60+ +s.slice(2); if(sec<10) return false; p.akg.sec=sec; save(); pop(); note('Saved') },{hint:'mm:ss',bad:'Minimum 00:10'}) }})],
   ['Security keyguard',()=>askCode(()=>OnOff('Security keyguard',p,'seckg'))],
   ['Welcome note',()=>push(Editor({mode:'text',title:'Welcome note',text:p.welcome,max:40,done(t){p.welcome=t;save();pop();note('Saved')}}))],
   ['Flight query',()=>OnOff('Flight query',p,'flightQ')],
-  ['Phone updates',()=>Info('Phone updates',`<p><span class="lbl">Larch K7 version</span>${esc(window.LARCH_VERSION||'—')}</p><p><span class="lbl">Running on</span>${Host&&Host.platform==='ios'?'iPhone app':Host&&Host.platform==='mac'?'Mac app':'Web browser'}</p><p>New versions are on the download website.</p>`)],
+  ['Phone updates',()=>checkUpdates()],
   ['Help text activation',()=>OnOff('Help text activation',p,'help')],['Start-up tone',()=>OnOff('Start-up tone',p,'startTone')]]) }
-function EnhMenu(){ menu('Enhancements',[['Headset',()=>menu('Headset',[['Default profile',()=>Radio('Default profile',PROF_ORDER.map(id=>[id,S.profiles[id].name]),()=>S.profile,()=>{})],['Automatic answer',()=>note('Connect a compatible headset','info')]])],['Charger',()=>note('Charging','info')]]) }
-function ConfigMenu(){ menu('Configuration',[['Default configuration settings',()=>Radio('Default configuration',[['operator','Default'],['personal','Personal']],()=>S.cfg,v=>S.cfg=v)],['Activate default in all applications',()=>note('Default settings activated')],
-  ['Preferred access point',()=>Radio('Access point',[['Internet','Internet'],['WAP','WAP services']],()=>S.apn,v=>S.apn=v)],['Connect to service provider support',()=>note('Network service not available','info')],['Personal configuration settings',()=>note('No personal settings','info')]]) }
+const bytes=n=>n>=1e9?(n/1e9).toFixed(1)+' GB':n>=1e6?(n/1e6).toFixed(1)+' MB':(n?Math.max(1,Math.round(n/1024)):0)+' kB';
+async function MemoryStatus(){ const apps=S.jars.reduce((a,j)=>a+(j.size||0),0), mus=S.music.reduce((a,m)=>a+(m.size||0),0); let free=null;
+  try{ if(Host&&Host.storage){ const r=await Host.storage(); if(r&&r.free!=null) free=r.free } else if(navigator.storage&&navigator.storage.estimate){ const e=await navigator.storage.estimate(); if(e&&e.quota) free=e.quota-(e.usage||0) } }catch(e){}
+  const msgs=S.msgs.inbox.length+S.msgs.sent.length+S.msgs.drafts.length+S.msgs.saved.length;
+  Info('Memory status',`${free!=null?`<p><span class="lbl">Free memory</span>${bytes(free)}</p>`:''}<p><span class="lbl">Applications</span>${S.jars.length} · ${bytes(apps)}</p><p><span class="lbl">Music files</span>${S.music.length} · ${bytes(mus)}</p><p><span class="lbl">Images</span>${S.images.length}</p><p><span class="lbl">Contacts</span>${S.contacts.length}</p><p><span class="lbl">Messages</span>${msgs}</p><p><span class="lbl">Notes</span>${S.notes.length+S.cal.length+S.todo.length}</p>`) }
+const SITE_URL='https://harkhowalia-1.github.io/larch-k7/';
+const verCmp=(a,b)=>{ const x=String(a).split('.').map(Number), y=String(b).split('.').map(Number); for(let i=0;i<3;i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d } return 0 };
+async function checkUpdates(){ const cur=String(window.LARCH_VERSION||''); const where=Host&&Host.platform==='ios'?'iPhone app':Host&&Host.platform==='mac'?'Mac app':'Web browser';
+  const show=(latest,msg,dl)=>Info('Phone updates',`<p><span class="lbl">This phone</span>${esc(cur||'—')} · ${where}</p>${latest?`<p><span class="lbl">Latest version</span>${esc(latest)}</p>`:''}<p>${msg}</p>`,dl?{L:{t:'Download',f:()=>{pop();openExternal(SITE_URL)}}}:{});
+  if(!dev.online){ show('','Connect to the internet to check for a new version.'); return }
+  note('Checking for updates','wait',20000);
+  try{ const r=await fetch('https://api.github.com/repos/harkhowalia-1/larch-k7/releases/latest',{headers:{Accept:'application/vnd.github+json'}}); if(!r.ok) throw new Error(r.status); const j=await r.json(); const latest=String(j.tag_name||'').replace(/^v/,''); endNote();
+    if(!latest) throw new Error('none'); const newer=cur&&/^\d/.test(cur)?verCmp(latest,cur)>0:false;
+    show(latest,newer?'A new version is available. Press Download.':'This phone is up to date.',newer) }
+  catch(e){ endNote(); show('','Could not reach the update server. Try again later.') } }
 function SecurityMenu(){ const s=S.sec; menu('Security',[
   ['PIN code request',()=>askPin(()=>Radio('PIN code request',[[true,'On'],[false,'Off']],()=>s.pinReq,v=>s.pinReq=v))],
-  ['Call barring service',()=>menu('Call barring',['Outgoing calls','International calls','Incoming calls','Incoming calls when abroad','Cancel all barrings'].map(t=>[t,()=>menu(t,[['Activate',netNote],['Cancel',netNote],['Check status',netNote]],{nums:false})]))],
-  ['Fixed dialling',()=>note('Not supported by SIM card','info')],['Closed user group',()=>Radio('Closed user group',[['default','Default'],['on','On'],['off','Off']],()=>s.cug,v=>s.cug=v)],
-  ['Security level',()=>askCode(()=>Radio('Security level',[['none','None'],['memory','Memory']],()=>s.level,v=>s.level=v))],
-  ['Access codes',()=>menu('Access codes',[['Change security code',()=>changeCode('code','security code',5)],['Change PIN code',()=>changeCode('pin','PIN code',4)],['Change PIN2 code',()=>changeCode('pin2','PIN2 code',4)],['Change barring password',netNote]])],
-  ['Code in use',()=>Radio('Code in use',[['pin','PIN'],['upin','UPIN']],()=>s.inuse,v=>s.inuse=v)],
-  ['Authority certificates',()=>push(List('Authority certificates',[],{empty:'No certificates'}))],['User certificates',()=>push(List('User certificates',[],{empty:'No certificates'}))]]) }
+  ['Access codes',()=>menu('Access codes',[['Change security code',()=>changeCode('code','security code',5)],['Change PIN code',()=>changeCode('pin','PIN code',4)]])]]) }
 function askPin(ok){ push(Editor({mode:'pass',title:'PIN code',label:'Enter PIN code:',max:8,done(t){ pop(); if(t===S.sec.pin) ok(); else note('Wrong PIN code','warn') }})) }
 function changeCode(key,label,min){ push(Editor({mode:'pass',title:label,label:'Current '+label+':',max:10,done(t){ pop(); if(t!==S.sec[key]){ note('Wrong code','warn'); return }
   push(Editor({mode:'pass',title:label,label:'New '+label+':',max:10,min,done(n){ pop(); push(Editor({mode:'pass',title:label,label:'Verify '+label+':',max:10,done(m){ pop(); if(m!==n){ note('Codes do not match','warn'); return } S.sec[key]=n; save(); note('Code changed') }})) }})) }})) }
@@ -1167,8 +1168,8 @@ function factory(all){ const keep=all?{}:{contacts:S.contacts,msgs:S.msgs,logs:S
 
 /* ---------------- gallery & media ---------------- */
 function GalleryMenu(){ const lib=!!(Host&&Host.library);
-  menu('Gallery',[['Images',()=>lib?LibraryGrid('image'):Images(false),'folder'],['Video clips',()=>lib?LibraryGrid('video'):push(List('Video clips',[],{empty:'No video clips'})),'folder'],['Music files',()=>Tracks(),'folder'],['Themes',()=>SelectTheme(),'folder'],
-    ['Graphics',()=>Images(false,!lib?true:false),'folder'],['Tones',()=>Tones(),'folder'],['Recordings',()=>RecordingsList(),'folder'],['Received files',()=>Received(),'folder']]) }
+  menu('Gallery',[['Images',()=>lib?LibraryGrid('image'):Images(false),'folder'],lib?['Video clips',()=>LibraryGrid('video'),'folder']:null,['Music files',()=>Tracks(),'folder'],['Themes',()=>SelectTheme(),'folder'],
+    ['Graphics',()=>Images(false,!lib?true:false),'folder'],['Tones',()=>Tones(),'folder'],['Recordings',()=>RecordingsList(),'folder']]) }
 /* ---- the device's own photo library, shown as the phone's Gallery */
 const mmss=s=>{ s=Math.max(0,Math.round(s||0)); return Math.floor(s/60)+':'+pad2(s%60) };
 function LibraryGrid(kind){ const v={name:'grid',kind,items:[],total:null,i:0,top:0,loading:false,err:'',
@@ -1226,7 +1227,7 @@ function takePhoto(){ photoCb=im=>{ if(im) Info('Camera','<p>Photo saved to Gall
   if(Host&&Host.camera){ Host.camera().then(p=>storePhotos(p?[p]:[])).catch(()=>note('Camera not available','warn')); return } try{ $('#cin').click() }catch(e){} }
 async function storePhotos(list){ let last=null; for(const p of list){ const d=await shrink(p.data,IMGW(),IMGH(),.82); if(!d) continue; last={id:'i:'+uid(),n:p.name||('Photo '+fmtDate(now())),data:d}; S.images.push(last) }
   save(); if(S.on&&V.length) render(); const cb=photoCb; photoCb=null; if(cb) cb(last); else if(last) note(list.length>1?list.length+' images added':'Image added') }
-function imgOptions(im){ menu('Options',[['Set as wallpaper',()=>{S.wall={on:true,id:im.id};save();pop();note('Wallpaper set')}],['Details',()=>{pop();Info('Details',`<p><span class="lbl">Name</span>${esc(im.n)}</p><p><span class="lbl">Format</span>${im.builtin?'Built-in':'Imported image'}</p><p><span class="lbl">Resolution</span>240x320</p>`)}],
+function imgOptions(im){ menu('Options',[['Set as wallpaper',()=>{S.wall={on:true,id:im.id};save();pop();note('Wallpaper set')}],['Details',()=>{pop(); const x=new Image(); const show=r=>Info('Details',`<p><span class="lbl">Name</span>${esc(im.n)}</p><p><span class="lbl">Format</span>${im.builtin?'Built-in':'Imported image'}</p>${r?`<p><span class="lbl">Resolution</span>${r}</p>`:''}`); x.onload=()=>show(x.naturalWidth+'x'+x.naturalHeight); x.onerror=()=>show(''); if(im.src) x.src=im.src; else show('') }],
   !im.builtin?['Rename',()=>{pop();push(Editor({mode:'text',noPred:true,title:'Rename',text:im.n,done(t){ const x=S.images.find(y=>y.id===im.id); if(x&&t.trim()) x.n=t.trim(); save(); pop(); note('Saved') }}))}]:null,
   !im.builtin?['Delete',()=>{pop();Ask('Delete image?',()=>{S.images=S.images.filter(y=>y.id!==im.id); if(S.wall.id===im.id) S.wall.id='w:dawn'; save(); note('Deleted') })}]:null],{nums:false}) }
 function ImageView(list,i){ push({name:'imgview',hdText(){ return list[i]?list[i].t:'' },hdRight(){ return `${i+1}/${list.length}` },
@@ -1238,9 +1239,7 @@ function Tones(){ let h=null; const stop=()=>{h&&h.stop();h=null};
     M:it=>({t:'Play',f:()=>{stop();h=playSeq(it.msg?MSGT[it.n]:RING[it.n],{vol:volG(Math.max(2,prof().vol))})}}),
     L:it=>({t:'Options',f:()=>menu('Options',[it.msg?['Set as message tone',()=>{prof().msg=it.n;save();pop();note('Message tone set')}]:['Set as ring tone',()=>{prof().tone=it.n;save();pop();note('Ringing tone set')}]],{nums:false})}),
     R:()=>({t:'Back',f:()=>{stop();pop()}}) })) }
-function Received(){ const items=S.images.map(i=>({t:i.n,ic:`<img src="${i.data}" alt="">`})).concat(S.jars.map(j=>({t:j.name,ic:j.icon?`<img src="${j.icon}" alt="">`:ico('java')}))).concat(S.themes.map(t=>({t:t.n,ic:ico('theme')})));
-  push(List('Received files',items,{empty:'Folder empty',M:()=>({t:''})})) }
-function MediaMenu(){ menu('Media',[['Camera',()=>CameraApp('photo')],['Video',()=>CameraApp('video')],['Music player',()=>MusicPlayer()],['Radio',()=>radio()],['Recorder',()=>Recorder()],
+function MediaMenu(){ menu('Media',[['Camera',()=>CameraApp('photo')],['Video',()=>CameraApp('video')],['Music player',()=>MusicPlayer()],['Radio',()=>RadioApp()],['Recorder',()=>Recorder()],
   ['Equaliser',()=>Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})]]) }
 /* ---- camera: live viewfinder on the phone's screen; pictures go to the device's Photos */
 function shutter(){ beep([2200,1100],.05,.07,'square'); setTimeout(()=>beep([1500],.04,.05,'square'),60) }
@@ -1320,24 +1319,92 @@ function RecPlayer(r){ const a=new Audio(); let url=null; const v={name:'recplay
   a.onended=()=>{ v.playing=false; if(tv()===v) render() };
   push(v); Rec.url(r).then(u=>{ url=u; a.src=u; return a.play() }).then(()=>{ v.playing=true; if(tv()===v) render() }).catch(()=>note('Could not play the recording','warn')) }
 
-function radio(){ note('FM radio is not available on this device','info',1800) }
-/* music player (tracks live for this session) */
-const music={tracks:[],cur:null,el:new Audio(),playing:false,vol:6,
+/* ---- radio: internet stations from the public radio-browser.info directory */
+const rr=()=>{ if(S.on&&V.length) render() };
+function hostAudio(on){ if(Host&&Host.audioSession) Host.audioSession(!!on).catch(()=>{}) }
+const RB_HOSTS=['de1.api.radio-browser.info','nl1.api.radio-browser.info','at1.api.radio-browser.info','de2.api.radio-browser.info','fi1.api.radio-browser.info'];
+let rbHost=null;
+async function rbGet(path){ const list=rbHost?[rbHost].concat(RB_HOSTS.filter(h=>h!==rbHost)):RB_HOSTS; let err=null;
+  for(const h of list){ try{ const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),8000); const r=await fetch('https://'+h+path,{signal:ctl.signal}); clearTimeout(t); if(r.ok){ rbHost=h; return await r.json() } err=new Error('http '+r.status) }catch(e){ err=e } }
+  throw err||new Error('radio directory') }
+const rbStation=x=>({id:x.stationuuid,name:String(x.name||'').trim()||'Station',url:x.url_resolved||x.url,country:x.countrycode||x.country||'',tags:String(x.tags||'').split(',').filter(Boolean).slice(0,2).join(', '),br:x.bitrate||0,codec:x.codec||''});
+const radioP={el:new Audio(),cur:null,playing:false,loading:false,vol:7,err:'',
+  play(st){ if(st) this.cur=st; if(!this.cur) return; if(!dev.online){ note('No network connection','warn'); return } if(S.profile==='flight'){ note('Flight profile is active','warn'); return }
+    if(music.playing) music.pause(); this.err=''; this.loading=true; this.playing=false; this.el.src=this.cur.url; this.el.volume=this.vol/10; S.radio.last=this.cur; save(); rr();
+    const st0=this.cur; this.el.play().then(()=>{ if(this.cur!==st0) return; this.playing=true; this.loading=false; hostAudio(true); rr() }).catch(()=>{ if(this.cur!==st0) return; this.loading=false; this.playing=false; this.err='Station not available'; rr() });
+    if(this.cur.id) rbGet('/json/url/'+encodeURIComponent(this.cur.id)).catch(()=>{}) },
+  stop(){ const was=this.playing||this.loading; this.el.pause(); this.el.removeAttribute('src'); try{ this.el.load() }catch(e){} this.playing=false; this.loading=false; if(was&&!music.playing) hostAudio(false); rr() },
+  setVol(v){ this.vol=Math.max(0,Math.min(10,v)); this.el.volume=this.vol/10; rr() } };
+radioP.el.addEventListener('error',()=>{ if(radioP.el.getAttribute('src')&&(radioP.loading||radioP.playing)){ radioP.playing=false; radioP.loading=false; radioP.err='Station not available'; rr() } });
+radioP.el.addEventListener('waiting',()=>{ if(radioP.playing){ radioP.loading=true; rr() } });
+radioP.el.addEventListener('playing',()=>{ if(radioP.el.getAttribute('src')){ radioP.loading=false; radioP.playing=true; rr() } });
+const chIndex=()=>radioP.cur?S.radio.ch.findIndex(c=>c.id===radioP.cur.id):-1;
+function RadioApp(){ if(!radioP.cur) radioP.cur=S.radio.last||S.radio.ch[0]||null;
+  const bars=Array.from({length:18},(_,i)=>`<i style="animation-delay:-${(i*.37%1.1).toFixed(2)}s;animation-duration:${(.55+(i*7%5)*.12).toFixed(2)}s"></i>`).join('');
+  push({name:'radio',title:'Radio',
+    hdRight(){ const i=chIndex(); return i>=0?`${i+1}/${S.radio.ch.length}`:'' },
+    draw(el){ const c=radioP.cur;
+      el.innerHTML=c?`<div class="rad${radioP.playing&&!radioP.loading?' play':''}"><div class="rdial">${bars}</div><div class="ti">${esc(c.name)}</div><div class="st">${esc([c.country,c.tags].filter(Boolean).join(' · '))}</div><div class="tm">${radioP.loading?'Connecting…':radioP.playing?'Playing'+(c.br?' · '+c.br+' kbit/s':''):esc(radioP.err||'Stopped')} · Vol ${radioP.vol}</div>${S.radio.ch.length?`<div class="tm">◂ ▸ channels · 1–9 saved channels</div>`:''}</div>`
+        :`<div class="empty">No station selected.<br>Press Find to choose an internet radio station.</div>` },
+    soft(){ const on=radioP.playing||radioP.loading; return [{t:'Options',f:()=>RadioOptions()},{t:radioP.cur?(on?'Stop':'Play'):'Find',f:()=>{ if(!radioP.cur) return RadioFind(); if(on) radioP.stop(); else radioP.play() }},{t:'Back',f:pop}] },
+    key(k){ if(k==='LT'||k==='RT'){ const n=S.radio.ch.length; if(n){ const i=chIndex(); radioP.play(S.radio.ch[i<0?0:(i+(k==='RT'?1:-1)+n)%n]) } return true }
+      if(k==='U'||k==='VUP'){ radioP.setVol(radioP.vol+1); return true } if(k==='D'||k==='VDN'){ radioP.setVol(radioP.vol-1); return true }
+      if(/^[1-9]$/.test(k)){ const c=S.radio.ch[+k-1]; if(c) radioP.play(c); return true } return false } }) }
+function RadioOptions(){ const c=radioP.cur, saved=chIndex()>=0;
+  menu('Options',[['Find stations',()=>{pop();RadioFind()}],['Channels',()=>{pop();RadioChannels()}],
+    c&&!saved?['Save channel',()=>{ if(S.radio.ch.length>=20){ note('Channel list full (20)','warn'); return } S.radio.ch.push(c); save(); pop(); note('Channel saved') }]:null,
+    c&&saved?['Delete channel',()=>{ S.radio.ch=S.radio.ch.filter(x=>x.id!==c.id); save(); pop(); note('Deleted') }]:null,
+    radioP.playing||radioP.loading?['Stop radio',()=>{pop();radioP.stop()}]:null],{nums:false}) }
+function RadioFind(){ const cc=((navigator.language||'').split('-')[1]||'').toUpperCase();
+  menu('Find stations',[['Search by name',()=>push(Editor({mode:'text',noPred:true,title:'Find stations',label:'Station name:',done(t){ pop(); t=t.trim(); if(t) RadioResults('“'+t+'”','name='+encodeURIComponent(t)) }}))],
+    ['Search by genre',()=>push(Editor({mode:'text',noPred:true,lower:true,title:'Find stations',label:'Genre (for example jazz, news, pop):',done(t){ pop(); t=t.trim(); if(t) RadioResults(t,'tag='+encodeURIComponent(t)) }}))],
+    /^[A-Z]{2}$/.test(cc)?['Stations in my country',()=>RadioResults('Country '+cc,'countrycode='+cc)]:null,
+    ['Most popular',()=>RadioResults('Most popular','')]],{nums:false}) }
+async function RadioResults(title,q){ if(!dev.online){ note('No network connection','warn'); return } note('Searching','wait',20000);
+  let list; try{ list=await rbGet('/json/stations/search?'+(q?q+'&':'')+'limit=60&hidebroken=true&is_https=true&order=clickcount&reverse=true') }catch(e){ endNote(); note('The station directory is not reachable','warn',2200); return }
+  endNote(); const seen=new Set(); const st=(list||[]).map(rbStation).filter(x=>x.url&&/^https:/i.test(x.url)&&!seen.has(x.name.toLowerCase())&&seen.add(x.name.toLowerCase()));
+  push(List(title,()=>st.map(x=>({t:x.name,s:[x.country,x.tags,x.br?x.br+' kbit/s':''].filter(Boolean).join(' · '),x,ic:ico('note')})),{two:true,empty:'No stations found',
+    M:it=>({t:'Listen',f:()=>radioListen(it.x)}),
+    L:it=>it?{t:'Options',f:()=>menu('Options',[['Listen',()=>{pop();radioListen(it.x)}],S.radio.ch.some(c=>c.id===it.x.id)?null:['Save channel',()=>{ if(S.radio.ch.length>=20){ note('Channel list full (20)','warn'); return } S.radio.ch.push(it.x); save(); pop(); note('Channel saved') }]],{nums:false})}:{t:''} })) }
+function radioListen(x){ radioP.play(x); if(V.some(v=>v.name==='radio')) popTo('radio'); else RadioApp() }
+function RadioChannels(){ push(List('Channels',()=>S.radio.ch.map((x,i)=>({t:(i+1)+'. '+x.name,s:[x.country,x.tags].filter(Boolean).join(' · '),x,ic:ico('note')})),{two:true,empty:'No saved channels. Use Find stations, then Save channel.',
+  M:it=>({t:'Listen',f:()=>radioListen(it.x)}),
+  L:it=>it?{t:'Options',f:()=>menu('Options',[['Listen',()=>{pop();radioListen(it.x)}],['Rename',()=>{pop();push(Editor({mode:'text',noPred:true,title:'Rename',text:it.x.name,max:30,done(t){ if(t.trim()) it.x.name=t.trim(); save(); pop(); note('Saved') }}))}],
+    ['Move up',()=>{ const a=S.radio.ch, i=a.indexOf(it.x); if(i>0){ a.splice(i,1); a.splice(i-1,0,it.x); save() } pop() }],['Delete',()=>{pop();Ask('Delete '+it.x.name+'?',()=>{ S.radio.ch=S.radio.ch.filter(y=>y!==it.x); save(); note('Deleted') })}]],{nums:false})}:{t:''} })) }
+
+/* music player: music files are stored on the phone (IndexedDB in a browser, app storage in the apps) */
+const music={get tracks(){ return S.music },cur:null,url:null,el:new Audio(),playing:false,vol:6,
   applyEq(){ const a=ac(); if(!a) return; if(!this.node){ try{ this.node=a.createMediaElementSource(this.el); this.lo=a.createBiquadFilter(); this.lo.type='lowshelf'; this.lo.frequency.value=200; this.mid=a.createBiquadFilter(); this.mid.type='peaking'; this.mid.frequency.value=1200; this.mid.Q.value=.9; this.hi=a.createBiquadFilter(); this.hi.type='highshelf'; this.hi.frequency.value=4000; this.node.connect(this.lo).connect(this.mid).connect(this.hi).connect(a.destination) }catch(e){ return } }
     const g={Normal:[0,0,0],Pop:[2,3,2],Rock:[5,-1,4],Jazz:[3,1,2],Classic:[3,0,3],'Bass boost':[8,0,0]}[S.eq]||[0,0,0]; this.lo.gain.value=g[0]; this.mid.gain.value=g[1]; this.hi.gain.value=g[2] },
-  play(t){ if(t){ this.cur=t; this.el.src=t.url } if(!this.cur) return; this.applyEq(); this.el.volume=this.vol/10; this.el.play().then(()=>{this.playing=true;render()}).catch(()=>{}) },
-  pause(){ this.el.pause(); this.playing=false; render() },
-  step(d){ if(!this.tracks.length) return; const i=this.tracks.indexOf(this.cur); this.play(this.tracks[(i+d+this.tracks.length)%this.tracks.length]) } };
-music.el.addEventListener('ended',()=>{ music.playing=false; music.step(1) });
-function Tracks(){ push(List('Music files',()=>music.tracks.map(t=>({t:t.name,tr:t,ic:ico('note')})),{empty:'No music files. Add audio in Settings › Emulator › Add files.',M:it=>({t:'Play',f:()=>{music.play(it.tr);MusicPlayer()}})})) }
+  async play(t){ if(t&&(!this.cur||t.id!==this.cur.id||!this.url)){ let buf=null; try{ buf=await Blobs.get('mus:'+t.id) }catch(e){}
+      if(!buf){ note('This music file is missing. Add it again.','warn',2200); return }
+      if(this.url) URL.revokeObjectURL(this.url); this.cur=t; this.url=URL.createObjectURL(new Blob([buf],{type:t.type||'audio/mpeg'})); this.el.src=this.url }
+    if(!this.cur) return; if(radioP.playing||radioP.loading) radioP.stop(); this.applyEq(); this.el.volume=this.vol/10;
+    this.el.play().then(()=>{ this.playing=true; hostAudio(true); rr() }).catch(()=>note('Could not play this music file','warn')) },
+  pause(){ this.el.pause(); if(this.playing){ this.playing=false; if(!radioP.playing) hostAudio(false) } rr() },
+  stop(){ this.pause(); try{ this.el.currentTime=0 }catch(e){} },
+  forget(id){ if(this.cur&&this.cur.id===id){ this.stop(); if(this.url) URL.revokeObjectURL(this.url); this.url=null; this.cur=null; this.el.removeAttribute('src') } },
+  step(d){ const a=S.music; if(!a.length) return; const i=this.cur?a.findIndex(x=>x.id===this.cur.id):-1; this.play(a[(i+d+a.length)%a.length]) } };
+music.el.addEventListener('ended',()=>{ music.playing=false; if(S.music.length>1) music.step(1); else { if(!radioP.playing) hostAudio(false); rr() } });
+const MUSIC_RE=/\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|mp4a)$/i;
+async function saveMusic(f){ const id=uid(); await Blobs.put('mus:'+id,await f.arrayBuffer()); S.music.push({id,name:f.name.replace(/\.[^.]+$/,''),size:f.size,type:f.type||'',added:Date.now()}); save() }
+function pickMusic(){ try{ $('#mus').click() }catch(e){ note('Could not open files','warn') } }
+$('#mus').addEventListener('change',async e=>{ const files=[...e.target.files]; e.target.value=''; if(!files.length) return; note('Saving','wait',120000); let ok=0;
+  for(const f of files){ try{ await saveMusic(f); ok++ }catch(err){} } endNote(); rr(); note(ok===files.length?(ok>1?ok+' music files added':'Music file added'):ok+' of '+files.length+' music files added',ok?'ok':'warn',1800) });
+function Tracks(){ push(List('Music files',()=>S.music.map(t=>({t:t.name,s:bytes(t.size),tr:t,ic:ico('note'),on:music.cur&&music.cur.id===t.id})),{name:'tracks',two:true,empty:'No music files. Press Add to choose audio files.',Mempty:{t:'Add',f:()=>pickMusic()},
+  M:it=>({t:'Play',f:()=>{music.play(it.tr);MusicPlayer()}}),
+  L:it=>it?{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();music.play(it.tr);MusicPlayer()}],['Add music',()=>{pop();pickMusic()}],
+    ['Rename',()=>{pop();push(Editor({mode:'text',noPred:true,title:'Rename',text:it.tr.name,done(t){ if(t.trim()) it.tr.name=t.trim(); save(); pop(); note('Saved') }}))}],
+    ['Details',()=>{pop();Info('Details',`<p><b>${esc(it.tr.name)}</b></p><p><span class="lbl">Size</span>${bytes(it.tr.size)}</p><p><span class="lbl">Format</span>${esc(it.tr.type||'Audio')}</p><p><span class="lbl">Added</span>${esc(fmtStamp(it.tr.added||Date.now()))}</p>`)}],
+    ['Delete',()=>{pop();Ask('Delete '+it.tr.name+'?',()=>{ music.forget(it.tr.id); Blobs.del('mus:'+it.tr.id); S.music=S.music.filter(x=>x!==it.tr); save(); note('Deleted') })}]],{nums:false})}:{t:'Add',f:()=>pickMusic()} })) }
 function MusicPlayer(){ push({name:'music',title:'Music player',
   draw(el){ const t=music.cur; const e=music.el; const pr=e.duration?e.currentTime/e.duration*100:0;
     el.innerHTML=t?`<div class="mp${music.playing?' play':''}"><div class="disc"></div><div class="ti">${esc(t.name)}</div><div class="pr"><i style="width:${pr}%"></i></div><div class="tm">${fmtDur(e.currentTime||0).slice(3)} / ${fmtDur(e.duration||0).slice(3)} · Vol ${music.vol}</div></div>`
-      :`<div class="empty">${music.tracks.length?'Select Play to start':'No music files. Add audio in Settings › Emulator › Add files.'}</div>` },
-  tick(){ render() },
-  soft(){ return [{t:'Options',f:()=>menu('Options',[['Track list',()=>{pop();Tracks()}],['Stop',()=>{music.pause();music.el.currentTime=0;pop()}]],{nums:false})},{t:music.playing?'Pause':'Play',f:()=>{ if(music.playing) music.pause(); else music.play(music.cur||music.tracks[0]) }},{t:'Back',f:pop}] },
+      :`<div class="empty">${S.music.length?'Press Play to start':'No music files.<br>Press Options › Add music.'}</div>` },
+  tick(){ if(music.playing) render() },
+  soft(){ return [{t:'Options',f:()=>menu('Options',[['Track list',()=>{pop();Tracks()}],['Add music',()=>{pop();pickMusic()}],music.cur?['Stop',()=>{music.stop();pop()}]:null,['Equaliser',()=>{pop();Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})}]],{nums:false})},
+    {t:music.playing?'Pause':(S.music.length?'Play':''),f:()=>{ if(music.playing) music.pause(); else if(S.music.length) music.play(music.cur||S.music[0]) }},{t:'Back',f:pop}] },
   key(k){ if(k==='LT'){music.step(-1);return true} if(k==='RT'){music.step(1);return true} if(k==='VUP'||k==='U'){music.vol=Math.min(10,music.vol+1);music.el.volume=music.vol/10;render();return true} if(k==='VDN'||k==='D'){music.vol=Math.max(0,music.vol-1);music.el.volume=music.vol/10;render();return true} return false } }) }
-
 /* ---------------- organiser ---------------- */
 function OrganiserMenu(){ menu('Organiser',[['Alarm clock',()=>AlarmMenu()],['Calendar',()=>Calendar()],['To-do list',()=>TodoList()],['Notes',()=>NotesMenu()],['Calculator',()=>Calculator()],['Countdown timer',()=>TimerMenu()],['Stopwatch',()=>Stopwatch()]]) }
 function AlarmMenu(){ const a=S.alarm; push(List('Alarm clock',()=>[
@@ -1409,15 +1476,18 @@ function Stopwatch(){ let t0=0, acc=0, run=false, laps=[], lapStart=0, mode='spl
     tickFast:true }) }
 
 /* ---------------- applications & games ---------------- */
-function AppsMenu(){ menu('Applications',[['Games',()=>menu('Games',[['Snake',()=>SnakeMenu(),'game']].concat(S.jars.filter(j=>j.game).map(j=>[j.name,()=>openJar(j),'java'])),{nums:true})],['Collection',()=>Collection()],
-  ['Install new',()=>pickApps()],['Install from web',()=>installFromWeb()],
-  ['Memory',()=>Info('Memory',`<p><span class="lbl">Installed applications</span>${S.jars.length}</p><p><span class="lbl">Used by applications</span>${kb(S.jars.reduce((a,j)=>a+(j.size||0),0))}</p><p>Applications are stored on this ${Host&&Host.platform==='ios'?'iPhone':Host&&Host.platform==='mac'?'Mac':'browser'} and stay after the phone is switched off.</p>`)]]) }
-function Collection(){ push(List('Collection',()=>S.jars.map(j=>({t:j.name,s:j.vendor||'',j,ic:j.icon?`<img src="${j.icon}" alt="">`:ico('java')})),{name:'coll',two:true,empty:'No applications. Press Install to add a .jar game or app.',Mempty:{t:'Install',f:()=>pickApps()},
-  M:it=>({t:'Open',f:()=>openJar(it.j)}),
-  L:it=>it?{t:'Options',f:()=>menu('Options',[['Open',()=>{pop();openJar(it.j)}],['Delete',()=>{pop();Ask('Delete '+it.j.name+'?',()=>{Blobs.del('jar:'+it.j.id);S.jars=S.jars.filter(x=>x!==it.j);save();note('Application deleted')})}],
-    ['Details',()=>{pop();Info('Details',`<p><b>${esc(it.j.name)}</b></p><p><span class="lbl">Vendor</span>${esc(it.j.vendor||'Unknown')}</p><p><span class="lbl">Version</span>${esc(it.j.ver||'—')}</p><p><span class="lbl">Size</span>${Math.round(it.j.size/1024)} kB</p><p><span class="lbl">Main class</span>${esc(it.j.main||'—')}</p><p><span class="lbl">Profile</span>${esc(it.j.profile||'MIDP-2.0')}</p>`)}],
-    ['Application access',()=>{pop();Radio('Network access',[['ask','Ask every time'],['first','Ask first time only'],['always','Always allowed'],['never','Not allowed']],()=>it.j.net||'ask',v=>it.j.net=v)}],
-    ['Mark as game',()=>{it.j.game=!it.j.game;save();pop();note(it.j.game?'Added to Games':'Removed from Games')}],['Install new',()=>{pop();pickApps()}],['Install from web',()=>{pop();installFromWeb()}]],{nums:false})}:{t:''} })) }
+function appItems(){ return S.jars.slice().sort((a,b)=>(b.added||0)-(a.added||0)).map(j=>({t:j.name,j,ic:j.icon?`<img src="${j.icon}" alt="">`:ico(j.game?'game':'java')}))
+  .concat([{t:'Snake',snake:true,ic:ico('game')},{t:'Install new',act:()=>pickApps(),ic:ico('folder')},{t:'Install from web',act:()=>installFromWeb(),ic:ico('web')},{t:'Memory',act:()=>appMemory(),ic:ico('doc')}]) }
+function appOpen(it){ if(it.j) openJar(it.j); else if(it.snake) SnakeMenu(); else it.act() }
+function AppsMenu(){ push(List('Applications',appItems,{name:'coll',
+  M:it=>({t:it.j?'Open':'Select',f:()=>appOpen(it)}), onSel(it){ appOpen(it) },
+  L:it=>it&&it.j?{t:'Options',f:()=>appOptions(it.j)}:{t:''} })) }
+function appMemory(){ Info('Memory',`<p><span class="lbl">Installed applications</span>${S.jars.length}</p><p><span class="lbl">Used by applications</span>${bytes(S.jars.reduce((a,j)=>a+(j.size||0),0))}</p><p>Applications are stored on this ${Host&&Host.platform==='ios'?'iPhone':Host&&Host.platform==='mac'?'Mac':'browser'} and stay after the phone is switched off.</p>`) }
+function appOptions(j){ menu('Options',[['Open',()=>{pop();openJar(j)}],
+  ['Details',()=>{pop();Info('Details',`<p><b>${esc(j.name)}</b></p><p><span class="lbl">Vendor</span>${esc(j.vendor||'Unknown')}</p><p><span class="lbl">Version</span>${esc(j.ver||'—')}</p><p><span class="lbl">Size</span>${bytes(j.size)}</p><p><span class="lbl">Main class</span>${esc(j.main||'—')}</p><p><span class="lbl">Profile</span>${esc(j.profile||'MIDP-2.0')}</p><p><span class="lbl">Installed</span>${esc(fmtStamp(j.added||Date.now()))}</p>`)}],
+  ['Delete',()=>{pop();Ask('Delete '+j.name+'?',()=>{Blobs.del('jar:'+j.id);S.jars=S.jars.filter(x=>x!==j);save();note('Application deleted')})}],
+  ['Install new',()=>{pop();pickApps()}],['Install from web',()=>{pop();installFromWeb()}]],{nums:false}) }
+function Collection(){ AppsMenu() }
 const J2ME_URL=(()=>{ if(window.LARCH_J2ME_URL) return window.LARCH_J2ME_URL; try{ if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)) return new URL('../j2me/larch.html',location.href).href }catch(e){} return 'https://harkhowalia-1.github.io/larch-k7/j2me/larch.html' })();
 const JVM=$('#jvm'); let jvmFrame=null, jvmApp=null;
 async function openJar(j){
@@ -1462,11 +1532,15 @@ function Snake(){ const W=20,H=21,C=12; let sn,dir,nd,food,score,dead,paused,tim
   reset(); push(v) }
 
 /* ---------------- web ---------------- */
-function WebMenu(){ menu('Web',[['Home',()=>openUrl('start')],['Bookmarks',()=>Bookmarks()],['Download links',()=>menu('Download links',[['Tone downloads',()=>openUrl('start')],['Graphic downloads',()=>openUrl('start')],['Game downloads',()=>openUrl('start')],['Theme downloads',()=>openUrl('start')]])],
-  ['Last web address',()=>S.web.last?openUrl(S.web.last):note('No address','info')],['Service inbox',()=>push(List('Service inbox',[],{empty:'No service messages'}))],
-  ['Settings',()=>menu('Web settings',[['Appearance settings',()=>menu('Appearance',[['Text wrapping',()=>OnOff('Text wrapping',S.web,'wrap')],['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.web,v=>S.fs.web=v)],['Show images',()=>Radio('Show images',[[true,'Yes'],[false,'No']],()=>S.web.img,v=>S.web.img=v)]])],
-    ['Cookies',()=>Radio('Cookies',[[true,'Allow'],[false,'Reject']],()=>S.web.cookies,v=>S.web.cookies=v)],['Download settings',()=>Radio('Automatic saving',[['ask','Ask first'],['auto','Save to Gallery']],()=>S.web.dlsave,v=>S.web.dlsave=v)],['Security settings',()=>push(List('Certificates',[],{empty:'No certificates'}))]])],
-  ['Go to address',()=>goAddress()],['Clear the cache',()=>note('Cache cleared')]]) }
+const webPrefs=()=>({zoom:{small:.68,normal:.8,large:1}[S.fs.web]||.8,cookies:S.web.cookies!==false,images:S.web.img!==false});
+function pushWebPrefs(){ if(Host&&Host.web) Host.web({op:'prefs',...webPrefs()}).catch(()=>{}) }
+function webClear(what){ Host.web({op:'clear',what}).then(()=>note(what==='cookies'?'Cookies deleted':'Cache cleared')).catch(()=>note('Could not clear','warn')) }
+function WebMenu(){ const nat=!!(Host&&Host.web);
+  menu('Web',[['Home',()=>openUrl('start')],['Bookmarks',()=>Bookmarks()],['Last web address',()=>S.web.last?openUrl(S.web.last):note('No address','info')],['Go to address',()=>goAddress()],
+    ['Settings',()=>menu('Web settings',[['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.web,v=>{S.fs.web=v;pushWebPrefs()})],
+      nat?['Show images',()=>Radio('Show images',[[true,'Yes'],[false,'No']],()=>S.web.img!==false,v=>{S.web.img=v;pushWebPrefs()})]:null,
+      nat?['Cookies',()=>Radio('Cookies',[[true,'Allow'],[false,'Reject']],()=>S.web.cookies!==false,v=>{S.web.cookies=v;pushWebPrefs()})]:null])],
+    nat?['Clear the cache',()=>webClear('cache')]:null,nat?['Delete cookies',()=>Ask('Delete all cookies? You will be signed out of websites.',()=>webClear('cookies'))]:null]) }
 function goAddress(){ const cur=V.find(x=>x.name==='webpage'); push(Editor({mode:'text',noPred:true,lower:true,title:'Address',label:'Address:',text:(cur&&cur.st.url)||S.web.last||'http://',done(t){ pop(); t=t.trim(); if(t&&t!=='http://') openUrl(t) }})) }
 function Bookmarks(){ push(List('Bookmarks',()=>S.web.bm.map(b=>({t:b.t,s:b.u,b,ic:ico('web')})),{two:true,empty:'No bookmarks',
   M:it=>({t:'Go to',f:()=>openUrl(it.b.u)}),Mempty:{t:'Add',f:()=>addBm()},
@@ -1478,7 +1552,7 @@ function openUrl(u){ if(S.profile==='flight'){ note('Flight profile is active','
   u=u.trim(); if(!/^[a-z][a-z0-9+.-]*:/i.test(u)) u=/\s/.test(u)||!/\./.test(u)?'https://www.google.com/search?q='+encodeURIComponent(u):'https://'+u.replace(/^\/+/,'');
   S.web.last=u; save();
   const cur=V.find(x=>x.name==='webpage');
-  if(cur){ while(tv()!==cur) pop(); cur.st={title:'',url:u,loading:true,canBack:cur.st.canBack}; if(Host&&Host.web) Host.web({op:'load',url:u}); else webLayerSet(u); render(); return }
+  if(cur){ while(tv()!==cur) pop(); cur.st={title:'',url:u,loading:true,canBack:cur.st.canBack}; if(Host&&Host.web) Host.web({op:'load',url:u,...webPrefs()}); else webLayerSet(u); render(); return }
   push(WebPage(u)) }
 const WEBL=$('#webl'), WEBF=WEBL.querySelector('iframe'); let webShown=false;
 WEBF.addEventListener('load',()=>{ const v=V.find(x=>x.name==='webpage'); if(v&&!(Host&&Host.web)){ v.st.loading=false; if(tv()===v) render() } });
@@ -1486,7 +1560,7 @@ function webLayerSet(u){ if(WEBF.getAttribute('src')!==u) WEBF.setAttribute('src
 function syncOverlays(){ const v=S.on?tv():null; Live.sync();
   JVM.hidden=!(v&&v.name==='java');
   const onWeb=!!(v&&v.name==='webpage');
-  if(Host&&Host.web){ if(onWeb){ const bd=SCR.querySelector('.bd'); if(!bd) return; const r=bd.getBoundingClientRect(); Host.web({op:'show',rect:{x:r.left,y:r.top,w:r.width,h:r.height},url:v.pendingUrl||null}).catch(()=>{}); v.pendingUrl=null; webShown=true }
+  if(Host&&Host.web){ if(onWeb){ const bd=SCR.querySelector('.bd'); if(!bd) return; const r=bd.getBoundingClientRect(); Host.web({op:'show',rect:{x:r.left,y:r.top,w:r.width,h:r.height},url:v.pendingUrl||null,...(v.pendingUrl?webPrefs():{})}).catch(()=>{}); v.pendingUrl=null; webShown=true }
     else if(webShown){ Host.web({op:'hide'}).catch(()=>{}); webShown=false } }
   else WEBL.hidden=!onWeb;
   if(Host&&Host.media){ if(v&&v.media){ const bd=SCR.querySelector('.bd'); if(bd){ const r=bd.getBoundingClientRect(); v.mediaShow({x:r.left,y:r.top,w:r.width,h:r.height}); mediaShown=true } }
@@ -1528,7 +1602,7 @@ function bootTail(){ booting=false; S.on=true; V=[Standby()]; keyLight();
   if(S.phone.flightQ) chain.push(next=>Ask('Activate phone?',()=>{ if(S.profile==='flight') S.profile='general'; save(); next() },()=>{ S.profile='flight'; save(); next() },{title:''}));
   if(S.phone.welcome) chain.push(next=>{ render(); note(S.phone.welcome,'info',1600,next) });
   const run=()=>{ const f=chain.shift(); if(f) f(run); else { home() } }; render(); run() }
-function powerOff(){ clearTimeout(litT); PHONE.classList.remove('lit'); stopRing(); stopRingback(); if(callObj){ clearTimeout(callObj.tm); callObj=null } V.forEach(v=>v.onPop&&v.onPop()); V=[]; S.on=false; save(); music.pause(); locked=false; NOTE.hidden=true; render() }
+function powerOff(){ clearTimeout(litT); PHONE.classList.remove('lit'); stopRing(); stopRingback(); if(callObj){ clearTimeout(callObj.tm); callObj=null } V.forEach(v=>v.onPop&&v.onPop()); V=[]; S.on=false; save(); music.pause(); radioP.stop(); locked=false; NOTE.hidden=true; render() }
 function ScreenSaver(){ let pos=[120,150];
   return {name:'ss',full:true,noSoft:true,
     draw(el){ const d=now(); const deep=S.sleep&&Date.now()-lastActivity>(S.ss.to+120)*1000;
@@ -1561,9 +1635,9 @@ setInterval(()=>{
   if(snoozeAt&&Date.now()>=snoozeAt&&!callObj){ snoozeAt=0; wake(); AlarmView(false); return }
   // calendar reminders
   const today=dkey(d), hm=pad2(d.getHours())+':'+pad2(d.getMinutes());
-  for(const n of S.cal){ if(n.alarm&&!n.fired&&n.date===today&&n.time<=hm&&!callObj){ n.fired=true; save(); wake(); startRing('alarm'); push({name:'remind',full:true,draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico(NOTE_IC[n.type],36)}<div class="t2">${esc(n.type)} · ${esc(n.time)}</div><div style="font-size:18px">${esc(n.subject)}</div></div>` },soft(){ return [{t:'Stop',f:()=>{stopRing();pop()}},{t:''},{t:'Exit',f:()=>{stopRing();pop()}}] },onPop(){stopRing()}}); return } }
+  for(const n of S.cal){ if(n.alarm&&!n.fired&&n.date===today&&n.time<=hm&&!callObj){ n.fired=true; save(); wake(); startRing('ring'); push({name:'remind',full:true,draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico(NOTE_IC[n.type],36)}<div class="t2">${esc(n.type)} · ${esc(n.time)}</div><div style="font-size:18px">${esc(n.subject)}</div></div>` },soft(){ return [{t:'Stop',f:()=>{stopRing();pop()}},{t:''},{t:'Exit',f:()=>{stopRing();pop()}}] },onPop(){stopRing()}}); return } }
   // countdown timer
-  if(S.timer&&Date.now()>=S.timer.end){ const t=S.timer; S.timer=null; save(); wake(); startRing('alarm'); push({name:'timerdone',full:true,draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico('timer',36)}<div class="t1" style="font-size:24px">Timer expired</div><div class="t2">${esc(t.note||'')}</div></div>` },soft(){ return [{t:''},{t:'OK',f:()=>{stopRing();pop()}},{t:''}] },onPop(){stopRing()}}); return }
+  if(S.timer&&Date.now()>=S.timer.end){ const t=S.timer; S.timer=null; save(); wake(); startRing('ring'); push({name:'timerdone',full:true,draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico('timer',36)}<div class="t1" style="font-size:24px">Timer expired</div><div class="t2">${esc(t.note||'')}</div></div>` },soft(){ return [{t:''},{t:'OK',f:()=>{stopRing();pop()}},{t:''}] },onPop(){stopRing()}}); return }
   // idle: backlight, screen saver, keyguard
   const idle=(Date.now()-lastActivity)/1000;
   if(S.phone.akg.on&&!locked&&idle>S.phone.akg.sec&&v&&(v.name==='standby'||v.name==='ss')){ locked=true; if(v.name==='standby') render() }
@@ -1620,23 +1694,27 @@ NOTE.addEventListener('click',()=>endNote());
 
 /* ---------------- Emulator section (Settings › Emulator) ---------------- */
 function EmulatorMenu(){ menu('Emulator',[
-  ['Phone skin',()=>SkinMenu()],
   ['Add files',()=>pickFiles()],
   ['Add photos',()=>addPhotos()],
-  ['Backup',()=>menu('Backup',[['Copy backup',()=>copyBackup()],['Restore backup',()=>restoreView()]])],
+  ['Add music',()=>pickMusic()],
+  ['Install application',()=>pickApps()],
+  ['Backup',()=>menu('Backup',[['Create backup',()=>saveBackup()],['Restore backup',()=>restoreBackup()]])],
+  ['Phone skin',()=>SkinMenu()],
+  ['Keypad light',()=>KeyLightMenu()],
   ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this device'}</p><p><span class="lbl">Connection</span>${!dev.online?'Offline':({wifi:'Wi-Fi',cellular:'Cellular',wired:'Wired'}[dev.net]||'Online')}</p><p><span class="lbl">Signal strength</span>${dev.sig!=null?dev.sig+' of 5 bars':'Not reported by this device'}</p>`)],
   Host&&Host.platform==='ios'?null:['Keyboard shortcuts',()=>Info('Keyboard shortcuts','<p><span class="lbl">Keypad</span>0–9, * and #</p><p><span class="lbl">Navigation key</span>Arrow keys</p><p><span class="lbl">Middle select key</span>Enter</p><p><span class="lbl">Left / right selection keys</span>[ and ]</p><p><span class="lbl">Clear / Back</span>Backspace</p><p><span class="lbl">Call key</span>=</p><p><span class="lbl">End key</span>Esc (hold to switch off or on)</p><p><span class="lbl">Emulator key</span>\\ (backslash), or the three-line key above the screen</p><p><span class="lbl">Text fields</span>Type letters directly, or paste with ⌘V</p>')],
-  ['About',()=>Info('About','<p><b>Larch K7</b></p><p>Series 40–style phone shell.</p><p>Contacts, messages, settings and files are stored on this device.</p>')]
+  ['About',()=>Info('About',`<p><b>Larch K7</b> ${esc(window.LARCH_VERSION||'')}</p><p>Series 40–style phone shell.</p><p>Contacts, messages, settings and files are stored on this device.</p>`)]
 ],{name:'emu'}) }
 
 function pickFiles(){ try{ $('#fin').click() }catch(e){ note('Could not open files','warn') } }
-function copyBackup(){ const txt=JSON.stringify(S); const fail=()=>note('Clipboard not available here','warn',1800);
-  try{ navigator.clipboard.writeText(txt).then(()=>note('Backup copied to clipboard','ok',1800),fail) }catch(e){ fail() } }
-function restoreView(){ push({name:'restore',title:'Restore backup',
-  draw(el){ el.innerHTML='<div class="txt"><p>Paste a backup now.</p><p><span class="lbl">On a Mac</span>Press ⌘V.</p><p>This replaces the contacts, messages, settings and files on this phone.</p></div>' },
-  soft(){ return [{t:''},{t:''},{t:'Back',f:pop}] },
-  onPaste(t){ let o=null; try{ o=JSON.parse(t) }catch(e){} if(!o||typeof o!=='object'||!o.profiles){ note('That text is not a Larch backup','warn'); return }
-    Ask('Replace this phone with the backup?',()=>{ S=deepMerge(clone(DEF),o); S.mig2=true; save(); note('Backup restored','ok',1200,()=>{ powerOff(); setTimeout(powerOn,600) }) }) } }) }
+function backupName(){ const d=now(); return 'Larch K7 backup '+d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'.json' }
+async function saveBackup(){ const txt=JSON.stringify(S), name=backupName();
+  if(Host&&Host.saveFile){ try{ const r=await Host.saveFile(name,txt); if(r) note('Backup saved','ok',1600) }catch(e){ note('The backup was not saved','warn') } return }
+  try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); note('Backup downloaded','ok',1600) }catch(e){ note('The backup was not saved','warn') } }
+function restoreBackup(){ try{ $('#bin').click() }catch(e){ note('Could not open files','warn') } }
+function restoreFrom(t){ let o=null; try{ o=JSON.parse(t) }catch(e){} if(!o||typeof o!=='object'||!o.profiles){ note('That file is not a Larch backup','warn'); return }
+  Ask('Replace this phone with the backup? Contacts, messages, settings and notes are replaced.',()=>{ S=deepMerge(clone(DEF),o); S.mig2=true; save(); note('Backup restored','ok',1200,()=>{ powerOff(); setTimeout(powerOn,600) }) }) }
+$('#bin').addEventListener('change',async e=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return; try{ restoreFrom(await readAs(f,'readAsText')) }catch(err){ note('Could not read the file','warn') } });
 document.addEventListener('paste',e=>{ const v=tv(); if(!S.on||!v||booting) return; const t=(e.clipboardData||window.clipboardData).getData('text'); if(!t) return;
   if(v.onPaste){ e.preventDefault(); v.onPaste(t); return }
   if(v.typeChar){ e.preventDefault(); if(v.ins){ if(v.commit) v.commit(); v.mt=null; v.ins(t.slice(0,2000)); render() } else t.split('').forEach(c=>v.typeChar(c)) } });
@@ -1692,7 +1770,7 @@ function installFromWeb(){ push(Editor({mode:'text',noPred:true,lower:true,title
 
 async function importFile(f){ const n=f.name, ext=n.split('.').pop().toLowerCase();
   if(f.type.startsWith('image/')){ const d=await shrink(await readAs(f,'readAsDataURL'),IMGW(),IMGH(),.82); if(!d) throw 0; S.images.push({id:'i:'+uid(),n:n.replace(/\.[^.]+$/,''),data:d}); save(); return n+' → Gallery' }
-  if(f.type.startsWith('audio/')){ music.tracks.push({name:n.replace(/\.[^.]+$/,''),url:URL.createObjectURL(f)}); return n+' → Music player (until the app closes)' }
+  if(f.type.startsWith('audio/')||MUSIC_RE.test(n)){ await saveMusic(f); return n+' → Music files' }
   if(ext==='jad'){ const t=await readAs(f,'readAsText'); const nm=(t.match(/MIDlet-Name:\s*(.+)/)||[])[1]; return n+': '+(nm?nm.trim()+' needs its .jar file':'needs its .jar file') }
   if(ext==='jar'||ext==='nth'||ext==='zip'){ const z=await unzip(f); const mfn=z.names.find(x=>x.toUpperCase()==='META-INF/MANIFEST.MF');
     if(ext==='jar'||mfn){ const j=await readJar(f,z); await saveJar(j,f); return j.name+' installed' }

@@ -38,6 +38,11 @@ targets:
         NSPhotoLibraryUsageDescription: Larch K7's Gallery shows your photos and videos, and its camera saves pictures to your library.
         NSPhotoLibraryAddUsageDescription: Photos and videos taken with Larch K7's camera are saved to your library.
         NSMicrophoneUsageDescription: Larch K7's Recorder and video camera record sound with the microphone.
+        UIBackgroundModes:
+          - audio
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoadsInWebContent: true
+          NSAllowsArbitraryLoadsForMedia: true
         LSApplicationQueriesSchemes:
           - tel
           - sms
@@ -70,6 +75,9 @@ targets:
         NSMicrophoneUsageDescription: Larch K7's Recorder and video camera record sound with the microphone.
         NSPhotoLibraryUsageDescription: Larch K7's Gallery shows your photos and videos, and its camera saves pictures to your library.
         NSHumanReadableCopyright: Larch K7
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoadsInWebContent: true
+          NSAllowsArbitraryLoadsForMedia: true
     settings:
       base:
         PRODUCT_NAME: Larch K7
