@@ -26,13 +26,13 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
     // MARK: status
 
     func pushStatus() {
-        let online = pathMonitor.currentPath.status == .satisfied
-        var signal = online ? 5 : 0
-        if online, pathMonitor.currentPath.usesInterfaceType(.wifi),
+        let path = pathMonitor.currentPath
+        let online = path.status == .satisfied
+        var parts = ["online:\(online)", "net:'\(BridgeBase.netType(path))'"]
+        if online, path.usesInterfaceType(.wifi),
            let rssi = CWWiFiClient.shared().interface()?.rssiValue(), rssi != 0 {
-            signal = rssi > -55 ? 5 : rssi > -65 ? 4 : rssi > -72 ? 3 : rssi > -80 ? 2 : 1
+            parts.append("sig:\(rssi > -55 ? 5 : rssi > -65 ? 4 : rssi > -72 ? 3 : rssi > -80 ? 2 : 1)")
         }
-        var parts = ["sig:\(signal)", "online:\(online)"]
         if let battery = Self.battery() {
             parts.append("level:\(battery.level)")
             parts.append("charging:\(battery.charging)")

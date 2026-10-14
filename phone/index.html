@@ -180,10 +180,10 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 .sb .icr{position:absolute;left:24px;right:24px;top:6px;display:flex;justify-content:center;gap:5px}
 .sb .icr svg{width:14px;height:14px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
 .sb .op{position:absolute;left:0;right:0;top:34px;text-align:center;font-size:17px;font-weight:500;text-shadow:0 1px 3px rgba(0,0,0,.7)}
-.sb .clk{position:absolute;left:0;right:0;top:62px;text-align:center;font-size:44px;font-weight:300;letter-spacing:-.01em;text-shadow:0 2px 6px rgba(0,0,0,.6);font-variant-numeric:tabular-nums}
+.sb .clk{position:absolute;left:0;right:0;top:40px;text-align:center;font-size:44px;font-weight:300;letter-spacing:-.01em;text-shadow:0 2px 6px rgba(0,0,0,.6);font-variant-numeric:tabular-nums}
 .sb .clk small{font-size:16px;margin-left:3px}
-.sb .dt{position:absolute;left:0;right:0;top:118px;text-align:center;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.7)}
-.sb .pf{position:absolute;left:0;right:0;top:140px;text-align:center;font-size:13px;text-shadow:0 1px 3px rgba(0,0,0,.7);opacity:.95}
+.sb .dt{position:absolute;left:0;right:0;top:96px;text-align:center;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.sb .pf{position:absolute;left:0;right:0;top:118px;text-align:center;font-size:13px;text-shadow:0 1px 3px rgba(0,0,0,.7);opacity:.95}
 .sb .as{position:absolute;left:10px;right:10px;bottom:36px;display:flex;flex-direction:column;gap:4px}
 .sb .as div{display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.38);border-radius:6px;padding:4px 7px;font-size:12px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sb .as svg{width:14px;height:14px;flex:none}
@@ -366,7 +366,7 @@ function syncSchedule(){ if(!Host||!Host.schedule) return; const items=[], off=S
 load();
 if(!S.mig3){ S.mig3=true; if(S.wall&&S.wall.id==='w:dawn') S.wall.id='live:dawn' }
 if(!S.mig2){ S.mig2=true; S.ss.on=false; S.psaver=false; S.sleep=false; save() }
-if(!S.seeded){ S.seeded=true; S.msgs.inbox.push({id:uid(),from:'Larch',text:'Welcome to your Larch K7. Press Menu to explore. Add Java apps, pictures and music in Settings › Emulator › Add files.',t:Date.now(),read:false}); save() }
+if(!S.seeded){ S.seeded=true; if(0) S.msgs.inbox.push({id:uid(),from:'Larch',text:'Welcome to your Larch K7. Press Menu to explore. Add Java apps, pictures and music in Settings › Emulator › Add files.',t:Date.now(),read:false}); save() }
 
 /* ---------------- time ---------------- */
 const now=()=>new Date(Date.now()+S.clock.off);
@@ -808,16 +808,27 @@ const nameFor=num=>{ const c=findContact(num); return c?c.name:num };
 const sortedContacts=()=>S.contacts.slice().sort((a,b)=>a.name.localeCompare(b.name));
 
 /* ---------------- device status (battery and network of the host device) ---------------- */
-const dev={bat:4,level:null,charging:false,sig:5,online:navigator.onLine!==false,src:'browser'};
+// Real values only: sig is set only where real signal strength exists (Mac Wi-Fi),
+// net is the real connection type, and level is null when the device doesn't report a battery.
+const dev={bat:4,level:null,charging:false,sig:null,net:null,online:navigator.onLine!==false,src:'browser'};
 function readNet(){ if(dev.src==='host') return; dev.online=navigator.onLine!==false; const c=navigator.connection||navigator.webkitConnection;
-  if(!dev.online){ dev.sig=0 } else if(c&&c.effectiveType){ const et=c.effectiveType; dev.sig=et==='slow-2g'?1:et==='2g'?2:et==='3g'?3:(c.downlink>=5?5:4); if(c.rtt&&c.rtt>500) dev.sig=Math.min(dev.sig,3) } else dev.sig=5;
+  dev.net=!dev.online?'none':c&&c.type&&c.type!=='unknown'?({wifi:'wifi',cellular:'cellular',ethernet:'wired'}[c.type]||'other'):'other';
   if(S&&S.on&&tv()&&tv().name==='standby') render() }
 addEventListener('online',readNet); addEventListener('offline',readNet);
 try{ const c=navigator.connection; if(c&&c.addEventListener) c.addEventListener('change',readNet) }catch(e){}
 try{ if(navigator.getBattery) navigator.getBattery().then(b=>{ const up=()=>{ if(dev.src==='host') return; dev.level=b.level; dev.charging=b.charging; dev.bat=Math.max(0,Math.min(4,Math.round(b.level*4))); if(S.on&&tv()&&tv().name==='standby') render() };
   up(); b.addEventListener('levelchange',up); b.addEventListener('chargingchange',up) }).catch(()=>{}) }catch(e){}
-// A Mac or iPhone wrapper can push real values: window.LarchStatus({level:0.8,charging:true,sig:4,online:true})
-window.LarchStatus=o=>{ dev.src='host'; if(o.level!=null){ dev.level=o.level; dev.bat=Math.max(0,Math.min(4,Math.round(o.level*4))) } if(o.charging!=null) dev.charging=!!o.charging; if(o.sig!=null) dev.sig=o.sig; if(o.online!=null) dev.online=!!o.online; if(S.on&&tv()&&tv().name==='standby') render() };
+// The Mac and iPhone apps push real values: LarchStatus({level, charging, online, net:'wifi'|'cellular'|'wired'|'other'|'none', sig?})
+window.LarchStatus=o=>{ dev.src='host'; if(o.level!=null){ dev.level=o.level; dev.bat=Math.max(0,Math.min(4,Math.round(o.level*4))) } if(o.charging!=null) dev.charging=!!o.charging;
+  dev.sig=o.sig!=null?o.sig:null; if(o.net) dev.net=o.net; if(o.online!=null) dev.online=!!o.online; if(!dev.online) dev.net='none'; if(S.on&&tv()&&tv().name==='standby') render() };
+function netSVG(){ const fl=S.profile==='flight';
+  if(fl) return `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15.5v-1.8l-7.5-4.7V4a1.5 1.5 0 0 0-3 0v5L3 13.7v1.8l7.5-2.3v4.9L8.6 19.6V21l3.4-1 3.4 1v-1.4l-1.9-1.5v-4.9z"/></svg>`;
+  if(dev.sig!=null&&dev.online) return sigSVG(dev.sig);
+  const n=dev.online?dev.net:'none';
+  if(n==='none') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8.5a15 15 0 0 1 20 0M5.5 12a10 10 0 0 1 13 0M9 15.5a5 5 0 0 1 6 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/><path d="M3 3l18 18"/></svg>`;
+  if(n==='wifi') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8.5a15 15 0 0 1 20 0M5.5 12a10 10 0 0 1 13 0M9 15.5a5 5 0 0 1 6 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></svg>`;
+  if(n==='cellular') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v12M8 5a6 6 0 0 0 0 8M16 5a6 6 0 0 1 0 8M5 2.5a10 10 0 0 0 0 13M19 2.5a10 10 0 0 1 0 13"/><circle cx="12" cy="9" r="1.6" fill="currentColor"/></svg>`;
+  return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/><path d="M3.5 9h17M3.5 15h17"/></svg>` }
 
 /* ---------------- standby ---------------- */
 let locked=false, unlockAt=0, lastActivity=Date.now();
@@ -837,8 +848,7 @@ function Standby(){
     draw(el){ const d=now(); const fl=S.profile==='flight'; const w=S.wall.on?wallSrc(S.wall.id):null;
       if(S.wall.on&&Live.isLive(S.wall.id)){ el.style.background='transparent'; SCR.classList.add('live') } else el.style.background=w?`#000 url(${w}) center/cover`:'var(--tbg)';
       const pf=S.profile!=='general'?`<div class="pf">${esc(prof().name)}${S.timedUntil?' ◷':''}</div>`:'';
-      let h=`<div class="sb"><div class="sig">${sigSVG(fl?0:dev.sig)}</div><div class="icr">${statusIcons()}</div><div class="bat">${batSVG(dev.charging&&dev.bat<4?(dev.bat+(Math.floor(Date.now()/1000)%(5-dev.bat))):dev.bat)}</div>`;
-      if(S.opLogo) h+=`<div class="op">${esc(fl?'Flight':dev.online?S.net:'No network')}</div>`;
+      let h=`<div class="sb"><div class="sig">${netSVG()}</div><div class="icr">${statusIcons()}</div>${dev.level!=null?`<div class="bat">${batSVG(dev.charging&&dev.bat<4?(dev.bat+(Math.floor(Date.now()/1000)%(5-dev.bat))):dev.bat)}</div>`:''}`;
       if(S.clock.show) h+=`<div class="clk">${fmtTimeHTML(d)}</div>`;
       if(S.date.show) h+=`<div class="dt">${DAY[d.getDay()].slice(0,3)} ${fmtDate(d)}</div>`;
       h+=pf;
@@ -1055,8 +1065,6 @@ function SpeedDials(){ push(List('Speed dials',()=>['1','2','3','4','5','6','7',
 function LogMenu(){ menu('Log',[['Missed calls',()=>LogList('Missed calls','missed')],['Received calls',()=>LogList('Received calls','recv')],['Dialled numbers',()=>LogList('Dialled numbers','dialled')],['Message recipients',()=>LogList('Message recipients','msgTo')],
   ['Clear log lists',()=>menu('Clear log lists',[['All',()=>Ask('Clear all log lists?',()=>{S.logs={missed:[],recv:[],dialled:[],msgTo:[]};save();note('Log lists cleared')})],['Missed',()=>{S.logs.missed=[];save();note('Cleared')}],['Received',()=>{S.logs.recv=[];save();note('Cleared')}],['Dialled',()=>{S.logs.dialled=[];save();note('Cleared')}],['Message recipients',()=>{S.logs.msgTo=[];save();note('Cleared')}]])],
   ['Call duration',()=>Info('Call duration',`<p><span class="lbl">Last call</span>${fmtDur(S.dur.last)}</p><p><span class="lbl">Received calls</span>${fmtDur(S.dur.recv)}</p><p><span class="lbl">Dialled calls</span>${fmtDur(S.dur.dialled)}</p><p><span class="lbl">All calls</span>${fmtDur(S.dur.recv+S.dur.dialled)}</p>`,{L:{t:'Clear',f:()=>askCode(()=>{S.dur={last:0,recv:0,dialled:0};save();pop();note('Timers cleared')})}})],
-  ['Packet data counter',()=>Info('Packet data counter',`<p><span class="lbl">Data sent</span>${S.pdata.sent} kB</p><p><span class="lbl">Data received</span>${S.pdata.recv} kB</p>`)],
-  ['Packet data conn. timer',()=>Info('Connection timer',`<p><span class="lbl">Duration of last</span>00:00:00</p><p><span class="lbl">Duration of all</span>00:00:00</p>`)],
   ['Message log',()=>Info('Message log',`<p><span class="lbl">Sent</span>${S.msgCount.sent}</p><p><span class="lbl">Received</span>${S.msgCount.recv}</p>`)]]) }
 function LogList(title,key){ if(key==='missed') { S.logs.missed.forEach(x=>x.seen=true); save() }
   push(List(title,()=>S.logs[key].map(x=>({t:nameFor(x.num),s:fmtStamp(x.t),x,ic:ico(key==='missed'?'missed':key==='recv'?'inc':key==='msgTo'?'msg':'out')})),{two:true,empty:'No numbers',
@@ -1099,8 +1107,7 @@ function DisplayMenu(){ menu('Display',[
   ['Screen saver',()=>menu('Screen saver',[['Screen saver',()=>OnOff('Screen saver',S.ss,'on')],['Screen savers',()=>Radio('Screen savers',[['digital','Digital clock'],['analog','Analogue clock'],['image','Wallpaper image']],()=>S.ss.type,v=>S.ss.type=v)],['Time-out',()=>Radio('Time-out',[[15,'15 seconds'],[30,'30 seconds'],[60,'1 minute'],[120,'2 minutes'],[300,'5 minutes'],[600,'10 minutes']],()=>S.ss.to,v=>S.ss.to=v)]])],
   ['Keypad light',()=>KeyLightMenu()],
   ['Power saver',()=>OnOff('Power saver',S,'psaver')],['Sleep mode',()=>OnOff('Sleep mode',S,'sleep')],
-  ['Font size',()=>menu('Font size',[['Messaging',()=>Radio('Messaging',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.msg,v=>S.fs.msg=v)],['Contacts',()=>Radio('Contacts',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.contacts,v=>S.fs.contacts=v)],['Web pages',()=>Radio('Web pages',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.web,v=>S.fs.web=v)]])],
-  ['Operator logo',()=>Radio('Operator logo',[[true,'Show'],[false,'Hide']],()=>S.opLogo,v=>S.opLogo=v)]]) }
+  ['Font size',()=>menu('Font size',[['Messaging',()=>Radio('Messaging',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.msg,v=>S.fs.msg=v)],['Contacts',()=>Radio('Contacts',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.contacts,v=>S.fs.contacts=v)],['Web pages',()=>Radio('Web pages',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.web,v=>S.fs.web=v)]])]]) }
 function TimeDateMenu(){ menu('Time and date',[
   ['Clock',()=>menu('Clock',[[S.clock.show?'Hide clock':'Show clock',()=>{S.clock.show=!S.clock.show;save();pop();note(S.clock.show?'Clock shown':'Clock hidden')}],
     ['Set the time',()=>{const d=now();TimeEntry('Set the time',d.getHours(),d.getMinutes(),(h,m)=>{const t=now();t.setHours(h,m,0,0);S.clock.off=t.getTime()-Date.now();save();pop();note('Time set')})}],
@@ -1123,7 +1130,7 @@ function SyncMenu(){ menu('Sync and backup',[['Phone switch',()=>{ if(!S.bt.on){
 function btSearch(){ note("Bluetooth is managed in this device's settings",'info',2000) }
 function BtMenu(){ btSearch() }
 function ConnMenu(){ menu('Connectivity',[['Bluetooth',()=>BtMenu()],
-  ['Packet data',()=>menu('Packet data',[['Packet data connection',()=>Radio('Packet data connection',[['needed','When needed'],['always','Always online']],()=>S.packet,v=>S.packet=v)],['Packet data settings',()=>menu('Packet data settings',[['Active access point',()=>Radio('Access point',[['Internet','Internet'],['WAP','WAP services']],()=>S.apn,v=>S.apn=v)]])],['Packet data counter',()=>Info('Packet data counter',`<p><span class="lbl">Data sent</span>${S.pdata.sent} kB</p><p><span class="lbl">Data received</span>${S.pdata.recv} kB</p>`)]])],
+  ['Packet data',()=>menu('Packet data',[['Packet data connection',()=>Radio('Packet data connection',[['needed','When needed'],['always','Always online']],()=>S.packet,v=>S.packet=v)],['Packet data settings',()=>menu('Packet data settings',[['Active access point',()=>Radio('Access point',[['Internet','Internet'],['WAP','WAP services']],()=>S.apn,v=>S.apn=v)]])]])],
   ['USB data cable',()=>Radio('USB data cable',[['ask','Ask on connection'],['pcsuite','PC Suite'],['print','Printing and media'],['storage','Data storage']],()=>S.usb,v=>S.usb=v)]]) }
 const netNote=()=>note('Network service not available','info',1600);
 function CallMenu(){ const c=S.call; menu('Call',[
@@ -1138,10 +1145,10 @@ function PhoneMenu(){ const p=S.phone; menu('Phone',[
   ['Security keyguard',()=>askCode(()=>OnOff('Security keyguard',p,'seckg'))],
   ['Welcome note',()=>push(Editor({mode:'text',title:'Welcome note',text:p.welcome,max:40,done(t){p.welcome=t;save();pop();note('Saved')}}))],
   ['Flight query',()=>OnOff('Flight query',p,'flightQ')],
-  ['Phone updates',()=>Info('Phone updates',`<p><span class="lbl">Current software</span>V 07.21 · Larch K7</p><p><span class="lbl">Shell build</span>${new Date().getFullYear()}.10</p><p>No updates available.</p>`)],
+  ['Phone updates',()=>Info('Phone updates',`<p><span class="lbl">Larch K7 version</span>${esc(window.LARCH_VERSION||'—')}</p><p><span class="lbl">Running on</span>${Host&&Host.platform==='ios'?'iPhone app':Host&&Host.platform==='mac'?'Mac app':'Web browser'}</p><p>New versions are on the download website.</p>`)],
   ['Help text activation',()=>OnOff('Help text activation',p,'help')],['Start-up tone',()=>OnOff('Start-up tone',p,'startTone')]]) }
 function EnhMenu(){ menu('Enhancements',[['Headset',()=>menu('Headset',[['Default profile',()=>Radio('Default profile',PROF_ORDER.map(id=>[id,S.profiles[id].name]),()=>S.profile,()=>{})],['Automatic answer',()=>note('Connect a compatible headset','info')]])],['Charger',()=>note('Charging','info')]]) }
-function ConfigMenu(){ menu('Configuration',[['Default configuration settings',()=>Radio('Default configuration',[['operator',S.net],['personal','Personal']],()=>S.cfg,v=>S.cfg=v)],['Activate default in all applications',()=>note('Default settings activated')],
+function ConfigMenu(){ menu('Configuration',[['Default configuration settings',()=>Radio('Default configuration',[['operator','Default'],['personal','Personal']],()=>S.cfg,v=>S.cfg=v)],['Activate default in all applications',()=>note('Default settings activated')],
   ['Preferred access point',()=>Radio('Access point',[['Internet','Internet'],['WAP','WAP services']],()=>S.apn,v=>S.apn=v)],['Connect to service provider support',()=>note('Network service not available','info')],['Personal configuration settings',()=>note('No personal settings','info')]]) }
 function SecurityMenu(){ const s=S.sec; menu('Security',[
   ['PIN code request',()=>askPin(()=>Radio('PIN code request',[[true,'On'],[false,'Off']],()=>s.pinReq,v=>s.pinReq=v))],
@@ -1616,9 +1623,8 @@ function EmulatorMenu(){ menu('Emulator',[
   ['Phone skin',()=>SkinMenu()],
   ['Add files',()=>pickFiles()],
   ['Add photos',()=>addPhotos()],
-  ['Network name',()=>push(Editor({mode:'text',noPred:true,title:'Network name',label:'Shown on standby:',text:S.net,max:18,done(t){ S.net=t.trim()||'Larch Mobile'; save(); pop(); note('Saved') }}))],
   ['Backup',()=>menu('Backup',[['Copy backup',()=>copyBackup()],['Restore backup',()=>restoreView()]])],
-  ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this browser'}</p><p><span class="lbl">Connection</span>${dev.online?'Online':'Offline'}</p><p><span class="lbl">Signal bars</span>${dev.sig} of 5</p><p><span class="lbl">Source</span>${dev.src==='host'?'This device':'Browser'}</p>`)],
+  ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this device'}</p><p><span class="lbl">Connection</span>${!dev.online?'Offline':({wifi:'Wi-Fi',cellular:'Cellular',wired:'Wired'}[dev.net]||'Online')}</p><p><span class="lbl">Signal strength</span>${dev.sig!=null?dev.sig+' of 5 bars':'Not reported by this device'}</p>`)],
   Host&&Host.platform==='ios'?null:['Keyboard shortcuts',()=>Info('Keyboard shortcuts','<p><span class="lbl">Keypad</span>0–9, * and #</p><p><span class="lbl">Navigation key</span>Arrow keys</p><p><span class="lbl">Middle select key</span>Enter</p><p><span class="lbl">Left / right selection keys</span>[ and ]</p><p><span class="lbl">Clear / Back</span>Backspace</p><p><span class="lbl">Call key</span>=</p><p><span class="lbl">End key</span>Esc (hold to switch off or on)</p><p><span class="lbl">Emulator key</span>\\ (backslash), or the three-line key above the screen</p><p><span class="lbl">Text fields</span>Type letters directly, or paste with ⌘V</p>')],
   ['About',()=>Info('About','<p><b>Larch K7</b></p><p>Series 40–style phone shell.</p><p>Contacts, messages, settings and files are stored on this device.</p>')]
 ],{name:'emu'}) }

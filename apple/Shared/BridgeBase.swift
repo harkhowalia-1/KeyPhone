@@ -2,6 +2,7 @@ import Foundation
 import WebKit
 import Contacts
 import UserNotifications
+import Network
 
 /// Shared part of the bridge between the phone shell (Web/index.html) and the
 /// operating system. The page calls `window.PhoneHost.<name>(...)`, which posts
@@ -297,6 +298,16 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
     private func fileDel(_ id: Int, _ key: String) {
         if let url = Self.fileURL(key) { try? FileManager.default.removeItem(at: url) }
         reply(id, true)
+    }
+
+    // MARK: connection type, as the system reports it
+
+    static func netType(_ path: NWPath) -> String {
+        guard path.status == .satisfied else { return "none" }
+        if path.usesInterfaceType(.wifi) { return "wifi" }
+        if path.usesInterfaceType(.cellular) { return "cellular" }
+        if path.usesInterfaceType(.wiredEthernet) { return "wired" }
+        return "other"
     }
 
     // MARK: downloading applications

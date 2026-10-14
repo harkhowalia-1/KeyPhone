@@ -43,10 +43,14 @@ final class HostBridge: BridgeBase {
 
     @objc func pushStatus() {
         let device = UIDevice.current
-        let level = device.batteryLevel < 0 ? 1.0 : Double(device.batteryLevel)
-        let charging = device.batteryState == .charging || device.batteryState == .full
-        let online = pathMonitor.currentPath.status == .satisfied
-        evaluate("window.LarchStatus&&LarchStatus({level:\(level),charging:\(charging),sig:\(online ? 5 : 0),online:\(online)})")
+        let path = pathMonitor.currentPath
+        var parts = ["online:\(path.status == .satisfied)", "net:'\(BridgeBase.netType(path))'"]
+        if device.batteryLevel >= 0 {
+            parts.append("level:\(Double(device.batteryLevel))")
+            parts.append("charging:\(device.batteryState == .charging || device.batteryState == .full)")
+        }
+        // iOS gives apps no signal strength, so no bars are sent.
+        evaluate("window.LarchStatus&&LarchStatus({\(parts.joined(separator: ","))})")
     }
 
     func appResumed() {

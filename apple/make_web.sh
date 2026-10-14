@@ -9,6 +9,7 @@ mkdir -p Web
   printf '%s\n' '<!doctype html><html lang="en"><head><meta charset="utf-8">'
   printf '%s\n' '<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">'
   printf '%s\n' '<style>html,body{height:100%;margin:0}body{padding:0!important;overflow:hidden}*{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}</style>'
+  printf '<script>window.LARCH_VERSION=%s;</script>\n' "'$(tr -d '[:space:]' < ../VERSION 2>/dev/null || echo dev)'"
   printf '%s\n' '</head><body>'
   cat "$SRC"
   printf '%s\n' '</body></html>'
