@@ -506,10 +506,8 @@ const Live=(()=>{
   const still=matchMedia('(prefers-reduced-motion: reduce)');
   const off=(w,h)=>{ const c=document.createElement('canvas'); c.width=Math.ceil(w*k); c.height=Math.ceil(h*k); const g=c.getContext('2d'); g.setTransform(k,0,0,k,0,0); return [c,g] };
   // a larch: a thin trunk with drooping tiers that narrow toward a sharp top
-  function larch(g,x,base,h,col){ g.fillStyle=col; g.fillRect(x-h*.012,base-h*.15,h*.024,h*.15); const tiers=7;
-    for(let i=0;i<tiers;i++){ const f=i/tiers, y=base-h*.1-f*h*.86, w=h*.22*(1-f*.85), th=h*.2;
-      g.beginPath(); g.moveTo(x,y-th); g.quadraticCurveTo(x-w*.35,y-th*.35,x-w,y+th*.08); g.lineTo(x-w*.55,y-th*.05); g.lineTo(x,y+th*.02); g.lineTo(x+w*.55,y-th*.05); g.lineTo(x+w,y+th*.08); g.quadraticCurveTo(x+w*.35,y-th*.35,x,y-th); g.fill() }
-    g.beginPath(); g.moveTo(x,base-h*1.04); g.lineTo(x-h*.02,base-h*.9); g.lineTo(x+h*.02,base-h*.9); g.fill() }
+  // the original tree shape: a clean narrow triangle, drawn at full resolution
+  function larch(g,x,base,h,col){ g.fillStyle=col; g.beginPath(); g.moveTo(x,base-h); g.lineTo(x-h*.28,base); g.lineTo(x+h*.28,base); g.closePath(); g.fill() }
   function ridge(g,W,base,amp,f,ph,col){ g.fillStyle=col; g.beginPath(); g.moveTo(0,330); for(let x=0;x<=W;x+=3) g.lineTo(x,base+Math.sin(x*f+ph)*amp+Math.sin(x*f*2.7+ph*1.7)*amp*.35); g.lineTo(W,330); g.fill() }
   function forest(W,base,amp,f,ph,col,count,hmin,hmax,seed){ const [c,g]=off(W,330); ridge(g,W,base,amp,f,ph,col); const r=rng(seed);
     for(let i=0;i<count;i++){ const x=r()*W, y=base+Math.sin(x*f+ph)*amp+Math.sin(x*f*2.7+ph*1.7)*amp*.35+4; larch(g,x,y,hmin+r()*(hmax-hmin),col) } return c }
@@ -520,7 +518,7 @@ const Live=(()=>{
 
   const SCENES={
     dawn:{n:'Larch dawn (live)',
-      build(){ layers={far:forest(280,214,9,.021,1.2,'#6b4a7c',26,16,30,3),mid:forest(290,244,11,.017,2.4,'#3c2752',22,26,48,5),near:forest(300,284,8,.013,.6,'#140c1f',14,52,96,9),
+      build(){ layers={far:forest(280,214,9,.021,1.2,'#6b4a7c',18,18,48,3),mid:forest(290,244,11,.017,2.4,'#3c2752',16,28,58,5),near:forest(300,284,8,.013,.6,'#140c1f',14,38,68,9),
         c1:cloud(150,40,'rgba(255,200,190,.42)'),c2:cloud(120,32,'rgba(255,176,170,.32)'),c3:cloud(170,46,'rgba(210,160,200,.28)')} },
       draw(g,t){ const sky=g.createLinearGradient(0,0,0,320); sky.addColorStop(0,'#16163d'); sky.addColorStop(.28,'#3f2563'); sky.addColorStop(.52,'#b34f7d'); sky.addColorStop(.7,'#ff9f78'); sky.addColorStop(.86,'#ffd6a2'); g.fillStyle=sky; g.fillRect(0,0,240,320);
         drawStars(g,t,150,.9);
