@@ -240,6 +240,7 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 .ss .c small{display:block;font-size:13px;color:#7c8794}
 @media (prefers-reduced-motion: reduce){.cr,.ring .av,.mp.play .disc,.phone.vib{animation:none}}
 </style>
+<style id="skincss"></style>
 
 <div class="stage">
   <input type="file" id="fin" multiple hidden accept="image/*,audio/*,.jar,.jad,.nth,.zip">
@@ -328,6 +329,7 @@ const DEF={
   cal:[], weekStart:1, todo:[], notes:[],
   timer:null, swTimes:[],
   web:{home:'start',last:'',bm:[{t:'Wikipedia (mobile)',u:'https://en.m.wikipedia.org'},{t:'Weather',u:'https://wttr.in'},{t:'Hacker News',u:'https://news.ycombinator.com'}],wrap:true,img:true,cookies:true,dlsave:'ask'},
+  skin:{body:'midnight',keys:'black',btns:'black'},
   jars:[], images:[], themes:[], snake:{lvl:5,best:0}, eq:'Normal', widen:false, t9:true, words:[], seeded:false
 };
 let S;
@@ -478,6 +480,51 @@ function mkWalls(){
 }
 mkWalls();
 function wallSrc(id){ if(WALLS[id]) return WALLS[id].src; const im=S.images.find(i=>i.id===id); if(im) return im.data; const th=S.themes.find(t=>'t:'+t.id===id); return th?th.wall:null }
+/* ---------------- phone skins (body, keypad, buttons) ---------------- */
+const BODY={
+  midnight:{n:'Midnight black',edge:'linear-gradient(90deg,#000 0%,#1d1d1f 3.5%,#060606 8%,#000 50%,#060606 92%,#1d1d1f 96.5%,#000 100%)',face:'#000',flat:'#000',brand:'#5c5c61'},
+  graphite:{n:'Graphite',edge:'linear-gradient(90deg,#1d232a 0%,#5b6774 3.5%,#39424d 8%,#2a3139 50%,#39424d 92%,#5b6774 96.5%,#1d232a 100%)',face:'linear-gradient(180deg,#171b20 0%,#101317 42%,#171b20 43%,#1b2026 100%)',flat:'#14181d',brand:'#8d98a5'},
+  silver:{n:'Brushed silver',edge:'linear-gradient(90deg,#8f98a2 0%,#eef1f4 3.5%,#c4cbd3 8%,#b7bfc8 50%,#c4cbd3 92%,#eef1f4 96.5%,#8f98a2 100%)',face:'linear-gradient(180deg,#e4e8ec,#c2c9d1)',flat:'#cfd5db',brand:'#56606c'},
+  ocean:{n:'Ocean blue',edge:'linear-gradient(90deg,#05121f 0%,#2e5a8a 3.5%,#14315a 8%,#0d2445 50%,#14315a 92%,#2e5a8a 96.5%,#05121f 100%)',face:'linear-gradient(180deg,#0e2747,#071a31)',flat:'#0a1f39',brand:'#7fa4cc'},
+  wine:{n:'Wine red',edge:'linear-gradient(90deg,#1a0308 0%,#7a2234 3.5%,#4a0f1c 8%,#3a0b16 50%,#4a0f1c 92%,#7a2234 96.5%,#1a0308 100%)',face:'linear-gradient(180deg,#3d0c18,#26060e)',flat:'#300a13',brand:'#c48a96'},
+  forest:{n:'Forest green',edge:'linear-gradient(90deg,#04140b 0%,#2f6a46 3.5%,#174028 8%,#10331f 50%,#174028 92%,#2f6a46 96.5%,#04140b 100%)',face:'linear-gradient(180deg,#123a24,#0a2616)',flat:'#0e301d',brand:'#86b89a'},
+  pearl:{n:'Pearl white',edge:'linear-gradient(90deg,#c4c8cd 0%,#ffffff 3.5%,#eceef0 8%,#e3e6e9 50%,#eceef0 92%,#ffffff 96.5%,#c4c8cd 100%)',face:'linear-gradient(180deg,#f8f9fa,#e5e8eb)',flat:'#eef0f2',brand:'#8a9099'}
+};
+const KEYS={
+  black:{n:'Black',bg:'linear-gradient(180deg,#2a2b2e,#0b0b0c)',fg:'#f2f2f4',sub:'#8e8e93',sh:'inset 0 1px 0 rgba(255,255,255,.14),0 2px 0 #000,0 3px 4px rgba(0,0,0,.6)'},
+  silver:{n:'Silver',bg:'linear-gradient(180deg,#e9edf1,#b6bfc9)',fg:'#1a2027',sub:'#4a5562',sh:'inset 0 1px 0 #fff,0 2px 0 #6d7884,0 3px 4px rgba(0,0,0,.45)'},
+  backlit:{n:'Blue backlight',bg:'linear-gradient(180deg,#16191d,#060708)',fg:'#6cc0ff',sub:'#4797e0',sh:'inset 0 1px 0 rgba(255,255,255,.08),0 2px 0 #000,0 3px 4px rgba(0,0,0,.6)',glow:'0 0 6px rgba(80,170,255,.8)'},
+  white:{n:'White',bg:'linear-gradient(180deg,#ffffff,#e2e6ea)',fg:'#16191d',sub:'#6b7480',sh:'inset 0 1px 0 #fff,0 2px 0 #aab2bb,0 3px 4px rgba(0,0,0,.3)'},
+  gold:{n:'Champagne gold',bg:'linear-gradient(180deg,#f4e4bd,#c9a861)',fg:'#2b1e06',sub:'#6b5420',sh:'inset 0 1px 0 #fff6dc,0 2px 0 #8c7238,0 3px 4px rgba(0,0,0,.4)'}
+};
+const BTNS={
+  black:{n:'Black',key:'linear-gradient(180deg,#1f2023,#050506)',mark:'#8e8e93',ring:'conic-gradient(from 0deg,#2c2d30,#55575c,#2c2d30,#141516,#2c2d30,#55575c,#2c2d30,#141516,#2c2d30)',arrow:'#c7c7cc',ok:'radial-gradient(circle at 40% 35%,#2b2c2f,#000)',okring:'#000'},
+  graphite:{n:'Graphite',key:'linear-gradient(180deg,#3a424c,#232930)',mark:'#c4ccd5',ring:'conic-gradient(from 0deg,#aab4bf,#e7ecf1,#aab4bf,#7d8895,#aab4bf,#e7ecf1,#aab4bf,#7d8895,#aab4bf)',arrow:'#3a434d',ok:'radial-gradient(circle at 40% 35%,#4a535e,#1c2127)',okring:'#11151a'},
+  chrome:{n:'Chrome',key:'linear-gradient(180deg,#f1f4f7,#aab3be)',mark:'#3a434d',ring:'conic-gradient(from 0deg,#b9c2cc,#f4f7fa,#b9c2cc,#8d98a5,#b9c2cc,#f4f7fa,#b9c2cc,#8d98a5,#b9c2cc)',arrow:'#3a434d',ok:'radial-gradient(circle at 40% 35%,#ffffff,#9aa4af)',okring:'#7d8895'},
+  white:{n:'White',key:'linear-gradient(180deg,#ffffff,#dde2e7)',mark:'#7a838d',ring:'conic-gradient(from 0deg,#e6e9ec,#ffffff,#e6e9ec,#c7cdd3,#e6e9ec,#ffffff,#e6e9ec,#c7cdd3,#e6e9ec)',arrow:'#59626c',ok:'radial-gradient(circle at 40% 35%,#ffffff,#d3d8de)',okring:'#b8bfc7'}
+};
+function applySkin(sk){ sk=sk||S.skin||{}; const b=BODY[sk.body]||BODY.midnight, k=KEYS[sk.keys]||KEYS.black, t=BTNS[sk.btns]||BTNS.black;
+  const css=`#phone .body{background:${b.edge}}
+#phone .face{background:${b.face}}
+#phone .brand{color:${b.brand}}
+#phone .ear{opacity:${b.flat==='#000'?.55:1}}
+#phone.fs .body,#phone.fs .face{background:${b.flat}}
+html.fsm,html.fsm body{background:${b.flat}!important}
+#phone .kk{background:${k.bg};color:${k.fg};box-shadow:${k.sh}}
+#phone .kk small{color:${k.sub}}
+#phone .kk b,#phone .kk small{text-shadow:${k.glow||'none'}}
+#phone .soft,#phone .cl,#phone .en,#phone .emu,#phone.fs .emu{background:${t.key}}
+#phone .soft i{background:${t.mark}}
+#phone .emu svg{fill:${t.mark}}
+#phone .pad{background:${t.ring}}
+#phone .dz.u i{border-bottom-color:${t.arrow}}#phone .dz.d i{border-top-color:${t.arrow}}#phone .dz.lt i{border-right-color:${t.arrow}}#phone .dz.rt i{border-left-color:${t.arrow}}
+#phone .pad .ok{background:${t.ok};box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 2px ${t.okring}}`;
+  const el=document.getElementById('skincss'); if(el&&el.textContent!==css) el.textContent=css }
+function SkinMenu(){ menu('Phone skin',[['Body colour',()=>skinRadio('Body colour','body',BODY)],['Keypad',()=>skinRadio('Keypad','keys',KEYS)],['Buttons',()=>skinRadio('Buttons','btns',BTNS)],
+  ['Restore default skin',()=>{ S.skin={body:'midnight',keys:'black',btns:'black'}; save(); applySkin(); note('Default skin restored') }]]) }
+function skinRadio(title,key,set){ Radio(title,Object.keys(set).map(id=>[id,set[id].n]),()=>S.skin[key],v=>{ S.skin[key]=v; applySkin() },
+  {onMove:it=>applySkin({...S.skin,[key]:it.val}),onPop:()=>applySkin(),note:'Skin saved'}) }
+
 function applyTheme(){ const lcd=$('#lcd'); let t=THEMES[S.theme]; let bg; if(!t){ const u=S.themes.find(x=>x.id===S.theme); t={...THEMES.steel,...(u?{n:u.n}:{})}; if(u&&u.bg) bg=`url(${u.bg}) center/cover`; }
   const m={tbg:bg||t.bg,tsolid:t.solid,tfg:t.fg,tsub:t.sub,thd:t.hd,thdfg:t.hdfg,thl:t.hl,thlfg:t.hlfg,tsk:t.sk,tskfg:t.skfg};
   for(const k in m) lcd.style.setProperty('--'+k,m[k]); lcd.style.setProperty('--sf',S.sfont) }
@@ -944,7 +991,7 @@ function Personalise(id,title){ const p=S.profiles[id]; const ringNames=Object.k
     ['Alert for',()=>Radio('Alert for',[['all','All calls'],...S.groups.map(g=>[g,g])],()=>p.alertFor,v=>p.alertFor=v)],
     id!=='general'&&id!=='flight'?['Profile name',()=>push(Editor({mode:'text',noPred:true,title:'Profile name',text:p.name,max:16,done(t){ if(t.trim()) p.name=t.trim(); save(); pop(); note('Saved') }}))]:null
   ]) }
-function ThemesMenu(){ menu('Themes',[['Select theme',()=>SelectTheme()],['Theme downloads',()=>note('Add .nth theme files in Settings › Emulator › Add files','info',2600)]]) }
+function ThemesMenu(){ menu('Themes',[['Select theme',()=>SelectTheme()],['Phone skin',()=>SkinMenu()],['Theme downloads',()=>note('Add .nth theme files in Settings › Emulator › Add files','info',2600)]]) }
 function themeList(){ return Object.keys(THEMES).map(k=>({id:k,n:THEMES[k].n})).concat(S.themes.map(t=>({id:t.id,n:t.n,user:true}))) }
 function SelectTheme(){ push(List('Select theme',()=>themeList().map(t=>({t:t.n,id:t.id,radio:true,on:S.theme===t.id,ic:ico('theme')})),{count:false,M:()=>({t:'Apply',f:()=>tv().select()}),
   onSel(it){ S.theme=it.id; const t=THEMES[it.id]; if(t){ S.wall={on:true,id:t.wall} } else { const u=S.themes.find(x=>x.id===it.id); if(u&&u.wall) S.wall={on:true,id:'t:'+u.id} } save(); render(); note('Theme applied') },
@@ -1340,6 +1387,7 @@ NOTE.addEventListener('click',()=>endNote());
 
 /* ---------------- Emulator section (Settings › Emulator) ---------------- */
 function EmulatorMenu(){ menu('Emulator',[
+  ['Phone skin',()=>SkinMenu()],
   ['Add files',()=>pickFiles()],
   ['Add photos',()=>addPhotos()],
   ['Network name',()=>push(Editor({mode:'text',noPred:true,title:'Network name',label:'Shown on standby:',text:S.net,max:18,done(t){ S.net=t.trim()||'Larch Mobile'; save(); pop(); note('Saved') }}))],
@@ -1435,6 +1483,6 @@ function fit(){ const W=280,H=742, wr=$('#wrap'), inn=$('#inner');
 addEventListener('resize',()=>{ fit(); syncOverlays() }); fit();
 
 /* ---------------- start ---------------- */
-applyTheme(); readNet(); refreshContacts();
+applySkin(); applyTheme(); readNet(); refreshContacts();
 if(S.on){ S.on=false; powerOn() } else render();
 </script>
