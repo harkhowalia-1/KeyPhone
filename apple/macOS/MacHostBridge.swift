@@ -215,6 +215,10 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
                 NSWorkspace.shared.open(url)   // tel:, mailto: and so on
                 return decisionHandler(.cancel)
             }
+            if BridgeBase.isJavaApp(url: url) {
+                offerInstall(url)
+                return decisionHandler(.cancel)
+            }
             return decisionHandler(.allow)
         }
         if url.isFileURL || url.scheme == "about" || url.scheme == "data" || url.scheme == "blob" {
@@ -222,6 +226,16 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
         }
         if action.targetFrame == nil || (action.navigationType == .linkActivated && action.targetFrame?.isMainFrame == true) {
             NSWorkspace.shared.open(url)
+            return decisionHandler(.cancel)
+        }
+        decisionHandler(.allow)
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor response: WKNavigationResponse,
+                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if webView === overlay, let url = response.response.url,
+           BridgeBase.isJavaApp(url: url, mimeType: response.response.mimeType) {
+            offerInstall(url)
             return decisionHandler(.cancel)
         }
         decisionHandler(.allow)

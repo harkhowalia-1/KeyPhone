@@ -245,6 +245,7 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
   <input type="file" id="fin" multiple hidden accept="image/*,audio/*,.jar,.jad,.nth,.zip">
   <input type="file" id="pin" multiple hidden accept="image/*">
   <input type="file" id="cin" hidden accept="image/*" capture="environment">
+  <input type="file" id="ain" multiple hidden accept=".jar,.jad,application/java-archive">
   <div class="wrap" id="wrap">
     <div class="phone" id="phone">
       <div class="body"></div>
@@ -1136,13 +1137,15 @@ function Stopwatch(){ let t0=0, acc=0, run=false, laps=[], lapStart=0, mode='spl
     tickFast:true }) }
 
 /* ---------------- applications & games ---------------- */
-function AppsMenu(){ menu('Applications',[['Games',()=>menu('Games',[['Snake',()=>SnakeMenu(),'game']].concat(S.jars.filter(j=>j.game).map(j=>[j.name,()=>openJar(j),'java'])),{nums:true})],['Collection',()=>Collection()],['Memory',()=>Info('Memory',`<p><span class="lbl">Installed applications</span>${S.jars.length}</p><p><span class="lbl">Used</span>${Math.round(S.jars.reduce((a,j)=>a+j.size,0)/1024)} kB</p>`)]]) }
-function Collection(){ push(List('Collection',()=>S.jars.map(j=>({t:j.name,s:j.vendor||'',j,ic:j.icon?`<img src="${j.icon}" alt="">`:ico('java')})),{name:'coll',two:true,empty:'No applications. Add .jar files in Settings › Emulator › Add files.',
+function AppsMenu(){ menu('Applications',[['Games',()=>menu('Games',[['Snake',()=>SnakeMenu(),'game']].concat(S.jars.filter(j=>j.game).map(j=>[j.name,()=>openJar(j),'java'])),{nums:true})],['Collection',()=>Collection()],
+  ['Install new',()=>pickApps()],['Install from web',()=>installFromWeb()],
+  ['Memory',()=>Info('Memory',`<p><span class="lbl">Installed applications</span>${S.jars.length}</p><p><span class="lbl">Used by applications</span>${kb(S.jars.reduce((a,j)=>a+(j.size||0),0))}</p><p>Applications are stored on this ${Host&&Host.platform==='ios'?'iPhone':Host&&Host.platform==='mac'?'Mac':'browser'} and stay after the phone is switched off.</p>`)]]) }
+function Collection(){ push(List('Collection',()=>S.jars.map(j=>({t:j.name,s:j.vendor||'',j,ic:j.icon?`<img src="${j.icon}" alt="">`:ico('java')})),{name:'coll',two:true,empty:'No applications. Press Install to add a .jar game or app.',Mempty:{t:'Install',f:()=>pickApps()},
   M:it=>({t:'Open',f:()=>openJar(it.j)}),
   L:it=>it?{t:'Options',f:()=>menu('Options',[['Open',()=>{pop();openJar(it.j)}],['Delete',()=>{pop();Ask('Delete '+it.j.name+'?',()=>{Blobs.del('jar:'+it.j.id);S.jars=S.jars.filter(x=>x!==it.j);save();note('Application deleted')})}],
     ['Details',()=>{pop();Info('Details',`<p><b>${esc(it.j.name)}</b></p><p><span class="lbl">Vendor</span>${esc(it.j.vendor||'Unknown')}</p><p><span class="lbl">Version</span>${esc(it.j.ver||'—')}</p><p><span class="lbl">Size</span>${Math.round(it.j.size/1024)} kB</p><p><span class="lbl">Main class</span>${esc(it.j.main||'—')}</p><p><span class="lbl">Profile</span>${esc(it.j.profile||'MIDP-2.0')}</p>`)}],
     ['Application access',()=>{pop();Radio('Network access',[['ask','Ask every time'],['first','Ask first time only'],['always','Always allowed'],['never','Not allowed']],()=>it.j.net||'ask',v=>it.j.net=v)}],
-    ['Mark as game',()=>{it.j.game=!it.j.game;save();pop();note(it.j.game?'Added to Games':'Removed from Games')}]],{nums:false})}:{t:''} })) }
+    ['Mark as game',()=>{it.j.game=!it.j.game;save();pop();note(it.j.game?'Added to Games':'Removed from Games')}],['Install new',()=>{pop();pickApps()}],['Install from web',()=>{pop();installFromWeb()}]],{nums:false})}:{t:''} })) }
 const J2ME_URL=(()=>{ if(window.LARCH_J2ME_URL) return window.LARCH_J2ME_URL; try{ if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)) return new URL('../j2me/larch.html',location.href).href }catch(e){} return 'https://harkhowalia-1.github.io/larch-k7/j2me/larch.html' })();
 const JVM=$('#jvm'); let jvmFrame=null, jvmApp=null;
 async function openJar(j){
@@ -1375,15 +1378,47 @@ async function unzip(file){ const buf=new Uint8Array(await file.arrayBuffer()); 
     if(en.method===0) return data; if(en.method!==8) throw new Error('compression'); const st=new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()) }
   return {names:Object.keys(ents), text:async n=>{ const b=await bytes(n); return b?td.decode(b):'' },
     b64:async n=>{ const b=await bytes(n); let s=''; for(let i=0;i<b.length;i+=0x8000) s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000)); return btoa(s) }} }
+/* ---------------- installing Java applications ---------------- */
+async function readJar(f,z){ z=z||await unzip(f); const mfn=z.names.find(x=>x.toUpperCase()==='META-INF/MANIFEST.MF'); if(!mfn) throw new Error('not a MIDlet');
+  const mf=await z.text(mfn); const lines=mf.replace(/\r?\n /g,'').split(/\r?\n/); const get=k=>{ const l=lines.find(x=>x.toLowerCase().startsWith(k.toLowerCase()+':')); return l?l.slice(k.length+1).trim():'' };
+  const m1=get('MIDlet-1').split(',').map(x=>x.trim()); if(!m1[0]&&!get('MIDlet-Name')) throw new Error('not a MIDlet');
+  const ipath=(get('MIDlet-Icon')||m1[1]||'').replace(/^\//,''); const ip=ipath&&z.names.find(x=>x.toLowerCase()===ipath.toLowerCase()); const icon=ip?'data:image/png;base64,'+await z.b64(ip):null;
+  return {id:uid(),name:get('MIDlet-Name')||m1[0]||f.name.replace(/\.jar$/i,''),vendor:get('MIDlet-Vendor'),ver:get('MIDlet-Version'),main:m1[2]||'',profile:get('MicroEdition-Profile'),size:f.size,icon,file:f.name,game:false,added:Date.now()} }
+async function saveJar(j,f){ await Blobs.put('jar:'+j.id,await f.arrayBuffer()); const back=await Blobs.get('jar:'+j.id); if(!back||back.byteLength!==f.size) throw new Error('not saved');
+  const old=S.jars.find(x=>x.name===j.name&&(x.vendor||'')===(j.vendor||'')); if(old){ j.game=old.game; Blobs.del('jar:'+old.id); S.jars=S.jars.filter(x=>x!==old) }
+  j.stored=true; S.jars.push(j); save(); return j }
+const kb=n=>Math.max(1,Math.round(n/1024))+' kB';
+async function installFlow(f){ let j; try{ j=await readJar(f) }catch(e){ note('This file is not a Java application','warn',2200); return }
+  const old=S.jars.find(x=>x.name===j.name&&(x.vendor||'')===(j.vendor||''));
+  Ask((old?'Replace ':'Install ')+j.name+'?'+(j.vendor?' '+j.vendor:'')+(j.ver?' · v'+j.ver:'')+' · '+kb(j.size),async()=>{
+    note('Installing','wait',60000);
+    try{ await saveJar(j,f); endNote(); Ask(j.name+' installed. Open it now?',()=>openJar(j)) }
+    catch(e){ endNote(); note('Phone memory full. The application was not installed.','warn',2600) } }) }
+function pickApps(){ try{ $('#ain').click() }catch(e){ note('Could not open files','warn') } }
+$('#ain').addEventListener('change',async e=>{ const files=[...e.target.files]; e.target.value=''; if(!files.length) return;
+  const jars=files.filter(f=>/\.jar$/i.test(f.name)), jads=files.filter(f=>/\.jad$/i.test(f.name));
+  if(jars.length===1) return installFlow(jars[0]);
+  if(jars.length>1){ note('Installing','wait',120000); let ok=0; for(const f of jars){ try{ await saveJar(await readJar(f),f); ok++ }catch(err){} } endNote(); render(); note(ok+' of '+jars.length+' applications installed',ok?'ok':'warn',2000); return }
+  if(jads.length){ const t=await readAs(jads[0],'readAsText'); const m=t.match(/MIDlet-Jar-URL:\s*(\S+)/i);
+    if(m&&/^https?:/i.test(m[1])) return installFromUrl(m[1].trim()); note('Choose the .jar file that goes with this .jad','info',2400) } });
+async function fetchBytes(u){
+  if(Host&&Host.download){ const r=await Host.download(u); return {name:r.name||'',buf:fromB64(r.data),url:r.url||u} }
+  const res=await fetch(u); if(!res.ok) throw new Error('http '+res.status); return {name:decodeURIComponent(((res.url||u).split('?')[0].split('/').pop())||''),buf:await res.arrayBuffer(),url:res.url||u} }
+async function installFromUrl(u){ if(!dev.online){ note('No network connection','warn'); return }
+  note('Downloading','wait',180000);
+  try{ let r=await fetchBytes(u);
+    if(/\.jad$/i.test(r.name)||/\.jad(\?|#|$)/i.test(u)){ const t=new TextDecoder().decode(r.buf); const m=t.match(/MIDlet-Jar-URL:\s*(\S+)/i); if(!m) throw new Error('jad'); r=await fetchBytes(new URL(m[1].trim(),r.url).href) }
+    endNote(); const name=/\.jar$/i.test(r.name)?r.name:(r.name||'application')+'.jar'; installFlow(new File([r.buf],name,{type:'application/java-archive'})) }
+  catch(e){ endNote(); note(Host&&Host.download?'Download failed':'This site blocks downloads into the phone here. Download the file, then use Install new.','warn',2800) } }
+window.LarchOfferInstall=u=>{ Ask('Download and install this application?',()=>installFromUrl(u)) };
+function installFromWeb(){ push(Editor({mode:'text',noPred:true,lower:true,title:'Install from web',label:'Address of a .jar or .jad file:',text:'https://',done(t){ pop(); t=t.trim(); if(t&&t!=='https://') installFromUrl(/^https?:/i.test(t)?t:'https://'+t) }})) }
+
 async function importFile(f){ const n=f.name, ext=n.split('.').pop().toLowerCase();
   if(f.type.startsWith('image/')){ const d=await shrink(await readAs(f,'readAsDataURL'),480,640,.82); if(!d) throw 0; S.images.push({id:'i:'+uid(),n:n.replace(/\.[^.]+$/,''),data:d}); save(); return n+' → Gallery' }
   if(f.type.startsWith('audio/')){ music.tracks.push({name:n.replace(/\.[^.]+$/,''),url:URL.createObjectURL(f)}); return n+' → Music player (until the app closes)' }
   if(ext==='jad'){ const t=await readAs(f,'readAsText'); const nm=(t.match(/MIDlet-Name:\s*(.+)/)||[])[1]; return n+': '+(nm?nm.trim()+' needs its .jar file':'needs its .jar file') }
   if(ext==='jar'||ext==='nth'||ext==='zip'){ const z=await unzip(f); const mfn=z.names.find(x=>x.toUpperCase()==='META-INF/MANIFEST.MF');
-    if(ext==='jar'||mfn){ const mf=mfn?await z.text(mfn):''; const lines=mf.replace(/\r?\n /g,'').split(/\r?\n/); const get=k=>{ const l=lines.find(x=>x.toLowerCase().startsWith(k.toLowerCase()+':')); return l?l.slice(k.length+1).trim():'' };
-      const m1=get('MIDlet-1').split(',').map(x=>x.trim()); const ipath=(get('MIDlet-Icon')||m1[1]||'').replace(/^\//,''); const ip=ipath&&z.names.find(x=>x.toLowerCase()===ipath.toLowerCase()); const icon=ip?'data:image/png;base64,'+await z.b64(ip):null;
-      const j={id:uid(),name:get('MIDlet-Name')||m1[0]||n.replace(/\.jar$/i,''),vendor:get('MIDlet-Vendor'),ver:get('MIDlet-Version'),main:m1[2]||'',profile:get('MicroEdition-Profile'),size:f.size,icon,file:n,game:false};
-      await Blobs.put('jar:'+j.id,await f.arrayBuffer()); j.stored=true; S.jars.push(j); save(); return j.name+' installed' }
+    if(ext==='jar'||mfn){ const j=await readJar(f,z); await saveJar(j,f); return j.name+' installed' }
     const imgs=z.names.filter(x=>/\.(png|jpe?g|gif|bmp)$/i.test(x)); const tx=z.names.find(x=>/\.xml$/i.test(x)); const xml=tx?await z.text(tx):'';
     const pickBy=re=>imgs.find(x=>re.test(x.split('/').pop())); const wp=pickBy(/wall|wp|standby|idle/i)||imgs[0], bg=pickBy(/bg|back|main/i)||wp;
     const toURL=async x=>x?await shrink('data:image/'+(/\.png$/i.test(x)?'png':'jpeg')+';base64,'+await z.b64(x),480,640,.8):null;

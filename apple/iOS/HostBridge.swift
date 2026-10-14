@@ -288,6 +288,19 @@ extension HostBridge: WKNavigationDelegate, WKUIDelegate {
             UIApplication.shared.open(url)   // tel:, mailto:, maps and so on
             return decisionHandler(.cancel)
         }
+        if let url = action.request.url, BridgeBase.isJavaApp(url: url) {
+            offerInstall(url)
+            return decisionHandler(.cancel)
+        }
+        decisionHandler(.allow)
+    }
+
+    func webView(_ view: WKWebView, decidePolicyFor response: WKNavigationResponse,
+                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if let url = response.response.url, BridgeBase.isJavaApp(url: url, mimeType: response.response.mimeType) {
+            offerInstall(url)
+            return decisionHandler(.cancel)
+        }
         decisionHandler(.allow)
     }
 

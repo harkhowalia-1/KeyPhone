@@ -36,7 +36,8 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
           web:function(o){return send('web',o)},
           filePut:function(id,data){return send('filePut',{id:id,data:data})},
           fileGet:function(id){return send('fileGet',{id:id})},
-          fileDel:function(id){return send('fileDel',{id:id})}};
+          fileDel:function(id){return send('fileDel',{id:id})},
+          download:function(u){return send('download',{url:u})}};
         })();
         """
     }
@@ -78,6 +79,7 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
         case "filePut": filePut(id, args["id"] as? String ?? "", args["data"] as? String ?? "")
         case "fileGet": fileGet(id, args["id"] as? String ?? "")
         case "fileDel": fileDel(id, args["id"] as? String ?? "")
+        case "download": download(id, args["url"] as? String ?? "")
         default: reply(id, "Not available on this device", ok: false)
         }
     }
@@ -290,6 +292,44 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
     private func fileDel(_ id: Int, _ key: String) {
         if let url = Self.fileURL(key) { try? FileManager.default.removeItem(at: url) }
         reply(id, true)
+    }
+
+    // MARK: downloading applications
+
+    /// Fetches a file for the phone (a .jar or .jad it is installing). Native, so no CORS limits.
+    private func download(_ id: Int, _ address: String) {
+        guard let url = URL(string: address), ["http", "https"].contains(url.scheme?.lowercased() ?? "") else {
+            return reply(id, "Invalid address", ok: false)
+        }
+        var request = URLRequest(url: url)
+        request.setValue(Self.mobileUserAgent, forHTTPHeaderField: "User-Agent")
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                return self.reply(id, "Download failed (\(http.statusCode))", ok: false)
+            }
+            guard let data = data, error == nil else {
+                return self.reply(id, error?.localizedDescription ?? "Download failed", ok: false)
+            }
+            guard data.count <= 25_000_000 else { return self.reply(id, "File too large", ok: false) }
+            let name = response?.suggestedFilename ?? url.lastPathComponent
+            self.reply(id, ["name": name, "data": data.base64EncodedString(),
+                            "url": response?.url?.absoluteString ?? address])
+        }.resume()
+    }
+
+    /// True for links and responses that are Java applications the phone can install.
+    static func isJavaApp(url: URL?, mimeType: String? = nil) -> Bool {
+        if let ext = url?.pathExtension.lowercased(), ext == "jar" || ext == "jad" { return true }
+        if let mime = mimeType?.lowercased(),
+           mime.contains("java-archive") || mime.contains("j2me.app-descriptor") { return true }
+        return false
+    }
+
+    /// Asks the phone to download and install an application found while browsing.
+    func offerInstall(_ url: URL) {
+        guard let data = try? JSONSerialization.data(withJSONObject: [url.absoluteString]),
+              let text = String(data: data, encoding: .utf8) else { return }
+        evaluate("window.LarchOfferInstall&&LarchOfferInstall(\(text.dropFirst().dropLast()))")
     }
 
     // MARK: in-screen web pages (shared by Mac and iPhone)
