@@ -35,7 +35,9 @@ targets:
           - UIInterfaceOrientationPortrait
         NSContactsUsageDescription: Larch K7 shows and edits your iPhone contacts in the phone's Names list.
         NSCameraUsageDescription: Larch K7 uses the camera to take photos for its Gallery.
-        NSPhotoLibraryUsageDescription: Larch K7 adds photos you choose to its Gallery and wallpapers.
+        NSPhotoLibraryUsageDescription: Larch K7's Gallery shows your photos and videos, and its camera saves pictures to your library.
+        NSPhotoLibraryAddUsageDescription: Photos and videos taken with Larch K7's camera are saved to your library.
+        NSMicrophoneUsageDescription: Larch K7's Recorder and video camera record sound with the microphone.
         LSApplicationQueriesSchemes:
           - tel
           - sms
@@ -64,6 +66,9 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
         NSContactsUsageDescription: Larch K7 shows and edits your Mac contacts in the phone's Names list.
+        NSCameraUsageDescription: Larch K7's camera uses your Mac's camera.
+        NSMicrophoneUsageDescription: Larch K7's Recorder and video camera record sound with the microphone.
+        NSPhotoLibraryUsageDescription: Larch K7's Gallery shows your photos and videos, and its camera saves pictures to your library.
         NSHumanReadableCopyright: Larch K7
     settings:
       base:

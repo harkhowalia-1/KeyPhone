@@ -11,6 +11,7 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
 
     weak var webView: WKWebView?
     let store = CNContactStore()
+    lazy var media = MediaController(bridge: self)
     private var askedNotifications = false
 
     // MARK: page-side shim
@@ -37,7 +38,10 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
           filePut:function(id,data){return send('filePut',{id:id,data:data})},
           fileGet:function(id){return send('fileGet',{id:id})},
           fileDel:function(id){return send('fileDel',{id:id})},
-          download:function(u){return send('download',{url:u})}};
+          download:function(u){return send('download',{url:u})},
+          media:function(o){return send('media',o)},
+          library:function(o){return send('library',o)},
+          audio:function(o){return send('audio',o)}};
         })();
         """
     }
@@ -80,6 +84,7 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
         case "fileGet": fileGet(id, args["id"] as? String ?? "")
         case "fileDel": fileDel(id, args["id"] as? String ?? "")
         case "download": download(id, args["url"] as? String ?? "")
+        case "media", "library", "audio": media.handle(cmd, id, args)
         default: reply(id, "Not available on this device", ok: false)
         }
     }

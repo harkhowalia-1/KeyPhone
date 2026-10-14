@@ -38,9 +38,11 @@ jobs:
       - name: Build iPhone app (.ipa)
         working-directory: apple
         run: |
+          set -o pipefail
           xcodebuild -project Larch.xcodeproj -target Larch -configuration Release -sdk iphoneos \
             SYMROOT="$PWD/build" MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build 2>&1 | tee ios-build.log \
+            || { grep -E "error:" ios-build.log | sort -u | head -40 | sed 's/^/::error::iOS /'; exit 1; }
           rm -rf Payload && mkdir Payload
           cp -R build/Release-iphoneos/LarchK7.app Payload/
           zip -qry ../LarchK7.ipa Payload
@@ -48,9 +50,11 @@ jobs:
       - name: Build Mac app
         working-directory: apple
         run: |
+          set -o pipefail
           xcodebuild -project Larch.xcodeproj -target LarchMac -configuration Release \
             SYMROOT="$PWD/build" MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
-            ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO build
+            ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO build 2>&1 | tee mac-build.log \
+            || { grep -E "error:" mac-build.log | sort -u | head -40 | sed 's/^/::error::Mac /'; exit 1; }
           codesign --force --deep --sign - "build/Release/Larch K7.app"
 
       - name: Make disk image (.dmg)
