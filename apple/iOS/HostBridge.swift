@@ -27,6 +27,7 @@ final class HostBridge: BridgeBase {
     /// iOS never tells apps the caller's number, so only times are logged.
     private var incoming: [UUID: (start: Date, connected: Date?)] = [:]
     private var overlay: WKWebView?
+    private var statusTimer: Timer?
 
     init(webView: WKWebView, presenter: UIViewController) {
         self.presenter = presenter
@@ -41,7 +42,13 @@ final class HostBridge: BridgeBase {
         pathMonitor.pathUpdateHandler = { [weak self] _ in DispatchQueue.main.async { self?.pushStatus() } }
         pathMonitor.start(queue: DispatchQueue.global(qos: .utility))
         tap.prepare()
+        // Phone sounds follow the silent switch until music, radio or an alarm needs to be heard.
+        try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default)
+        // iOS posts battery changes in steps, so the level is also re-read regularly.
+        statusTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { [weak self] _ in self?.pushStatus() }
     }
+
+    deinit { statusTimer?.invalidate() }
 
     // MARK: status
 

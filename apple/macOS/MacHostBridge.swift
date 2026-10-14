@@ -18,7 +18,16 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
         super.init()
         pathMonitor.pathUpdateHandler = { [weak self] _ in DispatchQueue.main.async { self?.pushStatus() } }
         pathMonitor.start(queue: DispatchQueue.global(qos: .utility))
-        statusTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in self?.pushStatus() }
+        statusTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in self?.pushStatus() }
+        // Battery and power changes arrive the moment macOS reports them.
+        let context = Unmanaged.passUnretained(self).toOpaque()
+        if let source = IOPSNotificationCreateRunLoopSource({ context in
+            guard let context = context else { return }
+            let bridge = Unmanaged<MacHostBridge>.fromOpaque(context).takeUnretainedValue()
+            DispatchQueue.main.async { bridge.pushStatus() }
+        }, context)?.takeRetainedValue() {
+            CFRunLoopAddSource(CFRunLoopGetMain(), source, .defaultMode)
+        }
     }
 
     deinit { statusTimer?.invalidate() }

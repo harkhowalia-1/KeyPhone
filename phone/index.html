@@ -422,15 +422,21 @@ function beep(fs,dur,g,wave){ const a=ac(); if(!a||!g) return; const t=a.current
 const prof=()=>S.profiles[S.profile];
 function keyTone(k){ if(!S.on) return; const lv=prof().keys; if(!lv) return; beep(DTMF[k]||[1320],DTMF[k]?.09:.05,[0,.04,.08,.13][lv],DTMF[k]?'sine':'square') }
 function warnTone(){ if(prof().warn) beep([880,660],.18,.05,'square') }
-let ringH=null;
+let ringH=null, ringing=false;
+/* Phone sounds (keys, tones, shutter) follow the device: the iPhone's silent switch mutes them.
+   Music, radio, recordings, videos and a ringing alarm or timer keep playing, as they do on an iPhone. */
+const loudSet=new Set(); let lastLoud=null;
+function audioMode(force){ const loud=!!(loudSet.size||ringing||music.playing||radioP.playing||radioP.loading);
+  try{ if(navigator.audioSession) navigator.audioSession.type=loud?'playback':'ambient' }catch(e){}
+  if(loud!==lastLoud||force){ lastLoud=loud; if(Host&&Host.audioSession) Host.audioSession(loud).catch(()=>{}) } }
 let vibI=null;
-function startRing(kind){ stopRing(); const p=prof(); const v=volG(p.vol);
+function startRing(kind){ stopRing(); ringing=true; audioMode(); const p=prof(); const v=volG(p.vol);
   if(p.vib){ PHONE.classList.add('vib'); if(Host&&Host.haptic){ Host.haptic('vibrate'); vibI=setInterval(()=>Host.haptic('vibrate'),1600) } }
   if(kind==='alarm'){ ringH=playSeq(ALARMT[S.alarm.tone]||ALARMT.Alarm,{vol:Math.max(v,.08),loop:true}); return }
   if(p.alert==='off'||!v) return;
   if(p.alert==='beep'){ ringH=playSeq('A6 16',{vol:v}); return }
   ringH=playSeq(RING[p.tone]||RING['KeyPhone theme'],{vol:p.alert==='asc'?.02:v,step:p.alert==='asc'?.03:0,loop:p.alert!=='once'}) }
-function stopRing(){ if(ringH){ringH.stop();ringH=null} clearInterval(vibI); vibI=null; PHONE.classList.remove('vib') }
+function stopRing(){ if(ringH){ringH.stop();ringH=null} clearInterval(vibI); vibI=null; PHONE.classList.remove('vib'); if(ringing){ ringing=false; audioMode() } }
 function msgAlert(){ const p=prof(); if(p.vib&&Host&&Host.haptic) Host.haptic('vibrate'); if(p.vib){PHONE.classList.add('vib');setTimeout(()=>{if(!ringH)PHONE.classList.remove('vib')},700)} if(p.msg!=='Off'&&MSGT[p.msg]) playSeq(MSGT[p.msg],{vol:Math.max(volG(p.vol),.04)}) }
 
 /* ---------------- icons (original line art) ---------------- */
@@ -472,9 +478,11 @@ const P={
 const ico=(n,w)=>`<svg viewBox="0 0 24 24" ${w?`width="${w}" height="${w}"`:''} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[n]||''}</svg>`;
 function sigSVG(n){ let s='<svg width="14" height="74" viewBox="0 0 14 74">'; s+='<path d="M7 2v10M3 3l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
   for(let i=0;i<5;i++){ const w=4+i*2, y=68-i*11; s+=`<rect x="${7-w/2}" y="${y}" width="${w}" height="7" rx="1" fill="currentColor" opacity="${i<n?1:.25}"/>` } return s+'</svg>' }
-function batSVG(n){ let s='<svg width="14" height="74" viewBox="0 0 14 74"><rect x="2.5" y="3" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="5" y="1" width="4" height="2" fill="currentColor"/><rect x="4.3" y="6" width="5.4" height="6" fill="currentColor"/>';
-  for(let i=0;i<4;i++){ const w=4+i*2.5, y=68-i*13; s+=`<rect x="${7-w/2}" y="${y}" width="${w}" height="9" rx="1" fill="currentColor" opacity="${i<n?1:.25}"/>` } return s+'</svg>' }
-
+function batSVG(lv,ch){ const n=Math.max(0,Math.min(4,Math.ceil(lv*4-.001))), pc=Math.round(lv*100), fh=Math.max(.6,8.4*lv);
+  let s=`<svg width="18" height="78" viewBox="-2 0 18 78"><rect x="2.5" y="3" width="9" height="12" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><rect x="5" y="1" width="4" height="2" fill="currentColor"/>`;
+  s+=ch?'<path d="M7.9 4.6 4.8 9.7h2.3l-.9 3.9 3.2-5.3H7.1z" fill="currentColor"/>':`<rect x="4.3" y="${(13.8-fh).toFixed(2)}" width="5.4" height="${fh.toFixed(2)}" fill="currentColor"/>`;
+  s+=`<text x="7" y="25" text-anchor="middle" font-size="7.2" font-weight="600" fill="currentColor">${pc}%</text>`;
+  for(let i=0;i<4;i++){ const w=4+i*2.5, y=70-i*12; s+=`<rect x="${7-w/2}" y="${y}" width="${w}" height="8" rx="1" fill="currentColor" opacity="${i<n?1:.25}"/>` } return s+'</svg>' }
 /* ---------------- themes & wallpapers (original) ---------------- */
 const TILES=['#3f7fd1','#e0742a','#3c9a4a','#6b6fd6','#c24d6b','#2e9e8f','#9a5bc4','#c9a227','#2f8fc0'];
 const THEMES={
@@ -858,7 +866,7 @@ function Standby(){
     draw(el){ const d=now(); const fl=S.profile==='flight'; const w=S.wall.on?wallSrc(S.wall.id):null;
       if(S.wall.on&&Live.isLive(S.wall.id)){ el.style.background='transparent'; SCR.classList.add('live') } else el.style.background=w?`#000 url(${w}) center/cover`:'var(--tbg)';
       const pf=S.profile!=='general'?`<div class="pf">${esc(prof().name)}${S.timedUntil?' ◷':''}</div>`:'';
-      let h=`<div class="sb"><div class="sig">${netSVG()}</div><div class="icr">${statusIcons()}</div>${dev.level!=null?`<div class="bat">${batSVG(dev.charging&&dev.bat<4?(dev.bat+(Math.floor(Date.now()/1000)%(5-dev.bat))):dev.bat)}</div>`:''}`;
+      let h=`<div class="sb"><div class="sig">${netSVG()}</div><div class="icr">${statusIcons()}</div>${dev.level!=null?`<div class="bat">${batSVG(dev.level,dev.charging)}</div>`:''}`;
       if(S.clock.show) h+=`<div class="clk">${fmtTimeHTML(d)}</div>`;
       if(S.date.show) h+=`<div class="dt">${DAY[d.getDay()].slice(0,3)} ${fmtDate(d)}</div>`;
       h+=pf;
@@ -1207,11 +1215,11 @@ function LibImage(g){ const v={name:'libimg',
 function VideoPlayer(it){ const v={name:'vplay',media:true,st:{t:0,d:it.dur||0,playing:true},started:false,
   hdText(){ return 'Video' }, hdRight(){ return mmss(this.st.t)+' / '+mmss(this.st.d) },
   draw(el){ el.style.background='#000'; el.innerHTML='' },
-  mediaShow(rect){ if(!this.started){ this.started=true; Host.media({op:'play',id:it.id,rect}).catch(e=>{ pop(); note((e&&e.message)||'Could not play the video','warn') }) } else Host.media({op:'rect',rect}).catch(()=>{}) },
+  mediaShow(rect){ if(!this.started){ this.started=true; loudSet.add(this); audioMode(); Host.media({op:'play',id:it.id,rect}).catch(e=>{ pop(); note((e&&e.message)||'Could not play the video','warn') }) } else Host.media({op:'rect',rect}).catch(()=>{}) },
   soft(){ const v=this; return [{t:'Options',f:()=>menu('Options',[['Rewind 10 s',()=>{pop();Host.media({op:'seek',by:-10})}],['Forward 10 s',()=>{pop();Host.media({op:'seek',by:10})}],['Details',()=>{pop();Info('Details',`<p><span class="lbl">Length</span>${mmss(it.dur)}</p><p><span class="lbl">Resolution</span>${it.w}×${it.h}</p>`)}]],{nums:false})},
     {t:v.st.playing?'Pause':'Play',f:()=>{ if(v.st.playing){ Host.media({op:'pause'}); v.st.playing=false } else { if(v.st.ended){ Host.media({op:'seek',by:-1e6}); v.st.ended=false } Host.media({op:'resume'}); v.st.playing=true } render() }},{t:'Back',f:pop}] },
   key(k){ if(k==='LT'){ Host.media({op:'seek',by:-10}); return true } if(k==='RT'){ Host.media({op:'seek',by:10}); return true } return false },
-  onPop(){ Host.media({op:'close'}).catch(()=>{}); mediaShown=false } };
+  onPop(){ Host.media({op:'close'}).catch(()=>{}); mediaShown=false; loudSet.delete(this); audioMode() } };
   push(v) }
 window.LarchMedia=o=>{ const v=tv(); if(v&&v.name==='vplay'){ Object.assign(v.st,o||{}); render() } };
 function Images(forWall,graphicsOnly){ const list=()=>{ const a=(graphicsOnly?allImages().filter(i=>i.builtin):allImages()).map(i=>({t:i.n,i,ic:`<img src="${i.src}" alt="">`,radio:forWall,on:forWall&&S.wall.id===i.id})); if(!graphicsOnly) a.unshift({t:forWall?'Choose from Photos…':'Add from Photos…',add:true,ic:ico('img')}); return a };
@@ -1240,7 +1248,13 @@ function Tones(){ let h=null; const stop=()=>{h&&h.stop();h=null};
 function MediaMenu(){ menu('Media',[['Camera',()=>CameraApp('photo')],['Video',()=>CameraApp('video')],['Music player',()=>MusicPlayer()],['Radio',()=>RadioApp()],['Recorder',()=>Recorder()],
   ['Equaliser',()=>Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})]]) }
 /* ---- camera: live viewfinder on the phone's screen; pictures go to the device's Photos */
-function shutter(){ beep([2200,1100],.05,.07,'square'); setTimeout(()=>beep([1500],.04,.05,'square'),60) }
+function shutter(){ if(Host&&Host.platform==='ios'&&Host.media) return; // iOS plays the system camera shutter itself
+  const p=prof(); if(!p.vol&&!p.keys) return; const a=ac(); if(!a) return; const t=a.currentTime;
+  const click=(at,dur,freq,g)=>{ const n=Math.max(1,Math.floor(a.sampleRate*dur)), b=a.createBuffer(1,n,a.sampleRate), d=b.getChannelData(0);
+    for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n,4);
+    const src=a.createBufferSource(); src.buffer=b; const f=a.createBiquadFilter(); f.type='bandpass'; f.frequency.value=freq; f.Q.value=.9; const g2=a.createGain(); g2.gain.value=g;
+    src.connect(f).connect(g2).connect(a.destination); src.start(t+at) };
+  click(0,.03,3600,.9); click(.004,.02,900,.5); click(.085,.045,2400,.7); click(.09,.03,700,.4) }
 function CameraApp(mode){ if(!(Host&&Host.media)){ if(mode==='video'){ note('Video recording needs the Mac or iPhone app','info',2200); return } takePhoto(); return } push(CameraView(mode)) }
 function CameraView(mode){ const v={name:'camera',media:true,mode,rec:false,recT:0,started:false,busy:false,
   hdText(){ return this.mode==='video'?(this.rec?'● Recording '+mmss((Date.now()-this.recT)/1000):'Video'):'Camera' },
@@ -1300,7 +1314,7 @@ function Recorder(){ if(!Rec.available()){ note('Microphone not available on thi
         clearInterval(lvT); lvT=setInterval(async()=>{ if(this.state!=='rec') return; const l=await Rec.level(); const i=document.getElementById('reclv'); if(i) i.style.width=Math.round(l*100)+'%' },150) })
       .catch(e=>note((e&&e.message)||'Microphone not available','warn',2400)) },
     async stop(){ const dur=this.el()/1000; clearInterval(lvT); this.state='saving'; render();
-      try{ const r=await Rec.stop(dur); this.state='idle'; this.acc=0; render(); note('Saved to Recordings','ok',1600) }catch(e){ this.state='idle'; render(); note('The recording was not saved','warn') } },
+      try{ const r=await Rec.stop(dur); audioMode(true); this.state='idle'; this.acc=0; render(); note('Saved to Recordings','ok',1600) }catch(e){ this.state='idle'; render(); note('The recording was not saved','warn') } },
     onPop(){ clearInterval(lvT); if(this.state==='rec'||this.state==='paused') Rec.stop(this.el()/1000).catch(()=>{}) } };
   push(v) }
 function RecordingsList(){ const v=List('Recordings',()=>(v._items||[]).map(r=>({t:r.name||r.id,s:mmss(r.dur)+(r.date?' · '+fmtStamp(r.date):''),r,ic:ico('mic')})),{two:true,name:'recs',empty:'No recordings. Use Media › Recorder to make one.',
@@ -1313,13 +1327,14 @@ function RecPlayer(r){ const a=new Audio(); let url=null; const v={name:'recplay
   tick(){ render() },
   soft(){ return [{t:''},{t:this.playing?'Pause':'Play',f:()=>{ if(this.playing){ a.pause(); this.playing=false } else { a.play().then(()=>{ this.playing=true; render() }).catch(()=>{}) } render() }},{t:'Back',f:pop}] },
   key(k){ if(k==='LT'){ a.currentTime=Math.max(0,a.currentTime-5); return true } if(k==='RT'){ a.currentTime=Math.min(a.duration||0,a.currentTime+5); return true } return false },
-  onPop(){ a.pause(); if(url) URL.revokeObjectURL(url) } };
+  onPop(){ a.pause(); loudSet.delete(a); audioMode(); if(url) URL.revokeObjectURL(url) } };
   a.onended=()=>{ v.playing=false; if(tv()===v) render() };
+  a.addEventListener('play',()=>{ loudSet.add(a); audioMode() }); ['pause','ended','error'].forEach(e=>a.addEventListener(e,()=>{ loudSet.delete(a); audioMode() }));
   push(v); Rec.url(r).then(u=>{ url=u; a.src=u; return a.play() }).then(()=>{ v.playing=true; if(tv()===v) render() }).catch(()=>note('Could not play the recording','warn')) }
 
 /* ---- radio: internet stations from the public radio-browser.info directory */
 const rr=()=>{ if(S.on&&V.length) render() };
-function hostAudio(on){ if(Host&&Host.audioSession) Host.audioSession(!!on).catch(()=>{}) }
+function hostAudio(){ audioMode() }
 const RB_HOSTS=['de1.api.radio-browser.info','nl1.api.radio-browser.info','at1.api.radio-browser.info','de2.api.radio-browser.info','fi1.api.radio-browser.info'];
 let rbHost=null;
 async function rbGet(path){ const list=rbHost?[rbHost].concat(RB_HOSTS.filter(h=>h!==rbHost)):RB_HOSTS; let err=null;
@@ -1328,7 +1343,7 @@ async function rbGet(path){ const list=rbHost?[rbHost].concat(RB_HOSTS.filter(h=
 const rbStation=x=>({id:x.stationuuid,name:String(x.name||'').trim()||'Station',url:x.url_resolved||x.url,country:x.countrycode||x.country||'',tags:String(x.tags||'').split(',').filter(Boolean).slice(0,2).join(', '),br:x.bitrate||0,codec:x.codec||''});
 const radioP={el:new Audio(),cur:null,playing:false,loading:false,vol:7,err:'',
   play(st){ if(st) this.cur=st; if(!this.cur) return; if(!dev.online){ note('No network connection','warn'); return } if(S.profile==='flight'){ note('Flight profile is active','warn'); return }
-    if(music.playing) music.pause(); this.err=''; this.loading=true; this.playing=false; this.el.src=this.cur.url; this.el.volume=this.vol/10; S.radio.last=this.cur; save(); rr();
+    if(music.playing) music.pause(); this.err=''; this.loading=true; this.playing=false; audioMode(); this.el.src=this.cur.url; this.el.volume=this.vol/10; S.radio.last=this.cur; save(); rr();
     const st0=this.cur; this.el.play().then(()=>{ if(this.cur!==st0) return; this.playing=true; this.loading=false; hostAudio(true); rr() }).catch(()=>{ if(this.cur!==st0) return; this.loading=false; this.playing=false; this.err='Station not available'; rr() });
     if(this.cur.id) rbGet('/json/url/'+encodeURIComponent(this.cur.id)).catch(()=>{}) },
   stop(){ const was=this.playing||this.loading; this.el.pause(); this.el.removeAttribute('src'); try{ this.el.load() }catch(e){} this.playing=false; this.loading=false; if(was&&!music.playing) hostAudio(false); rr() },
@@ -1378,7 +1393,7 @@ const music={get tracks(){ return S.music },cur:null,url:null,el:new Audio(),pla
       if(!buf){ note('This music file is missing. Add it again.','warn',2200); return }
       if(this.url) URL.revokeObjectURL(this.url); this.cur=t; this.url=URL.createObjectURL(new Blob([buf],{type:t.type||'audio/mpeg'})); this.el.src=this.url }
     if(!this.cur) return; if(radioP.playing||radioP.loading) radioP.stop(); this.applyEq(); this.el.volume=this.vol/10;
-    this.el.play().then(()=>{ this.playing=true; hostAudio(true); rr() }).catch(()=>note('Could not play this music file','warn')) },
+    this.playing=true; audioMode(); this.el.play().then(()=>{ this.playing=true; audioMode(); rr() }).catch(()=>{ this.playing=false; audioMode(); note('Could not play this music file','warn') }) },
   pause(){ this.el.pause(); if(this.playing){ this.playing=false; if(!radioP.playing) hostAudio(false) } rr() },
   stop(){ this.pause(); try{ this.el.currentTime=0 }catch(e){} },
   forget(id){ if(this.cur&&this.cur.id===id){ this.stop(); if(this.url) URL.revokeObjectURL(this.url); this.url=null; this.cur=null; this.el.removeAttribute('src') } },
@@ -1802,6 +1817,6 @@ function fit(){ const W=280,H=742, wr=$('#wrap'), inn=$('#inner');
 addEventListener('resize',()=>{ fit(); syncOverlays() }); fit(); setTimeout(syncOverlays,0);
 
 /* ---------------- start ---------------- */
-applySkin(); applyTheme(); readNet(); refreshContacts();
+applySkin(); applyTheme(); readNet(); refreshContacts(); audioMode(true);
 if(S.on){ S.on=false; powerOn() } else render();
 </script>
