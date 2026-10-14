@@ -56,7 +56,14 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 .fsm .stage{min-height:0;height:100%}
 .phone.fs .body{border-radius:0;background:#14181d;box-shadow:none}
 .phone.fs .face{inset:0;border-radius:0;box-shadow:none;background:linear-gradient(180deg,#14181d 0%,#101317 45%,#181c22 100%)}
-.phone.fs .ear,.phone.fs .brand{display:none}
+.phone.fs .ear,.phone.fs .brand,.phone.fs .mic{display:none}
+/* full screen (iPhone, Mac app): fit() sizes the layout to the display; --c shrinks the keys when height is short */
+.phone.fs #lcd{left:4px;top:4px}
+.phone.fs .pad{transform:scale(var(--c,1));transform-origin:50% 0}
+.phone.fs .soft{top:calc(2px*var(--c,1));height:calc(30px*var(--c,1));width:var(--sw,66px)}
+.phone.fs .cl,.phone.fs .en{top:calc(62px*var(--c,1));height:calc(38px*var(--c,1));width:var(--sw,66px)}
+.phone.fs .kp{gap:calc(7px*var(--c,1)) 8px}
+.phone.fs .kk{height:calc(40px*var(--c,1))}
 .phone.fs .emu{left:16px;top:33px;width:28px;height:20px}
 .phone.fs .pwr,.phone.fs .side{top:33px;left:auto;width:26px;height:20px;border-radius:6px;display:grid;place-items:center;color:#d6dde5;
   background:linear-gradient(180deg,#4a535e,#232930);box-shadow:0 0 0 1px #0b0e12,inset 0 1px 0 rgba(255,255,255,.22),0 2px 3px rgba(0,0,0,.6)}
@@ -1145,8 +1152,7 @@ function PhoneMenu(){ const p=S.phone; menu('Phone',[
   ['Security keyguard',()=>askCode(()=>OnOff('Security keyguard',p,'seckg'))],
   ['Welcome note',()=>push(Editor({mode:'text',title:'Welcome note',text:p.welcome,max:40,done(t){p.welcome=t;save();pop();note('Saved')}}))],
   ['Flight query',()=>OnOff('Flight query',p,'flightQ')],
-  ['Phone updates',()=>checkUpdates()],
-  ['Start-up tone',()=>OnOff('Start-up tone',p,'startTone')]]) }
+  ['Phone updates',()=>checkUpdates()]]) }
 const bytes=n=>n>=1e9?(n/1e9).toFixed(1)+' GB':n>=1e6?(n/1e6).toFixed(1)+' MB':(n?Math.max(1,Math.round(n/1024)):0)+' kB';
 async function MemoryStatus(){ const apps=S.jars.reduce((a,j)=>a+(j.size||0),0), mus=S.music.reduce((a,m)=>a+(m.size||0),0); let free=null;
   try{ if(Host&&Host.storage){ const r=await Host.storage(); if(r&&r.free!=null) free=r.free } else if(navigator.storage&&navigator.storage.estimate){ const e=await navigator.storage.estimate(); if(e&&e.quota) free=e.quota-(e.usage||0) } }catch(e){}
@@ -1602,7 +1608,6 @@ let booting=false;
 function powerOn(){ if(S.on&&V.length) return; S.on=true; save(); V=[]; booting=true; locked=false; applyTheme();
   SCR.className='full'; SCR.innerHTML='<div class="boot"><canvas width="240" height="320"></canvas></div>';
   const cv=SCR.querySelector('canvas'), x=hiDPI(cv,240,320); const t0=performance.now();
-  if(S.phone.startTone) playSeq('E5 16,B5 16,E6 16,G#6 8,B6 4',{vol:.07,wave:'triangle'});
   const ease=u=>u<0?0:u>1?1:1-Math.pow(1-u,3);
   (function fr(){ const t=(performance.now()-t0)/1000; x.fillStyle='#000'; x.fillRect(0,0,240,320);
     phoneLogo(x,120,138,96,ease(t/.45));
@@ -1809,11 +1814,31 @@ const EMBED=/embed/.test(location.hash+location.search); if(EMBED) document.docu
 const FULL=!EMBED&&(!!Host||(matchMedia('(pointer: coarse)').matches&&Math.min(screen.width,screen.height)<600));
 if(FULL){ document.documentElement.classList.add('fsm'); PHONE.classList.add('fs') }
 function fit(){ const W=280,H=742, wr=$('#wrap'), inn=$('#inner');
-  if(FULL){ const vw=innerWidth, vh=innerHeight, s=Math.min(vw/W,vh/H), pw=vw/s, ph=vh/s;
-    PHONE.style.width=pw+'px'; PHONE.style.height=ph+'px'; PHONE.style.transform=`scale(${s})`; PHONE.style.setProperty('--sc',`scale(${s})`);
-    inn.style.left=(pw-W)/2+'px'; inn.style.top=(ph-H)/2+'px'; wr.style.width=vw+'px'; wr.style.height=vh+'px'; return }
+  if(FULL){ fitFull(innerWidth,innerHeight); wr.style.width=innerWidth+'px'; wr.style.height=innerHeight+'px'; return }
   const g=EMBED?4:32, availH=innerHeight-g, availW=innerWidth-g; const s=Math.max(.5,Math.min(1.4,availH/H,availW/W));
   PHONE.style.transform=`scale(${s})`; PHONE.style.setProperty('--sc',`scale(${s})`); wr.style.width=W*s+'px'; wr.style.height=H*s+'px' }
+function safeInsets(){ const d=document.createElement('div'); d.style.cssText='position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+  document.body.appendChild(d); const cs=getComputedStyle(d); const r={t:parseFloat(cs.paddingTop)||0,b:parseFloat(cs.paddingBottom)||0}; d.remove();
+  if(Host&&Host.platform==='ios'&&!r.t&&innerHeight/innerWidth>2){ r.t=50; r.b=34 } return r }
+/* Full screen: the phone's screen spans the display's width, the keypad stretches to the same width,
+   and the keys get shorter (never below two thirds) so everything fits between the camera cut-out and the home bar. */
+function fitFull(vw,vh){ const BZW=248, BZH=328, NAT=305, CMIN=.66, ins=safeInsets(), st=ins.t, sb=ins.b;
+  const layout=s=>{ let top=st/s, emuTop; if(top>=24){ emuTop=(top-20)/2; top+=4 } else { emuTop=6; top=Math.max(top+4,32) }
+    const bottom=vh/s-sb/s-6; return {top,emuTop,bottom,c:(bottom-top-BZH-10)/NAT} };
+  let s=vw/(BZW+16), L=layout(s);
+  if(L.c<CMIN){ let lo=.2, hi=s; for(let i=0;i<32;i++){ const m=(lo+hi)/2; if(layout(m).c>=CMIN) lo=m; else hi=m } s=lo; L=layout(s) }
+  const c=Math.min(1,Math.max(CMIN,L.c)), top=L.top, emuTop=L.emuTop, bottom=L.bottom;
+  const Wi=vw/s, Hi=vh/s, colW=Math.min(Wi,300), colL=(Wi-colW)/2;
+  const extra=Math.max(0,bottom-(top+BZH)-10-NAT*c);
+  const ctlTop=top+BZH+10+extra*.4, ctlH=112*c, kpTop=ctlTop+ctlH+12*c+extra*.25, ctlW=colW-16;
+  PHONE.style.width=Wi+'px'; PHONE.style.height=Hi+'px'; PHONE.style.transform=`scale(${s})`; PHONE.style.setProperty('--sc',`scale(${s})`);
+  PHONE.style.setProperty('--c',c.toFixed(4)); PHONE.style.setProperty('--sw',Math.max(56,(ctlW-110*c)/2-8)+'px');
+  const set=(el,o)=>{ for(const k in o) el.style[k]=typeof o[k]==='number'?o[k]+'px':o[k] };
+  set($('#inner'),{left:0,top:0,width:Wi,height:Hi});
+  set(PHONE.querySelector('.bezel'),{left:(Wi-BZW)/2,top,width:BZW,height:BZH});
+  set(PHONE.querySelector('.ctl'),{left:colL+8,right:'auto',width:ctlW,top:ctlTop,height:ctlH});
+  set($('#kp'),{left:colL+10,right:'auto',width:colW-20,top:kpTop});
+  set(PHONE.querySelector('.emu'),{top:emuTop,left:colL+14}) }
 addEventListener('resize',()=>{ fit(); syncOverlays() }); fit(); setTimeout(syncOverlays,0);
 
 /* ---------------- start ---------------- */
