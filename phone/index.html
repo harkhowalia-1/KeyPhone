@@ -145,6 +145,20 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 .dlg .dq{width:30px;height:30px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background:#3f7fd1}
 .dlg p{margin:0;font-size:15px;line-height:1.3}
 #note[hidden]{display:none}
+.gal{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:85px;gap:3px;padding:3px;align-content:start}
+.gal div{position:relative;background:#16181b center/cover no-repeat;border-radius:3px;cursor:pointer}
+.gal div.on{box-shadow:0 0 0 3px var(--tsolid),0 0 0 5px #3f8cff}
+.gal span{position:absolute;right:3px;bottom:3px;font-size:10px;line-height:14px;color:#fff;background:rgba(0,0,0,.65);padding:0 4px;border-radius:3px;font-variant-numeric:tabular-nums}
+.rec{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.rec .rmic{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:var(--thl);color:var(--thlfg)}
+.rec .rmic.on{background:#d33b2f;color:#fff;animation:pulse 1.2s ease-in-out infinite}
+.rec .rmic svg{width:38px;height:38px}
+.rec .t{font-size:34px;font-weight:300;font-variant-numeric:tabular-nums}
+.rec .st{color:var(--tsub);font-size:13px}
+.rec .rlv{width:70%;height:6px;border-radius:3px;background:rgba(127,127,127,.25);overflow:hidden}
+.rec .rlv i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2f9a4a,#e0b020,#d33b2f);transition:width .12s}
+.snap{position:absolute;inset:0;background:#000 center/contain no-repeat}
+.vbar{position:absolute;left:0;right:0;bottom:0;height:22px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;display:flex;align-items:center;gap:8px;padding:0 8px;font-variant-numeric:tabular-nums}
 #jvm,#webl{position:absolute;z-index:4}
 #jvm{inset:0;background:#000}
 #jvm iframe,#webl iframe{display:block;width:100%;height:100%;border:0;background:transparent}
@@ -437,7 +451,9 @@ const P={
   envin:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3.5 7.5 12 13l8.5-5.5"/>',
   envopen:'<path d="M3 10v9h18v-9l-9-6z"/><path d="m3.5 10.5 8.5 5.5 8.5-5.5"/>',
   out:'<path d="M4 12h12M12 7l5 5-5 5"/><path d="M20 4v16"/>',
-  inc:'<path d="M20 12H8M12 7l-5 5 5 5"/><path d="M4 4v16"/>'
+  inc:'<path d="M20 12H8M12 7l-5 5 5 5"/><path d="M4 4v16"/>',
+  mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>',
+  cam:'<path d="M4 7.5h3l1.6-2.3h6.8L17 7.5h3a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8.5a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/>'
 };
 const ico=(n,w)=>`<svg viewBox="0 0 24 24" ${w?`width="${w}" height="${w}"`:''} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[n]||''}</svg>`;
 function sigSVG(n){ let s='<svg width="14" height="74" viewBox="0 0 14 74">'; s+='<path d="M7 2v10M3 3l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
@@ -790,7 +806,7 @@ const FEAT={
   notes:['Notes',()=>NotesMenu()], todo:['To-do list',()=>TodoList()], calc:['Calculator',()=>Calculator()], stopwatch:['Stopwatch',()=>Stopwatch()], timer:['Countdown timer',()=>TimerMenu()],
   gallery:['Gallery',()=>GalleryMenu()], music:['Music player',()=>MusicPlayer()], radio:['Radio',()=>radio()], web:['Web',()=>WebMenu()], bookmarks:['Bookmarks',()=>Bookmarks()],
   profiles:['Profiles',()=>ProfilesMenu()], themes:['Themes',()=>ThemesMenu()], settings:['Settings',()=>SettingsMenu()], snake:['Snake',()=>SnakeMenu()], collection:['Collection',()=>Collection()],
-  bt:['Bluetooth',()=>BtMenu()], emu:['Emulator',()=>EmulatorMenu()], menu:['Menu',()=>push(MainMenu())]
+  camera:['Camera',()=>CameraApp('photo')], recorder:['Recorder',()=>Recorder()], bt:['Bluetooth',()=>BtMenu()], emu:['Emulator',()=>EmulatorMenu()], menu:['Menu',()=>push(MainMenu())]
 };
 const scSoft=id=>FEAT[id]?{t:FEAT[id][0],f:FEAT[id][1]}:{t:''};
 const runFeat=id=>FEAT[id]&&FEAT[id][1]();
@@ -1075,7 +1091,55 @@ function factory(all){ const keep=all?{}:{contacts:S.contacts,msgs:S.msgs,logs:S
   note('Restoring','wait',1500,()=>{ S=deepMerge(clone(DEF),keep); S.seeded=true; save(); powerOff(); setTimeout(powerOn,900) }) }
 
 /* ---------------- gallery & media ---------------- */
-function GalleryMenu(){ menu('Gallery',[['Images',()=>Images(false),'folder'],['Video clips',()=>push(List('Video clips',[],{empty:'Folder empty'})),'folder'],['Music files',()=>Tracks(),'folder'],['Themes',()=>SelectTheme(),'folder'],['Graphics',()=>Images(false,true),'folder'],['Tones',()=>Tones(),'folder'],['Recordings',()=>push(List('Recordings',[],{empty:'Folder empty'})),'folder'],['Received files',()=>Received(),'folder']]) }
+function GalleryMenu(){ const lib=!!(Host&&Host.library);
+  menu('Gallery',[['Images',()=>lib?LibraryGrid('image'):Images(false),'folder'],['Video clips',()=>lib?LibraryGrid('video'):push(List('Video clips',[],{empty:'No video clips'})),'folder'],['Music files',()=>Tracks(),'folder'],['Themes',()=>SelectTheme(),'folder'],
+    ['Graphics',()=>Images(false,!lib?true:false),'folder'],['Tones',()=>Tones(),'folder'],['Recordings',()=>RecordingsList(),'folder'],['Received files',()=>Received(),'folder']]) }
+/* ---- the device's own photo library, shown as the phone's Gallery */
+const mmss=s=>{ s=Math.max(0,Math.round(s||0)); return Math.floor(s/60)+':'+pad2(s%60) };
+function LibraryGrid(kind){ const v={name:'grid',kind,items:[],total:null,i:0,top:0,loading:false,err:'',
+  title:kind==='video'?'Video clips':'Images',
+  hdRight(){ return this.total?`${this.i+1}/${this.total}`:'' },
+  load(){ if(this.loading||(this.total!==null&&this.items.length>=this.total)) return; this.loading=true;
+    Host.library({op:'list',kind,offset:this.items.length,limit:24,thumb:200}).then(r=>{ this.total=r.total; this.items=this.items.concat(r.items||[]); this.loading=false; if(tv()===this) render() })
+      .catch(e=>{ this.loading=false; this.err=(e&&e.message)||'Gallery not available'; if(tv()===this) render() }) },
+  draw(el){ el.style.background='var(--tbg)';
+    if(this.err){ el.innerHTML=`<div class="empty">${esc(this.err)}</div>`; return }
+    if(this.total===null){ this.load(); el.innerHTML='<div class="empty">Opening Gallery…</div>'; return }
+    if(!this.total){ el.innerHTML=`<div class="empty">${kind==='video'?'No video clips':'No images'}</div>`; return }
+    const cols=3, rows=3, row=Math.floor(this.i/cols); if(row<this.top) this.top=row; if(row>=this.top+rows) this.top=row-rows+1;
+    const from=this.top*cols, to=Math.min(this.items.length,from+cols*rows); let h='<div class="gal">';
+    for(let j=from;j<to;j++){ const it=this.items[j]; h+=`<div class="${j===this.i?'on':''}" data-i="${j}" style="background-image:url('${it.thumb}')">${kind==='video'?`<span>▶ ${mmss(it.dur)}</span>`:''}</div>` }
+    el.innerHTML=h+'</div>'+scrollbar(this.top,rows,Math.ceil(this.total/cols));
+    if(this.i>=this.items.length-6) this.load() },
+  soft(){ const it=this.items[this.i]; return [{t:it?'Options':'',f:()=>it&&libOptions(this,it)},{t:it?(kind==='video'?'Play':'Open'):'',f:()=>it&&libOpen(this)},{t:'Back',f:pop}] },
+  key(k){ const n=this.items.length; if(!n) return false; let i=this.i; if(k==='LT')i--; else if(k==='RT')i++; else if(k==='U')i-=3; else if(k==='D')i+=3; else return false; this.i=Math.max(0,Math.min(n-1,i)); render(); return true },
+  pick(j){ if(this.i===j) libOpen(this); else { this.i=j; render() } } };
+  push(v) }
+function libOpen(g){ const it=g.items[g.i]; if(!it) return; if(g.kind==='video') return VideoPlayer(it); LibImage(g) }
+function libOptions(g,it){ menu('Options',[[g.kind==='video'?'Play':'Open',()=>{pop();libOpen(g)}],g.kind==='image'?['Set as wallpaper',()=>{pop();libWallpaper(it)}]:null,
+  ['Details',()=>{pop();Info('Details',`<p><span class="lbl">Date</span>${it.date?esc(fmtStamp(it.date-S.clock.off)):'—'}</p><p><span class="lbl">Resolution</span>${it.w}×${it.h}</p>${it.dur?`<p><span class="lbl">Length</span>${mmss(it.dur)}</p>`:''}`)}],
+  ['Delete',()=>{pop();Ask(g.kind==='video'?'Delete video clip?':'Delete image?',()=>Host.library({op:'delete',id:it.id}).then(ok=>{ if(ok){ g.items.splice(g.items.indexOf(it),1); g.total--; g.i=Math.min(g.i,Math.max(0,g.items.length-1)); popTo('grid'); note('Deleted') } }))}]],{nums:false}) }
+async function libWallpaper(it){ note('Setting wallpaper','wait',30000);
+  try{ const r=it.big?{data:it.big}:await Host.library({op:'get',id:it.id,max:960}); it.big=r.data; const d=await shrink(r.data,480,640,.82); endNote(); if(!d) throw 0;
+    const im={id:'i:'+uid(),n:'Wallpaper '+fmtDate(now()),data:d}; S.images.push(im); S.wall={on:true,id:im.id}; save(); note('Wallpaper set') }
+  catch(e){ endNote(); note('Could not set the wallpaper','warn') } }
+function LibImage(g){ const v={name:'libimg',
+  hdText(){ const it=g.items[g.i]; return it&&it.date?fmtStamp(it.date-S.clock.off):'Image' }, hdRight(){ return `${g.i+1}/${g.total}` },
+  draw(el){ const it=g.items[g.i]; el.innerHTML=`<div class="snap" style="background-image:url('${it.big||it.thumb}')"></div>`;
+    if(!it.big&&!it.loading){ it.loading=true; Host.library({op:'get',id:it.id,max:960}).then(r=>{ it.big=r.data; it.loading=false; if(tv()===v) render() }).catch(()=>{ it.loading=false }) } },
+  soft(){ return [{t:'Options',f:()=>libOptions(g,g.items[g.i])},{t:''},{t:'Back',f:pop}] },
+  key(k){ if(k==='LT'||k==='U'){ if(g.i>0){ g.i--; render() } return true } if(k==='RT'||k==='D'){ if(g.i<g.items.length-1){ g.i++; render(); if(g.i>=g.items.length-3) g.load() } return true } return false } };
+  push(v) }
+function VideoPlayer(it){ const v={name:'vplay',media:true,st:{t:0,d:it.dur||0,playing:true},started:false,
+  hdText(){ return 'Video' }, hdRight(){ return mmss(this.st.t)+' / '+mmss(this.st.d) },
+  draw(el){ el.style.background='#000'; el.innerHTML='' },
+  mediaShow(rect){ if(!this.started){ this.started=true; Host.media({op:'play',id:it.id,rect}).catch(e=>{ pop(); note((e&&e.message)||'Could not play the video','warn') }) } else Host.media({op:'rect',rect}).catch(()=>{}) },
+  soft(){ const v=this; return [{t:'Options',f:()=>menu('Options',[['Rewind 10 s',()=>{pop();Host.media({op:'seek',by:-10})}],['Forward 10 s',()=>{pop();Host.media({op:'seek',by:10})}],['Details',()=>{pop();Info('Details',`<p><span class="lbl">Length</span>${mmss(it.dur)}</p><p><span class="lbl">Resolution</span>${it.w}×${it.h}</p>`)}]],{nums:false})},
+    {t:v.st.playing?'Pause':'Play',f:()=>{ if(v.st.playing){ Host.media({op:'pause'}); v.st.playing=false } else { if(v.st.ended){ Host.media({op:'seek',by:-1e6}); v.st.ended=false } Host.media({op:'resume'}); v.st.playing=true } render() }},{t:'Back',f:pop}] },
+  key(k){ if(k==='LT'){ Host.media({op:'seek',by:-10}); return true } if(k==='RT'){ Host.media({op:'seek',by:10}); return true } return false },
+  onPop(){ Host.media({op:'close'}).catch(()=>{}); mediaShown=false } };
+  push(v) }
+window.LarchMedia=o=>{ const v=tv(); if(v&&v.name==='vplay'){ Object.assign(v.st,o||{}); render() } };
 function Images(forWall,graphicsOnly){ const list=()=>{ const a=(graphicsOnly?allImages().filter(i=>i.builtin):allImages()).map(i=>({t:i.n,i,ic:`<img src="${i.src}" alt="">`,radio:forWall,on:forWall&&S.wall.id===i.id})); if(!graphicsOnly) a.unshift({t:forWall?'Choose from Photos…':'Add from Photos…',add:true,ic:ico('img')}); return a };
   push(List(forWall?'Select image':graphicsOnly?'Graphics':'Images',list,{name:'images',empty:'Folder empty',count:!forWall,
     M:it=>it.add?{t:'Open',f:()=>addPhotos(im=>{ if(!im) return; if(forWall){ S.wall={on:true,id:im.id}; save(); pop(); note('Wallpaper set') } else note('Image added') })}
@@ -1101,8 +1165,86 @@ function Tones(){ let h=null; const stop=()=>{h&&h.stop();h=null};
     R:()=>({t:'Back',f:()=>{stop();pop()}}) })) }
 function Received(){ const items=S.images.map(i=>({t:i.n,ic:`<img src="${i.data}" alt="">`})).concat(S.jars.map(j=>({t:j.name,ic:j.icon?`<img src="${j.icon}" alt="">`:ico('java')}))).concat(S.themes.map(t=>({t:t.n,ic:ico('theme')})));
   push(List('Received files',items,{empty:'Folder empty',M:()=>({t:''})})) }
-function MediaMenu(){ menu('Media',[['Camera',()=>takePhoto()],['Video',()=>note('Video recording is not available yet','info',1800)],['Music player',()=>MusicPlayer()],['Radio',()=>radio()],['Recorder',()=>note('Voice recording is not available yet','info',1800)],
+function MediaMenu(){ menu('Media',[['Camera',()=>CameraApp('photo')],['Video',()=>CameraApp('video')],['Music player',()=>MusicPlayer()],['Radio',()=>radio()],['Recorder',()=>Recorder()],
   ['Equaliser',()=>Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})]]) }
+/* ---- camera: live viewfinder on the phone's screen; pictures go to the device's Photos */
+function shutter(){ beep([2200,1100],.05,.07,'square'); setTimeout(()=>beep([1500],.04,.05,'square'),60) }
+function CameraApp(mode){ if(!(Host&&Host.media)){ if(mode==='video'){ note('Video recording needs the Mac or iPhone app','info',2200); return } takePhoto(); return } push(CameraView(mode)) }
+function CameraView(mode){ const v={name:'camera',media:true,mode,rec:false,recT:0,started:false,busy:false,
+  hdText(){ return this.mode==='video'?(this.rec?'● Recording '+mmss((Date.now()-this.recT)/1000):'Video'):'Camera' },
+  hdRight(){ return this.rec?'':(this.mode==='video'?'◀ ▶ Photo':'◀ ▶ Video') },
+  draw(el){ el.style.background='#000'; el.innerHTML='<div class="empty" style="color:#888">Starting camera…</div>' },
+  tick(){ if(this.rec) render() },
+  mediaShow(rect){ if(!this.started){ this.started=true; Host.media({op:'camera',rect}).catch(e=>{ if(tv()===v) pop(); note((e&&e.message)||'Camera not available','warn',2600) }) } else Host.media({op:'rect',rect}).catch(()=>{}) },
+  soft(){ const v=this; if(v.rec) return [{t:''},{t:'Stop',f:()=>v.stopRec()},{t:''}];
+    return [{t:'Options',f:()=>menu('Options',[[v.mode==='photo'?'Video':'Camera',()=>{pop();v.switchMode()}],['Change camera',()=>{pop();Host.media({op:'flip'}).catch(()=>{})}],['Self-timer',()=>{pop();v.selfTimer()}],[v.mode==='photo'?'Images':'Video clips',()=>{pop();LibraryGrid(v.mode==='photo'?'image':'video')}]],{nums:false})},
+      {t:v.mode==='photo'?'Capture':'Record',f:()=>v.mode==='photo'?v.shoot():v.startRec()},{t:'Back',f:pop}] },
+  key(k){ if(this.rec) return k!=='M'&&k!=='END'; if(k==='LT'||k==='RT'){ this.switchMode(); return true } if(k==='CALL'){ this.mode==='photo'?this.shoot():this.startRec(); return true } return false },
+  switchMode(){ this.mode=this.mode==='photo'?'video':'photo'; render() },
+  shoot(){ if(this.busy) return; this.busy=true; shutter();
+    Host.media({op:'capture'}).then(r=>{ this.busy=false; snapTaken(r) }).catch(e=>{ this.busy=false; note((e&&e.message)||'The photo was not taken','warn') }) },
+  selfTimer(){ let n=10; const t=setInterval(()=>{ if(tv()!==v){ clearInterval(t); return } n--; beep([1200],.05,.05,'square'); if(n<=0){ clearInterval(t); endNote(); v.shoot() } else note('Self-timer '+n,'info',1100) },1000); note('Self-timer 10','info',1100) },
+  startRec(){ Host.media({op:'recordVideo'}).then(()=>{ this.rec=true; this.recT=Date.now(); beep([880],.08,.06,'square'); render() }).catch(e=>note((e&&e.message)||'Could not record','warn')) },
+  stopRec(){ this.rec=false; render(); beep([660],.08,.06,'square'); note('Saving video','wait',30000);
+    Host.media({op:'stopVideo'}).then(r=>{ endNote(); note(r&&r.id?'Video saved to Gallery':'The video could not be saved to Photos',r&&r.id?'ok':'warn',2200) }).catch(()=>{ endNote(); note('The video was not saved','warn') }) },
+  onPop(){ if(this.rec) Host.media({op:'stopVideo'}).catch(()=>{}); Host.media({op:'close'}).catch(()=>{}); mediaShown=false } };
+  return v }
+async function snapTaken(r){ let local=null;
+  if(!r.id&&r.data){ const d=await shrink(r.data,480,640,.82); if(d){ local={id:'i:'+uid(),n:'Photo '+fmtDate(now()),data:d}; S.images.push(local); save() } }
+  push({name:'snap',title:'Camera',hdRight(){ return r.id?'Saved':'Phone memory' },
+    draw(el){ el.innerHTML=`<div class="snap" style="background-image:url('${r.data}')"></div>` },
+    soft(){ return [{t:'Options',f:()=>menu('Options',[['Set as wallpaper',()=>{ pop(); if(local){ S.wall={on:true,id:local.id}; save(); note('Wallpaper set') } else libWallpaper({id:r.id,big:r.data}) }],
+        r.id?['Delete',()=>{ pop(); Ask('Delete image?',()=>Host.library({op:'delete',id:r.id}).then(ok=>{ if(ok){ pop(); note('Deleted') } })) }]:null,
+        ['Go to Images',()=>{ pop(); pop(); pop(); LibraryGrid('image') }]],{nums:false})},{t:'Camera',f:pop},{t:'Back',f:pop}] } }) }
+const Rec={ native:()=>!!(Host&&Host.audio), mr:null, chunks:[], stream:null, an:null, t0:0, acc:0,
+  available(){ return Rec.native()||!!(navigator.mediaDevices&&window.MediaRecorder) },
+  async start(){ if(Rec.native()){ await Host.audio({op:'start'}); return }
+    Rec.stream=await navigator.mediaDevices.getUserMedia({audio:true}); Rec.chunks=[];
+    const type=['audio/mp4','audio/webm;codecs=opus','audio/webm'].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||'';
+    Rec.mr=new MediaRecorder(Rec.stream,type?{mimeType:type}:undefined); Rec.mr.ondataavailable=e=>{ if(e.data.size) Rec.chunks.push(e.data) }; Rec.mr.start(500);
+    const a=ac(); if(a){ const src=a.createMediaStreamSource(Rec.stream); Rec.an=a.createAnalyser(); Rec.an.fftSize=256; src.connect(Rec.an) } },
+  pause(){ if(Rec.native()) return Host.audio({op:'pause'}); Rec.mr&&Rec.mr.pause() },
+  resume(){ if(Rec.native()) return Host.audio({op:'resume'}); Rec.mr&&Rec.mr.resume() },
+  async level(){ if(Rec.native()) return Host.audio({op:'level'}).catch(()=>0); if(!Rec.an) return 0; const d=new Uint8Array(Rec.an.fftSize); Rec.an.getByteTimeDomainData(d); let m=0; for(const x of d) m=Math.max(m,Math.abs(x-128)); return Math.min(1,m/64) },
+  async stop(dur){ if(Rec.native()) return Host.audio({op:'stop'});
+    const mr=Rec.mr; if(!mr) return {name:''}; await new Promise(r=>{ mr.onstop=r; mr.stop() }); Rec.stream.getTracks().forEach(t=>t.stop());
+    const blob=new Blob(Rec.chunks,{type:mr.mimeType||'audio/webm'}); const id='rec'+Date.now(); const name='Recording '+fmtDate(now())+' '+fmtTime(now(),true).replace(/:/g,'.');
+    await Blobs.put('rec:'+id,await blob.arrayBuffer()); S.recs=S.recs||[]; S.recs.unshift({id,name,dur,size:blob.size,date:Date.now(),type:blob.type}); save(); Rec.mr=null; Rec.an=null; return {name} },
+  async list(){ if(Rec.native()) return (await Host.audio({op:'list'})).map(r=>({...r,name:r.id})); return (S.recs||[]).slice() },
+  async url(r){ if(Rec.native()){ const b=await Host.audio({op:'get',id:r.id}); if(!b) throw 0; return URL.createObjectURL(new Blob([fromB64(b)],{type:'audio/mp4'})) }
+    const buf=await Blobs.get('rec:'+r.id); if(!buf) throw 0; return URL.createObjectURL(new Blob([buf],{type:r.type||'audio/webm'})) },
+  async del(r){ if(Rec.native()) return Host.audio({op:'delete',id:r.id}); await Blobs.del('rec:'+r.id); S.recs=(S.recs||[]).filter(x=>x.id!==r.id); save() } };
+function Recorder(){ if(!Rec.available()){ note('Microphone not available on this device','info',1800); return }
+  let lvT=null; const v={name:'recorder',title:'Recorder',state:'idle',t0:0,acc:0,
+    el(){ return this.acc+(this.state==='rec'?Date.now()-this.t0:0) },
+    draw(el){ const st={idle:'Ready to record',rec:'Recording',paused:'Paused',saving:'Saving'}[this.state];
+      el.innerHTML=`<div class="rec"><div class="rmic${this.state==='rec'?' on':''}">${ico('mic')}</div><div class="t">${mmss(this.el()/1000)}</div><div class="rlv"><i id="reclv"></i></div><div class="st">${st}</div></div>` },
+    tick(){ if(this.state==='rec') render() },
+    soft(){ const v=this;
+      if(v.state==='rec') return [{t:''},{t:'Pause',f:()=>{ Rec.pause(); v.acc=v.el(); v.state='paused'; render() }},{t:'Stop',f:()=>v.stop()}];
+      if(v.state==='paused') return [{t:''},{t:'Continue',f:()=>{ Rec.resume(); v.t0=Date.now(); v.state='rec'; render() }},{t:'Stop',f:()=>v.stop()}];
+      return [{t:'Options',f:()=>menu('Options',[['Record',()=>{pop();v.start()}],['Recordings',()=>{pop();RecordingsList()}]],{nums:false})},{t:'Record',f:()=>v.start()},{t:'Back',f:pop}] },
+    start(){ if(this.state!=='idle') return; Rec.start().then(()=>{ this.state='rec'; this.t0=Date.now(); this.acc=0; render();
+        clearInterval(lvT); lvT=setInterval(async()=>{ if(this.state!=='rec') return; const l=await Rec.level(); const i=document.getElementById('reclv'); if(i) i.style.width=Math.round(l*100)+'%' },150) })
+      .catch(e=>note((e&&e.message)||'Microphone not available','warn',2400)) },
+    async stop(){ const dur=this.el()/1000; clearInterval(lvT); this.state='saving'; render();
+      try{ const r=await Rec.stop(dur); this.state='idle'; this.acc=0; render(); note('Saved to Recordings','ok',1600) }catch(e){ this.state='idle'; render(); note('The recording was not saved','warn') } },
+    onPop(){ clearInterval(lvT); if(this.state==='rec'||this.state==='paused') Rec.stop(this.el()/1000).catch(()=>{}) } };
+  push(v) }
+function RecordingsList(){ const v=List('Recordings',()=>(v._items||[]).map(r=>({t:r.name||r.id,s:mmss(r.dur)+(r.date?' · '+fmtStamp(r.date):''),r,ic:ico('mic')})),{two:true,name:'recs',empty:'No recordings. Use Media › Recorder to make one.',
+    M:it=>({t:'Play',f:()=>RecPlayer(it.r)}),Mempty:{t:'Record',f:()=>{pop();Recorder()}},
+    L:it=>it?{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();RecPlayer(it.r)}],['Record new',()=>{pop();Recorder()}],['Details',()=>{pop();Info('Details',`<p><b>${esc(it.r.name||it.r.id)}</b></p><p><span class="lbl">Length</span>${mmss(it.r.dur)}</p><p><span class="lbl">Size</span>${kb(it.r.size||0)}</p>`)}],
+      ['Delete',()=>{pop();Ask('Delete recording?',()=>Promise.resolve(Rec.del(it.r)).then(()=>{ v._items=v._items.filter(x=>x!==it.r); render(); note('Deleted') }))}]],{nums:false})}:{t:''} });
+  v._items=[]; push(v); Rec.list().then(l=>{ v._items=l; if(tv()===v) render() }).catch(()=>{}) }
+function RecPlayer(r){ const a=new Audio(); let url=null; const v={name:'recplay',title:r.name||r.id,playing:false,
+  draw(el){ const pr=a.duration?a.currentTime/a.duration*100:0; el.innerHTML=`<div class="mp${this.playing?' play':''}"><div class="rmic" style="width:80px;height:80px;border-radius:50%;display:grid;place-items:center;background:var(--thl);color:var(--thlfg)">${ico('mic',40)}</div><div class="ti">${esc(r.name||r.id)}</div><div class="pr"><i style="width:${pr}%"></i></div><div class="tm">${mmss(a.currentTime)} / ${mmss(a.duration||r.dur)}</div></div>` },
+  tick(){ render() },
+  soft(){ return [{t:''},{t:this.playing?'Pause':'Play',f:()=>{ if(this.playing){ a.pause(); this.playing=false } else { a.play().then(()=>{ this.playing=true; render() }).catch(()=>{}) } render() }},{t:'Back',f:pop}] },
+  key(k){ if(k==='LT'){ a.currentTime=Math.max(0,a.currentTime-5); return true } if(k==='RT'){ a.currentTime=Math.min(a.duration||0,a.currentTime+5); return true } return false },
+  onPop(){ a.pause(); if(url) URL.revokeObjectURL(url) } };
+  a.onended=()=>{ v.playing=false; if(tv()===v) render() };
+  push(v); Rec.url(r).then(u=>{ url=u; a.src=u; return a.play() }).then(()=>{ v.playing=true; if(tv()===v) render() }).catch(()=>note('Could not play the recording','warn')) }
+
 function radio(){ note('FM radio is not available on this device','info',1800) }
 /* music player (tracks live for this session) */
 const music={tracks:[],cur:null,el:new Audio(),playing:false,vol:6,
@@ -1271,7 +1413,10 @@ function syncOverlays(){ const v=S.on?tv():null;
   const onWeb=!!(v&&v.name==='webpage');
   if(Host&&Host.web){ if(onWeb){ const bd=SCR.querySelector('.bd'); if(!bd) return; const r=bd.getBoundingClientRect(); Host.web({op:'show',rect:{x:r.left,y:r.top,w:r.width,h:r.height},url:v.pendingUrl||null}).catch(()=>{}); v.pendingUrl=null; webShown=true }
     else if(webShown){ Host.web({op:'hide'}).catch(()=>{}); webShown=false } }
-  else WEBL.hidden=!onWeb }
+  else WEBL.hidden=!onWeb;
+  if(Host&&Host.media){ if(v&&v.media){ const bd=SCR.querySelector('.bd'); if(bd){ const r=bd.getBoundingClientRect(); v.mediaShow({x:r.left,y:r.top,w:r.width,h:r.height}); mediaShown=true } }
+    else if(mediaShown){ Host.media({op:'hide'}).catch(()=>{}); mediaShown=false } } }
+let mediaShown=false;
 window.LarchWeb=o=>{ const v=V.find(x=>x.name==='webpage'); if(!v) return; Object.assign(v.st,o||{}); if(o&&o.url&&o.url!==S.web.last){ S.web.last=o.url; save() } if(tv()===v) render() };
 function openExternal(u){ if(Host&&Host.openUrl){ Host.openUrl(u); return } const a=document.createElement('a'); a.href=u; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove() }
 function WebPage(u){ let i=0; const start=u==='start'; const native=!!(Host&&Host.web);
