@@ -15,6 +15,20 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden}
 <body>
 <canvas id="display" tabindex="0"></canvas>
 <div id="msg"><i></i><span id="msgt">Starting Java…</span></div>
+<script>
+/* Sound follows the phone: muted while the iPhone is on silent (or the profile is silent). Every audio
+   context made on this page plays through one gain node the phone can turn down. */
+(function(){ var Base=window.AudioContext||window.webkitAudioContext, gains=[], media=[]; window.__kpMuted=false;
+  if(Base){ try{ var proto=(window.BaseAudioContext||Base).prototype, d=Object.getOwnPropertyDescriptor(proto,'destination');
+    var M=function(o){ var c=o?new Base(o):new Base(), g=c.createGain(); g.gain.value=window.__kpMuted?0:1; g.connect(d.get.call(c));
+      Object.defineProperty(c,'destination',{get:function(){ return g }}); gains.push(g); return c };
+    M.prototype=Base.prototype; window.AudioContext=M; if(window.webkitAudioContext) window.webkitAudioContext=M }catch(e){} }
+  var A=window.Audio; if(A){ var W=function(s){ var a=s===undefined?new A():new A(s); a.muted=window.__kpMuted; media.push(a); return a }; W.prototype=A.prototype; window.Audio=W }
+  window.__kpMute=function(on){ window.__kpMuted=!!on; gains.forEach(function(g){ g.gain.value=on?0:1 });
+    media.concat([].slice.call(document.querySelectorAll('audio,video'))).forEach(function(m){ m.muted=!!on }) };
+  addEventListener('message',function(e){ var m=e.data||{}; if(m.t==='mute') window.__kpMute(m.on) });
+})();
+</script>
 <script src="https://cjrtnc.leaningtech.com/20260317_2978/loader.js"></script>
 <script type="module" src="src/larch.js"></script>
 </body>

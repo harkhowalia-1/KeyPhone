@@ -209,6 +209,50 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 #phone.m-modern .kk small{font:500 11px/1 'KP Modern',var(--f-lcd);text-transform:lowercase;letter-spacing:0}
 #phone.m-modern .kk:nth-child(3n) small{order:-1}
 
+/* Messenger: a wide messenger with a landscape screen, a one-touch Menu and Messages key either side of the
+   navigation key, and a four-row keyboard whose middle-left keys double as the phone keypad */
+#phone.m-qwerty,#phone.m-qwerty .inner{width:360px;height:668px}
+#phone.m-qwerty .body{border-radius:30px 30px 34px 34px}
+#phone.m-qwerty .face{left:7px;right:7px;top:7px;bottom:7px;border-radius:24px 24px 28px 28px}
+#phone.m-qwerty .ear{top:14px;width:62px;margin-left:-31px;height:5px}
+#phone.m-qwerty .bezel{left:11px;top:34px;width:338px;height:258px;border-radius:9px}
+#phone.m-qwerty #lcd{width:320px;height:240px}
+#phone.m-qwerty .glass{border-radius:9px}
+#phone.m-qwerty .emu{left:22px;top:8px;width:26px;height:18px;border-radius:6px}
+#phone.m-qwerty .ctl{left:14px;right:14px;top:302px;height:94px}
+#phone.m-qwerty .soft{top:0;width:23%;height:28px}
+#phone.m-qwerty .soft.l{border-radius:7px 16px 7px 7px}#phone.m-qwerty .soft.r{border-radius:16px 7px 7px 7px}
+#phone.m-qwerty .cl,#phone.m-qwerty .en{top:40px;width:17%;height:42px}
+#phone.m-qwerty .cl{border-radius:7px 7px 7px 20px}#phone.m-qwerty .en{border-radius:7px 7px 20px 7px}
+#phone.m-qwerty .qx{display:grid}
+#phone.m-qwerty .pad{transform:scale(.84);transform-origin:50% 0}
+#phone.m-qwerty .kp{left:14px;right:14px;top:406px;grid-template-columns:repeat(10,1fr);gap:7px 4px}
+#phone.m-qwerty .kk{height:48px;border-radius:8px;flex-direction:column;gap:0;padding-top:3px;box-sizing:border-box}
+#phone.m-qwerty .kk:nth-child(n){border-radius:8px}
+#phone.m-qwerty .kp .kk:nth-child(-n+10){border-top-left-radius:9px;border-top-right-radius:9px}
+#phone.m-qwerty .kk b{font:600 16px/1 var(--f-lcd);letter-spacing:0}
+#phone.m-qwerty .kk small{position:absolute;top:3px;right:4px;font:600 9px/1 var(--f-lcd);letter-spacing:0;text-transform:none}
+#phone.m-qwerty .kk.nk b{font-size:15px}
+#phone.m-qwerty .kk.nk small{font-size:10px;font-weight:700}
+#phone.m-qwerty .kk.sp{grid-column:span 4}
+#phone.m-qwerty .kk svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#phone.m-qwerty .kk.fx b{font-size:12px;font-weight:700}
+#phone.m-qwerty .kk.on{box-shadow:inset 0 0 0 2px var(--qacc,#3f9cff),0 1px 0 rgba(0,0,0,.6)!important}
+#phone.m-qwerty .kk.on.lock::after{content:"";position:absolute;left:50%;bottom:4px;width:10px;height:2px;margin-left:-5px;border-radius:1px;background:var(--qacc,#3f9cff)}
+#phone.m-qwerty .deco .d1{display:block;left:7px;right:7px;top:297px;height:1px;background:rgba(255,255,255,.14);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+#phone.m-qwerty .deco .d2{display:block;left:9px;right:9px;top:399px;height:228px;border-radius:14px 14px 22px 22px;background:rgba(0,0,0,.2);box-shadow:inset 0 1px 0 rgba(0,0,0,.3),0 1px 0 rgba(255,255,255,.08)}
+#phone.m-qwerty .mic{bottom:16px}
+.qx{display:none;position:absolute;top:44px;width:13%;height:34px;border-radius:10px;cursor:pointer;place-items:center;background:linear-gradient(180deg,#3a424c,#232930);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 3px rgba(0,0,0,.5)}
+.qx.hm{left:19%}.qx.ml{right:19%}
+.qx svg{width:18px;height:18px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.qx:active,.qx.dn{filter:brightness(1.35)}
+#phone.fs.fill.m-qwerty .kk{height:calc(48px*var(--c,1))}
+#phone.fs.fill.m-qwerty .kp{gap:calc(7px*var(--c,1)) 4px}
+#phone.fs.fill.m-qwerty .soft{width:23%;top:0;height:calc(28px*var(--c,1))}
+#phone.fs.fill.m-qwerty .cl,#phone.fs.fill.m-qwerty .en{width:17%;top:calc(40px*var(--c,1));height:calc(42px*var(--c,1))}
+#phone.fs.fill.m-qwerty .qx{top:calc(44px*var(--c,1));height:calc(34px*var(--c,1))}
+#phone.fs.fill.m-qwerty .pad{transform:scale(calc(var(--c,1)*.84))}
+
 /* ---------- LCD ---------- */
 #scr{position:absolute;inset:0;background:var(--tbg);z-index:1}
 #scr.live{background:transparent}
@@ -279,7 +323,18 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 #jvm{inset:0;background:#000}
 #jvm iframe,#webl iframe{display:block;width:100%;height:100%;border:0;background:transparent}
 #webl{left:0;right:0;top:26px;bottom:28px;background:#fff}
-#jvm[hidden],#webl[hidden]{display:none}
+#webl[hidden]{display:none}
+#jvm[hidden]{visibility:hidden;pointer-events:none}
+#jvm iframe{position:absolute;inset:0}
+#jvm iframe.warm{visibility:hidden;pointer-events:none}
+.jsplash{position:absolute;inset:0;z-index:2;background:#000;color:#f2f2f4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px;font-family:var(--f-lcd)}
+.jsplash .ji{width:64px;height:64px;border-radius:14px;display:grid;place-items:center;background:#1c1c1f;color:#e6e6ea;overflow:hidden}
+.jsplash .ji img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.jsplash b{font-weight:500;font-size:16px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jsplash span{font-size:12px;color:#8e8e93;min-height:15px}
+.jsplash i{display:block;width:84px;height:3px;border-radius:2px;background:#2c2c2e;overflow:hidden;margin-top:6px}
+.jsplash i u{display:block;width:40%;height:100%;border-radius:2px;background:#f2f2f4;animation:jbar 1.1s ease-in-out infinite}
+@keyframes jbar{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
 #note{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;z-index:5}
 #note .nb{background:var(--tsolid);color:var(--tfg);border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.45);padding:14px 12px;text-align:center;width:100%;border:1px solid rgba(127,127,127,.35)}
 #note .ni{width:32px;height:32px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px}
@@ -381,6 +436,35 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 .mp.xm{gap:6px}
 .mp .art{width:112px;height:112px;border-radius:8px;background:#222 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.35)}
 .mp .ar{font-size:12px;color:var(--tsub);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:-4px}
+/* the music player */
+.mp2{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:10px 14px 6px;gap:7px;text-align:center}
+.mp2 .cov{flex:none}
+.mp2 .art{width:104px;height:104px;border-radius:8px;background:#222 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.mp2 .disc{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle,var(--tsolid) 12%,#222 13%,#444 40%,#222 41%,#333 70%,#111 71%);box-shadow:0 3px 10px rgba(0,0,0,.4)}
+.mp2.play .disc{animation:spin 3s linear infinite}
+.mp2 .inf{width:100%;min-width:0;display:flex;flex-direction:column;gap:3px}
+.mp2 .ti{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp2 .ar{font-size:12px;color:var(--tsub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp2 .pr{height:4px;background:rgba(127,127,127,.3);border-radius:2px;overflow:hidden;margin-top:3px}
+.mp2 .pr i{display:block;height:100%;background:var(--thl)}
+.mp2 .tm{display:flex;justify-content:space-between;font-size:11px;color:var(--tsub);font-variant-numeric:tabular-nums}
+.mp2 .tr{display:flex;justify-content:center;align-items:center;gap:20px}
+.mp2 .tr i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;transition:background .15s,transform .15s}
+.mp2 .tr i.pp{width:36px;height:36px;background:var(--thl);color:var(--thlfg)}
+.mp2 .tr i.hit{background:rgba(127,127,127,.35);transform:scale(.92)}
+.mp2 .tr i.pp.hit{background:var(--thl);filter:brightness(1.3)}
+.mp2 .st{display:flex;justify-content:center;align-items:center;gap:12px;color:var(--tsub);min-height:14px}
+.mp2 .st span{display:inline-flex;align-items:center;gap:4px;opacity:.4}
+.mp2 .st span.on{opacity:1;color:var(--tfg)}.mp2 .st span.vl{opacity:.9}
+.mp2 .st sup{font:700 8px/1 var(--f-lcd);margin-left:-4px;margin-top:-6px}
+.mp2 .st b{display:block;width:34px;height:4px;border-radius:2px;background:rgba(127,127,127,.3);overflow:hidden}
+.mp2 .st b i{display:block;height:100%;background:currentColor}
+#lcd.land .mp2{flex-direction:row;align-items:center;padding:8px 12px;gap:12px;text-align:left}
+#lcd.land .mp2 .art{width:108px;height:108px}#lcd.land .mp2 .disc{width:100px;height:100px}
+#lcd.land .mp2 .tr{justify-content:flex-start;gap:14px}#lcd.land .mp2 .st{justify-content:flex-start}
+#lcd.ui-mono .mp2 .ti{font-size:19px}#lcd.ui-mono .mp2 .ar,#lcd.ui-mono .mp2 .tm{font-size:15px}
+#lcd.ui-mono .mp2 .art{width:84px;height:84px;filter:grayscale(1) contrast(1.15);mix-blend-mode:multiply}#lcd.ui-mono .mp2 .disc{width:76px;height:76px}
+#lcd.ui-mono .mp2 .tr i.pp{background:var(--tfg);color:var(--tsolid)}
 /* weather */
 .wx{position:absolute;inset:0;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 .wx .now{display:flex;align-items:center;gap:12px}
@@ -484,6 +568,52 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 #lcd.ui-flip .sk.ov{border-radius:0}
 #lcd.ui-flip #note .nb,#lcd.ui-flip .dlg{border-radius:20px}
 
+/* Messenger: a crisp business look for a landscape screen: slim bars with an accent rule, compact rows, small tiles */
+#lcd.ui-qw{font-size:13.5px}
+#lcd.ui-qw .hd{height:24px;font-size:13.5px;font-weight:600;padding:0 8px;box-shadow:inset 0 -2px 0 var(--tac)}
+#lcd.ui-qw .hd .hr{font-size:11.5px}
+#lcd.ui-qw .bd{top:24px;bottom:26px}
+#lcd.ui-qw .full .bd{top:0}
+#lcd.ui-qw .sk{height:26px;font-size:13px;font-weight:600;padding:0 9px;box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
+#lcd.ui-qw .li{height:31px;padding:0 9px 0 7px}
+#lcd.ui-qw .li.two{height:40px}
+#lcd.ui-qw .li small{font-size:11.5px;margin-top:1px}
+#lcd.ui-qw .li.on{margin:0 3px;padding:0 6px 0 4px;border-radius:6px;border-bottom-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 1px 2px rgba(0,0,0,.25)}
+#lcd.ui-qw .lic{width:20px;height:20px}#lcd.ui-qw .lic svg{width:18px;height:18px}#lcd.ui-qw .lic img{width:20px;height:20px}
+#lcd.ui-qw .gm{padding:4px 8px;gap:2px 6px}
+#lcd.ui-qw .gi{border-radius:9px;gap:3px}
+#lcd.ui-qw .gi.on{background:rgba(127,127,127,.16);color:var(--tfg);box-shadow:inset 0 0 0 1.5px var(--tac)}
+#lcd.ui-qw .gi.on .tile{transform:none}
+#lcd.ui-qw .tile{width:42px;height:42px;border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 1px 3px rgba(0,0,0,.3)}
+#lcd.ui-qw .tile svg{width:24px;height:24px}
+#lcd.ui-qw .gm.lbl .tile{width:32px;height:32px;border-radius:9px}#lcd.ui-qw .gm.lbl .tile svg{width:19px;height:19px}
+#lcd.ui-qw .gi span{font-size:10.5px}
+#lcd.ui-qw #note .nb,#lcd.ui-qw .dlg{border-radius:10px;border:1px solid rgba(127,127,127,.35);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+#lcd.ui-qw .sb .clk{font-weight:300;letter-spacing:-.02em}
+#lcd.ui-qw .sb .dt{font-weight:500}
+#lcd.ui-qw .sk.ov{background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.55));box-shadow:none}
+/* any landscape screen */
+#lcd.land #livewall{width:320px;height:427px;top:-150px}
+#lcd.land canvas.cv,#lcd.land .ss canvas{display:block;height:100%!important;width:auto!important;margin:0 auto}
+#lcd.land .gal{grid-auto-rows:57px}
+#lcd.land .cal td{height:23px}#lcd.land .cal td span{width:20px;height:20px}#lcd.land .cal th{height:14px}#lcd.land .cal table{font-size:12px}
+#lcd.land .sym{grid-template-columns:repeat(9,1fr)}#lcd.land .sym span{height:30px}
+#lcd.land .call{gap:3px;padding:6px}#lcd.land .call .av{width:48px;height:48px;margin-bottom:2px}#lcd.land .call .av svg{width:28px;height:28px}
+#lcd.land .lv{padding:20px 60px 40px}
+#lcd.land .big .t1{font-size:34px}
+#lcd.land .rec{gap:6px}#lcd.land .rec .rmic{width:56px;height:56px}#lcd.land .rec .t{font-size:28px}
+#lcd.land .sb .clk{left:16px;right:auto;text-align:left;top:30px;font-size:48px}
+#lcd.land .sb .dt{left:18px;right:auto;text-align:left;top:88px;transform:none}
+#lcd.land .sb .pf{left:18px;right:auto;text-align:left;top:108px}
+#lcd.land .sb .as{left:152px;right:28px;top:34px;bottom:auto}
+#lcd.land .sb .nv{display:none}
+#lcd.land .lock{bottom:32px}
+#lcd.land .wx{flex-direction:row;flex-wrap:wrap;align-content:flex-start;gap:4px 10px}
+#lcd.land .wx .now{width:100%}#lcd.land .wx .now .t{font-size:32px}
+#lcd.land .wx .det{width:100%}
+#lcd.land .wx .days{width:100%}#lcd.land .wx .days div{height:20px;font-size:12px}
+#lcd.land .cvt .row b{font-size:20px}#lcd.land .cvt{gap:5px;padding:7px 10px}
+
 /* Modern Bar: flat, large clean type, rounded accent highlight */
 #lcd.ui-modern{font-family:'KP Modern',var(--f-lcd);font-size:14px}
 #lcd.ui-modern .hd{font-weight:700;font-size:15px;padding:0 10px}
@@ -530,6 +660,8 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
         <div class="k soft l" data-k="L" title="Left selection key"><i></i></div>
         <div class="k soft r" data-k="R" title="Right selection key"><i></i></div>
         <div class="k cl" data-k="CALL" title="Call"><svg viewBox="0 0 24 24"><path fill="#38c35a" d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div>
+        <div class="k qx hm" data-k="HOME" title="Menu"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></div>
+        <div class="k qx ml" data-k="MAIL" title="Messages"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3.5 7.5 12 13l8.5-5.5"/></svg></div>
         <div class="k en" data-k="END" title="End / hold to power"><svg viewBox="0 0 24 24"><path fill="#e2453c" d="M12 9c-1.6 0-3.2.3-4.6.7v3.1c0 .4-.2.7-.6.9-1 .5-1.9 1.1-2.7 1.8-.2.2-.4.3-.7.3s-.5-.1-.7-.3L.3 13.1c-.2-.2-.3-.4-.3-.7s.1-.5.3-.7A16.8 16.8 0 0 1 12 7c4.6 0 8.7 1.8 11.7 4.7.2.2.3.4.3.7s-.1.5-.3.7l-2.4 2.4c-.2.2-.4.3-.7.3s-.5-.1-.7-.3c-.8-.7-1.7-1.3-2.7-1.8-.3-.2-.6-.5-.6-.9V9.7C15.2 9.3 13.6 9 12 9z"/></svg></div>
         <div class="pad">
           <div class="k dz u" data-k="U"><i></i></div>
@@ -574,7 +706,7 @@ const DEF={
     pager:{name:'Pager',tone:'KeyPhone theme',vol:0,alert:'off',vib:true,msg:'Beep',keys:2,warn:false,alertFor:'all'},
     flight:{name:'Flight',tone:'KeyPhone theme',vol:0,alert:'off',vib:false,msg:'Off',keys:1,warn:true,alertFor:'all'}
   },
-  model:'k7', fill:false, java:'auto', msrc:'files', spotify:{cid:''}, weather:{place:null,unit:'c',sb:true}, wclock:['Europe/London','America/New_York','Asia/Tokyo'], tones:[], games:{blocks:0,mines:0}, voip:{on:false,uri:'',pass:'',ws:'',name:'',auth:'',ice:'',iceUser:'',icePass:'',mode:'ask'}, theme:'steel', wall:{on:true,id:'live:dawn'}, sfont:'#ffffff', navIcons:false, activeSb:true,
+  model:'k7', fill:false, mp:{shuffle:false,repeat:'all'}, java:'auto', msrc:'files', spotify:{cid:''}, weather:{place:null,unit:'c',sb:true}, wclock:['Europe/London','America/New_York','Asia/Tokyo'], tones:[], games:{blocks:0,mines:0}, voip:{on:false,uri:'',pass:'',ws:'',name:'',auth:'',ice:'',iceUser:'',icePass:'',mode:'ask'}, theme:'steel', wall:{on:true,id:'live:dawn'}, sfont:'#ffffff', navIcons:false, activeSb:true,
   ss:{on:false,type:'digital',to:60}, psaver:false, sleep:false,
   fs:{msg:'normal',contacts:'normal',web:'normal'}, opLogo:true,
   clock:{show:true,h24:true,off:0,tz:SYS_TZ}, date:{show:true,fmt:'DD-MM-YYYY',sep:'-'}, autoTime:'on',
@@ -614,6 +746,8 @@ function syncSchedule(){ if(!Host||!Host.schedule) return; const items=[], off=S
   const js=JSON.stringify(items); if(js===lastSched) return; lastSched=js; Host.schedule(items).catch(()=>{}) }
 load();
 for(const t of S.tones||[]) RING[t.n]=t.seq;
+if(!S.mig5){ S.mig5=true; if(Host&&Host.music&&(S.msrc||'files')==='files') S.msrc='apple';
+  if((Host&&Host.platform==='ios')||(!Host&&matchMedia('(pointer: coarse)').matches&&Math.min(screen.width,screen.height)<600)) S.fill=true; save() }
 if(!S.mig4){ S.mig4=true; for(const k in S.profiles) if(S.profiles[k].tone==='Larch theme') S.profiles[k].tone='KeyPhone theme'; if(S.alarm.tone==='Larch theme') S.alarm.tone='KeyPhone theme' }
 if(!S.mig3){ S.mig3=true; if(S.wall&&S.wall.id==='w:dawn') S.wall.id='live:dawn' }
 if(!S.mig2){ S.mig2=true; S.ss.on=false; S.psaver=false; S.sleep=false; save() }
@@ -661,8 +795,12 @@ const DTMF={'1':[697,1209],'2':[697,1336],'3':[697,1477],'4':[770,1209],'5':[770
 function beep(fs,dur,g,wave){ const a=ac(); if(!a||!g) return; const t=a.currentTime; const gn=a.createGain(); gn.gain.setValueAtTime(g,t); gn.gain.setValueAtTime(g,t+dur*.8); gn.gain.linearRampToValueAtTime(0,t+dur); gn.connect(a.destination);
   fs.forEach(f=>{const o=a.createOscillator(); o.type=wave||'sine'; o.frequency.value=f; o.connect(gn); o.start(t); o.stop(t+dur)}) }
 const prof=()=>S.profiles[S.profile];
-function keyTone(k){ if(!S.on) return; const lv=prof().keys; if(!lv) return; beep(DTMF[k]||[1320],DTMF[k]?.09:.05,[0,.04,.08,.13][lv],DTMF[k]?'sine':'square') }
-function warnTone(){ if(prof().warn) beep([880,660],.18,.05,'square') }
+/* The iPhone's Ring/Silent switch (or Action button): while it is set to silent, key tones, message tones,
+   ringing and game sounds are muted and the phone vibrates instead. Alarms, timers and music still play, as on an iPhone. */
+const hushed=()=>!!(typeof dev!=='undefined'&&dev.silent);
+function sfx(fs,dur,g,wave){ if(!hushed()) beep(fs,dur,g,wave) }
+function keyTone(k){ if(!S.on||hushed()) return; const lv=prof().keys; if(!lv) return; beep(DTMF[k]||[1320],DTMF[k]?.09:.05,[0,.04,.08,.13][lv],DTMF[k]?'sine':'square') }
+function warnTone(){ if(prof().warn&&!hushed()) beep([880,660],.18,.05,'square') }
 let ringH=null, ringing=false;
 /* Phone sounds (keys, tones, shutter) follow the device: the iPhone's silent switch mutes them.
    Music, radio, recordings, videos and a ringing alarm or timer keep playing, as they do on an iPhone. */
@@ -672,14 +810,15 @@ function audioMode(force){ if(callObj&&callObj.voip){ try{ if(navigator.audioSes
   try{ if(navigator.audioSession) navigator.audioSession.type=loud?'playback':'ambient' }catch(e){}
   if(loud!==lastLoud||force){ lastLoud=loud; if(Host&&Host.audioSession) Host.audioSession(loud).catch(()=>{}) } }
 let vibI=null;
-function startRing(kind){ stopRing(); ringing=true; audioMode(); const p=prof(); const v=volG(p.vol);
-  if(p.vib){ PHONE.classList.add('vib'); if(Host&&Host.haptic){ Host.haptic('vibrate'); vibI=setInterval(()=>Host.haptic('vibrate'),1600) } }
+function startRing(kind){ stopRing(); const p=prof(); const v=volG(p.vol), hush=kind==='ring'&&hushed(); ringing=!hush; audioMode();
+  if(p.vib||hush){ PHONE.classList.add('vib'); if(Host&&Host.haptic){ Host.haptic('vibrate'); vibI=setInterval(()=>Host.haptic('vibrate'),1600) } }
   if(kind==='alarm'){ ringH=playSeq(ALARMT[S.alarm.tone]||ALARMT.Alarm,{vol:Math.max(v,.08),loop:true}); return }
-  if(p.alert==='off'||!v) return;
+  if(kind==='timer'){ ringH=playSeq(RING[p.tone]||RING['KeyPhone theme'],{vol:Math.max(v,.08),loop:true}); return }
+  if(hush||p.alert==='off'||!v) return;
   if(p.alert==='beep'){ ringH=playSeq('A6 16',{vol:v}); return }
   ringH=playSeq(RING[p.tone]||RING['KeyPhone theme'],{vol:p.alert==='asc'?.02:v,step:p.alert==='asc'?.03:0,loop:p.alert!=='once'}) }
 function stopRing(){ if(ringH){ringH.stop();ringH=null} clearInterval(vibI); vibI=null; PHONE.classList.remove('vib'); if(ringing){ ringing=false; audioMode() } }
-function msgAlert(){ const p=prof(); if(p.vib&&Host&&Host.haptic) Host.haptic('vibrate'); if(p.vib){PHONE.classList.add('vib');setTimeout(()=>{if(!ringH)PHONE.classList.remove('vib')},700)} if(p.msg!=='Off'&&MSGT[p.msg]) playSeq(MSGT[p.msg],{vol:Math.max(volG(p.vol),.04)}) }
+function msgAlert(){ const p=prof(), vib=p.vib||hushed(); if(vib&&Host&&Host.haptic) Host.haptic('vibrate'); if(vib){PHONE.classList.add('vib');setTimeout(()=>{if(!ringH)PHONE.classList.remove('vib')},700)} if(!hushed()&&p.msg!=='Off'&&MSGT[p.msg]) playSeq(MSGT[p.msg],{vol:Math.max(volG(p.vol),.04)}) }
 
 /* ---------------- icons (original line art) ---------------- */
 const P={
@@ -757,6 +896,10 @@ const THEMES={
   blush:{ui:'flip',n:'Blush',bg:'linear-gradient(180deg,#fff6f8,#ffdfe7)',solid:'#fff1f4',fg:'#3a1020',sub:'#9a5a6c',hd:'linear-gradient(180deg,#ff8fab,#ef5a82)',hdfg:'#fff',hl:'linear-gradient(180deg,#ffb7c9,#ff7fa3)',hlfg:'#3a1020',sk:'linear-gradient(180deg,#ffe4eb,#ffcfdb)',skfg:'#3a1020',ac:'#ef5a82',wall:'w:bubbles'},
   mint:{ui:'flip',n:'Mint',bg:'linear-gradient(180deg,#f2fcf8,#d3f3e6)',solid:'#ecfaf4',fg:'#0d2a20',sub:'#4e7a68',hd:'linear-gradient(180deg,#4fd1a5,#1f9c74)',hdfg:'#fff',hl:'linear-gradient(180deg,#8ff0cd,#3bc796)',hlfg:'#0d2a20',sk:'linear-gradient(180deg,#dcf7ec,#bdeedb)',skfg:'#0d2a20',ac:'#1f9c74',wall:'w:bubbles-m'},
   lavender:{ui:'flip',n:'Lavender',bg:'linear-gradient(180deg,#f8f5ff,#e6dcff)',solid:'#f4f0ff',fg:'#22113f',sub:'#6f5f96',hd:'linear-gradient(180deg,#a68bff,#6f4fe0)',hdfg:'#fff',hl:'linear-gradient(180deg,#c9b8ff,#9b7dff)',hlfg:'#22113f',sk:'linear-gradient(180deg,#ece5ff,#ddd1ff)',skfg:'#22113f',ac:'#6f4fe0',wall:'w:bubbles-l'},
+  frost:{ui:'qw',n:'Frost',bg:'linear-gradient(180deg,#f5f9fc,#dae6ef)',solid:'#f3f7fa',fg:'#13212d',sub:'#5b6e7d',hd:'linear-gradient(180deg,#2a4054,#16242f)',hdfg:'#ffffff',hl:'linear-gradient(180deg,#62b4ff,#1f7fe0)',hlfg:'#ffffff',sk:'linear-gradient(180deg,#2a4054,#16242f)',skfg:'#ffffff',ac:'#2d8cf0',wall:'w:ribbon'},
+  nocturne:{ui:'qw',n:'Night',bg:'linear-gradient(180deg,#10161b,#05080a)',solid:'#131b21',fg:'#e8f0f6',sub:'#8398a7',hd:'linear-gradient(180deg,#1c262f,#0e1419)',hdfg:'#e8f0f6',hl:'linear-gradient(180deg,#2f9fff,#1167cc)',hlfg:'#ffffff',sk:'linear-gradient(180deg,#1c262f,#0b1014)',skfg:'#e8f0f6',ac:'#38a3ff',wall:'w:ribbon'},
+  amberq:{ui:'qw',n:'Amber',bg:'linear-gradient(180deg,#18130e,#0a0806)',solid:'#1c1611',fg:'#f6efe6',sub:'#a9998a',hd:'linear-gradient(180deg,#2b2219,#17120d)',hdfg:'#f6efe6',hl:'linear-gradient(180deg,#ffb14d,#e07a12)',hlfg:'#1a0e02',sk:'linear-gradient(180deg,#2b2219,#130f0b)',skfg:'#f6efe6',ac:'#ff9a2e',wall:'w:ribbon-a'},
+  glacier:{ui:'qw',n:'Glacier',bg:'linear-gradient(180deg,#eef6f7,#cfe3e6)',solid:'#eef5f6',fg:'#0f2326',sub:'#4f6b70',hd:'linear-gradient(180deg,#0f6f7c,#0a4c55)',hdfg:'#ffffff',hl:'linear-gradient(180deg,#3fd0c4,#119c94)',hlfg:'#ffffff',sk:'linear-gradient(180deg,#0f6f7c,#0a4c55)',skfg:'#ffffff',ac:'#14a89e',wall:'w:ribbon-l'},
   charcoal:{ui:'modern',n:'Charcoal',bg:'#131416',solid:'#1d1e21',fg:'#f2f2f3',sub:'#9a9da3',hd:'#131416',hdfg:'#f2f2f3',hl:'#3478f6',hlfg:'#ffffff',sk:'#131416',skfg:'#f2f2f3',ac:'#3478f6',wall:'w:waves'},
   paper:{ui:'modern',n:'Paper',bg:'#f3f3f1',solid:'#ffffff',fg:'#151515',sub:'#6b6b6b',hd:'#f3f3f1',hdfg:'#151515',hl:'#151515',hlfg:'#f3f3f1',sk:'#f3f3f1',skfg:'#151515',ac:'#151515',wall:'w:waves-l'},
   forest2:{ui:'modern',n:'Forest',bg:'#101714',solid:'#18211d',fg:'#eef3f0',sub:'#93a39b',hd:'#101714',hdfg:'#eef3f0',hl:'#2fa36b',hlfg:'#ffffff',sk:'#101714',skfg:'#eef3f0',ac:'#2fa36b',wall:'w:waves'},
@@ -816,6 +959,19 @@ function mkWalls(){
       gg.addColorStop(0,dark?`rgba(255,255,255,${a})`:`rgba(255,255,255,${a*3})`); gg.addColorStop(1,dark?'rgba(0,0,0,.35)':`rgba(0,0,0,${a})`);
       x.fillStyle=gg; x.beginPath(); x.moveTo(0,H); for(let i=0;i<=W;i+=4) x.lineTo(i,base+Math.sin(i/58+k*1.3)*16+Math.sin(i/23+k)*4); x.lineTo(W,H); x.fill() } });
   waves('w:waves','Grey waves',true); waves('w:waves-l','Light waves',false);
+  // landscape (320 × 240): silk ribbons of light
+  const RW=320, RH=240, c2=document.createElement('canvas'); c2.width=RW*3; c2.height=RH*3; const y=c2.getContext('2d');
+  const ribbons=(id,n,bg1,bg2,cols,light)=>{ y.save(); y.setTransform(3,0,0,3,0,0); const g=y.createLinearGradient(0,0,RW*.6,RH); g.addColorStop(0,bg1); g.addColorStop(1,bg2); y.fillStyle=g; y.fillRect(0,0,RW,RH);
+    const r=rng(29); if(!light) for(let i=0;i<70;i++){ y.fillStyle=`rgba(255,255,255,${.12+r()*.5})`; y.beginPath(); y.arc(r()*RW,r()*RH*.55,.35+r()*.75,0,7); y.fill() }
+    y.globalCompositeOperation=light?'source-over':'lighter';
+    for(let k=0;k<5;k++){ const base=RH*(.42+k*.08), amp=16+k*5, f=.011+k*.0024, ph=k*1.9, th=14+k*4, col=cols[k%cols.length];
+      for(let s=0;s<th;s+=1.4){ const a=(light?.16:.13)*(1-Math.abs(s/th-.5)*1.6); if(a<=0) continue; y.strokeStyle=col.replace('A',a.toFixed(3)); y.lineWidth=1.1; y.beginPath();
+        for(let X=-8;X<=RW+8;X+=4){ const Y=base+Math.sin(X*f+ph)*amp+Math.sin(X*f*2.3+ph*1.3)*amp*.28+s*(.9+.5*Math.sin(X*.013+k)); X===-8?y.moveTo(X,Y):y.lineTo(X,Y) } y.stroke() } }
+    y.globalCompositeOperation='source-over'; const v=y.createRadialGradient(RW/2,RH*.55,RH*.2,RW/2,RH*.55,RW*.75); v.addColorStop(0,'rgba(0,0,0,0)'); v.addColorStop(1,light?'rgba(40,70,90,.18)':'rgba(0,0,0,.45)'); y.fillStyle=v; y.fillRect(0,0,RW,RH);
+    y.restore(); WALLS[id]={n,src:c2.toDataURL('image/jpeg',.9),alpha:false} };
+  ribbons('w:ribbon','Night ribbons','#06121f','#0d3048',['rgba(80,200,255,A)','rgba(60,120,255,A)','rgba(120,255,230,A)']);
+  ribbons('w:ribbon-l','Frost ribbons','#f2f8fb','#b7d2e2',['rgba(255,255,255,A)','rgba(40,120,200,A)','rgba(255,255,255,A)'],true);
+  ribbons('w:ribbon-a','Amber ribbons','#120a05','#3c1d08',['rgba(255,170,60,A)','rgba(255,110,40,A)','rgba(255,220,140,A)']);
 }
 mkWalls();
 
@@ -898,6 +1054,8 @@ const BODY={
   matte:{n:'Matte charcoal',edge:'linear-gradient(90deg,#141518 0%,#3d3f44 2.5%,#2a2c30 6%,#2a2c30 94%,#3d3f44 97.5%,#141518 100%)',face:'#2a2c30',flat:'#2a2c30',brand:'#8b8e94'},
   sand:{n:'Sand',edge:'linear-gradient(90deg,#8d806c 0%,#e9dfcd 2.5%,#cfc3ad 6%,#cbbfa8 50%,#cfc3ad 94%,#e9dfcd 97.5%,#8d806c 100%)',face:'#cbbfa8',flat:'#cbbfa8',brand:'#6d6352'},
   sky:{n:'Sky blue',edge:'linear-gradient(90deg,#3a5f86 0%,#b5d4f2 2.5%,#7fa9d4 6%,#79a4d0 50%,#7fa9d4 94%,#b5d4f2 97.5%,#3a5f86 100%)',face:'#79a4d0',flat:'#79a4d0',brand:'#1d3a5a'},
+  ice:{n:'Ice blue',edge:'linear-gradient(90deg,#6f8796 0%,#e9f3f9 3%,#b9cfdc 7.5%,#aec6d5 50%,#b9cfdc 92.5%,#e9f3f9 97%,#6f8796 100%)',face:'linear-gradient(180deg,#c9dbe6 0%,#b4c9d7 44%,#a9bfcd 44.3%,#bdd0dc 100%)',flat:'#b6cad7',brand:'#4f6878'},
+  copper:{n:'Copper',edge:'linear-gradient(90deg,#3a1d10 0%,#c98a63 3%,#8f5234 7.5%,#7e4529 50%,#8f5234 92.5%,#c98a63 97%,#3a1d10 100%)',face:'linear-gradient(180deg,#2b211d 0%,#1c1512 45%,#251c18 100%)',flat:'#231a16',brand:'#c4977b'},
   pearl:{n:'Pearl white',edge:'linear-gradient(90deg,#c4c8cd 0%,#ffffff 3.5%,#eceef0 8%,#e3e6e9 50%,#eceef0 92%,#ffffff 96.5%,#c4c8cd 100%)',face:'linear-gradient(180deg,#f8f9fa,#e5e8eb)',flat:'#eef0f2',brand:'#8a9099'}
 };
 const KEYS={
@@ -910,6 +1068,7 @@ const KEYS={
   pearlkeys:{n:'Pearl',bg:'linear-gradient(180deg,#ffffff,#f0e9eb)',fg:'#3a1a24',sub:'#a0717f',sh:'inset 0 1px 0 #fff,0 2px 0 #c9b2b9,0 3px 5px rgba(0,0,0,.3)',key:'#d6336c',keysub:'#e8598a',glow:'rgba(255,120,170,.7)',btn:'#ff9fbf'},
   mattekeys:{n:'Matte',bg:'#2a2c30',fg:'#eceef1',sub:'#a2a6ad',sh:'none',key:'#ffffff',keysub:'#cfe3ff',glow:'rgba(150,200,255,.75)',btn:'#ffffff'},
   sandkeys:{n:'Sand',bg:'#cbbfa8',fg:'#2b2418',sub:'#6d6352',sh:'none',key:'#5a3d00',keysub:'#7a5510',glow:'rgba(255,190,80,.6)',btn:'#ffc670'},
+  frosty:{n:'Frosted silver',bg:'linear-gradient(180deg,#f7fafc,#d3dee6)',fg:'#1b2a35',sub:'#2f6f9e',sh:'inset 0 1px 0 #fff,0 1.5px 0 #8ea3b2,0 2px 3px rgba(0,0,0,.35)',key:'#0f62c4',keysub:'#1f79e0',glow:'rgba(70,160,255,.7)',btn:'#8ec5ff'},
   gold:{n:'Champagne gold',bg:'linear-gradient(180deg,#f4e4bd,#c9a861)',fg:'#2b1e06',sub:'#6b5420',sh:'inset 0 1px 0 #fff6dc,0 2px 0 #8c7238,0 3px 4px rgba(0,0,0,.4)',key:'#a24c00',keysub:'#b8600a',glow:'rgba(255,170,60,.75)',btn:'#ffc670'}
 };
 const BTNS={
@@ -944,7 +1103,11 @@ html.fsm,html.fsm body{background:${b.flat}!important}
 #phone .emu svg{fill:${t.mark}}
 #phone .pad{background:${t.ring}}
 #phone .dz.u i{border-bottom-color:${t.arrow}}#phone .dz.d i{border-top-color:${t.arrow}}#phone .dz.lt i{border-right-color:${t.arrow}}#phone .dz.rt i{border-left-color:${t.arrow}}
-#phone .pad .ok{background:${t.ok};box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 2px ${t.okring}}`;
+#phone .pad .ok{background:${t.ok};box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 2px ${t.okring}}
+#phone .qx{background:${t.key}}#phone .qx svg{stroke:${t.mark}}
+#phone.lit .qx svg{stroke:${bl};filter:drop-shadow(0 0 3px ${bg})}
+#phone.m-qwerty .kk.nk small{color:${t.light?'#1366d6':k.key==='#ffffff'?'#7fb8ff':k.key}}
+#phone{--qacc:${k.key==='#ffffff'?'#5aa9ff':k.key}}`;
   PHONE.style.setProperty('--sk-edge',b.edge); PHONE.style.setProperty('--sk-face',b.face); PHONE.style.setProperty('--sk-flat',b.flat);
   const el=document.getElementById('skincss'); if(el&&el.textContent!==css) el.textContent=css }
 /* Phone models: each is an original handset design from a different era of keypad phones,
@@ -955,14 +1118,20 @@ const MODELS={
   gloss:{n:'Colour Classic',era:'Colour bar, 2005',ui:'gloss',theme:'aqua',wall:'w:swoosh',skin:{body:'twotone',keys:'silver',btns:'chrome'}},
   slim:{n:'Slim',era:'Slim metal bar, 2008',ui:'slim',theme:'ember2',wall:'w:streaks',skin:{body:'titan',keys:'flatdark',btns:'black'}},
   flip:{n:'Flip',era:'Clamshell, 2006',ui:'flip',theme:'blush',wall:'w:bubbles',skin:{body:'cherry',keys:'pearlkeys',btns:'white'}},
-  modern:{n:'Modern Bar',era:'Retro reboot, 2024',ui:'modern',theme:'charcoal',wall:'w:waves',skin:{body:'matte',keys:'mattekeys',btns:'matte'}}
+  modern:{n:'Modern Bar',era:'Retro reboot, 2024',ui:'modern',theme:'charcoal',wall:'w:waves',skin:{body:'matte',keys:'mattekeys',btns:'matte'}},
+  qwerty:{n:'Messenger',era:'QWERTY messenger, 2010',ui:'qw',theme:'frost',wall:'w:ribbon',skin:{body:'ice',keys:'frosty',btns:'chrome'},land:true,kb:'qwerty',dim:[360,668],
+    ways:[['Ice blue',{body:'ice',keys:'frosty',btns:'chrome'}],['Midnight black',{body:'midnight',keys:'black',btns:'black'}],['Chalk white',{body:'pearl',keys:'white',btns:'white'}],
+      ['Graphite',{body:'graphite',keys:'flatdark',btns:'graphite'}],['Copper',{body:'copper',keys:'black',btns:'black'}]]}
 };
-let prevModel=null, prevTheme=null;
+const landNow=()=>!!(MODELS[modelId()]&&MODELS[modelId()].land);
+const LW=()=>landNow()?320:240, LH=()=>landNow()?240:320;
+let prevModel=null, prevTheme=null, layoutReady=false;
 const modelId=()=>MODELS[prevModel||S.model]?(prevModel||S.model):'k7';
 const uiOf=()=>MODELS[modelId()].ui;
 function applyModel(){ const id=modelId(), m=MODELS[id];
   [...PHONE.classList].filter(c=>c.startsWith('m-')).forEach(c=>PHONE.classList.remove(c)); PHONE.classList.add('m-'+id);
-  const lcd=$('#lcd'); [...lcd.classList].filter(c=>c.startsWith('ui-')).forEach(c=>lcd.classList.remove(c)); lcd.classList.add('ui-'+m.ui) }
+  const lcd=$('#lcd'); [...lcd.classList].filter(c=>c.startsWith('ui-')).forEach(c=>lcd.classList.remove(c)); lcd.classList.add('ui-'+m.ui); lcd.classList.toggle('land',!!m.land);
+  buildKeys(); if(layoutReady){ fit(); syncOverlays() } }
 function chooseModel(id){ const m=MODELS[id]; if(!m) return; prevModel=null; prevTheme=null;
   S.model=id; S.skin={...m.skin}; S.theme=m.theme; S.wall={on:true,id:m.wall}; save(); applyModel(); applySkin(); render(); keyLight() }
 function ModelMenu(){ const ids=Object.keys(MODELS);
@@ -971,8 +1140,10 @@ function ModelMenu(){ const ids=Object.keys(MODELS);
     onSel(it){ chooseModel(it.id); pop(); note(MODELS[it.id].n+' selected','ok') },
     onPop(){ prevModel=null; prevTheme=null; applyModel(); applySkin() } })) }
 function KeyLightMenu(){ Radio('Keypad light',[['auto','On when keys are pressed'],['on','Always on'],['off','Off']],()=>S.kpLight,v=>{ S.kpLight=v; keyLight() }) }
-function SkinMenu(){ menu('Phone colours',[['Body colour',()=>skinRadio('Body colour','body',BODY)],['Keypad',()=>skinRadio('Keypad','keys',KEYS)],['Buttons',()=>skinRadio('Buttons','btns',BTNS)],['Keypad light',()=>KeyLightMenu()],
-  ['Restore model colours',()=>{ S.skin={...MODELS[modelId()].skin}; save(); applySkin(); note('Colours restored') }]]) }
+function SkinMenu(){ const ways=MODELS[modelId()].ways;
+  menu('Phone colours',[ways?['Colourway',()=>Radio('Colourway',ways.map(w=>[w[0],w[0]]),()=>{ const w=ways.find(w=>JSON.stringify(w[1])===JSON.stringify({body:S.skin.body,keys:S.skin.keys,btns:S.skin.btns})); return w?w[0]:'' },
+      v=>{ const w=ways.find(x=>x[0]===v); S.skin={...w[1]}; applySkin(); keyLight() },{onMove:it=>{ const w=ways.find(x=>x[0]===it.val); applySkin(w[1]); keyLight() },onPop:()=>applySkin(),note:'Colours saved'})]:null,['Body colour',()=>skinRadio('Body colour','body',BODY)],['Keypad',()=>skinRadio('Keypad','keys',KEYS)],['Buttons',()=>skinRadio('Buttons','btns',BTNS)],['Keypad light',()=>KeyLightMenu()],
+  ['Restore model colours',()=>{ S.skin={...MODELS[modelId()].skin}; save(); applySkin(); note('Colours restored') }]].filter(Boolean)) }
 function skinRadio(title,key,set){ Radio(title,Object.keys(set).map(id=>[id,set[id].n]),()=>S.skin[key],v=>{ S.skin[key]=v; applySkin() },
   {onMove:it=>{ applySkin({...S.skin,[key]:it.val}); keyLight() },onPop:()=>applySkin(),note:'Skin saved'}) }
 
@@ -1026,7 +1197,7 @@ function List(title,items,o){ o=o||{};
     draw(el){ const it=this.items(), n=it.length; if(o.cls) el.classList.add(o.cls);
       if(!n){ el.innerHTML=`<div class="empty">${esc(o.empty||'(empty)')}</div>`+(o.foot?`<div class="foot">${o.foot.call(this)}</div>`:''); return }
       if(this.i>=n) this.i=n-1; if(this.i<0) this.i=0;
-      const avail=266-(o.foot?24:0), rh=o.two?47:33, rows=Math.floor(avail/rh);
+      const avail=LH()-54-(o.foot?24:0), rh=uiOf()==='qw'?(o.two?40:31):(o.two?47:33), rows=Math.max(1,Math.floor(avail/rh));
       if(this.i<this.top) this.top=this.i; if(this.i>=this.top+rows) this.top=this.i-rows+1; if(this.top>Math.max(0,n-rows)) this.top=Math.max(0,n-rows);
       let h='<div class="ls">';
       for(let j=this.top;j<Math.min(n,this.top+rows);j++){ const x=it[j];
@@ -1142,7 +1313,7 @@ function Editor(o){
 function symbols(cb){ const chars=".,'?!\"-()@/:_;+&%*=<>£$€¥#[]{}\\~^¡¿§|°…•→".split(''); let i=0;
   push({name:'sym',title:'Symbols',draw(el){ el.innerHTML='<div class="sym">'+chars.map((c,j)=>`<span class="${j===i?'on':''}" data-i="${j}">${esc(c)}</span>`).join('')+'</div>' },
     soft(){ return [{t:'Use',f:()=>{pop();cb(chars[i]);render()}},{t:'Use',f:()=>{pop();cb(chars[i]);render()}},{t:'Back',f:pop}] },
-    key(k){ const n=chars.length; if(k==='LT')i=(i-1+n)%n; else if(k==='RT')i=(i+1)%n; else if(k==='U')i=(i-6+n)%n; else if(k==='D')i=(i+6)%n; else return false; render(); return true },
+    key(k){ const n=chars.length, c=landNow()?9:6; if(k==='LT')i=(i-1+n)%n; else if(k==='RT')i=(i+1)%n; else if(k==='U')i=(i-c+n)%n; else if(k==='D')i=(i+c)%n; else return false; render(); return true },
     pick(j){ i=j; pop(); cb(chars[i]); render() } }) }
 
 /* ---------------- file storage ---------------- */
@@ -1180,6 +1351,7 @@ try{ if(navigator.getBattery) navigator.getBattery().then(b=>{ const up=()=>{ if
 // The Mac and iPhone apps push real values: LarchStatus({level, charging, online, net:'wifi'|'cellular'|'wired'|'other'|'none', sig?})
 window.LarchStatus=o=>{ dev.src='host'; if(o.level!=null){ dev.level=o.level; dev.bat=Math.max(0,Math.min(4,Math.round(o.level*4))) } if(o.charging!=null) dev.charging=!!o.charging;
   dev.sig=o.sig!=null?o.sig:null; if(o.net) dev.net=o.net; if(o.online!=null) dev.online=!!o.online; if(!dev.online) dev.net='none'; if(S.on&&tv()&&tv().name==='standby') render() };
+window.LarchSilent=on=>{ const was=!!dev.silent; dev.silent=!!on; if(was!==dev.silent){ if(typeof javaMute==='function') javaMute(); if(S.on&&tv()&&tv().name==='standby') render() } };
 function netSVG(){ const fl=S.profile==='flight';
   if(fl) return `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15.5v-1.8l-7.5-4.7V4a1.5 1.5 0 0 0-3 0v5L3 13.7v1.8l7.5-2.3v4.9L8.6 19.6V21l3.4-1 3.4 1v-1.4l-1.9-1.5v-4.9z"/></svg>`;
   if(dev.sig!=null&&dev.online) return sigSVG(dev.sig);
@@ -1194,7 +1366,7 @@ let locked=false, unlockAt=0, lastActivity=Date.now();
 function statusIcons(){ const out=[]; const unread=S.msgs.inbox.filter(m=>!m.read).length;
   if(unread) out.push(ico('msg')); if(S.logs.missed.some(x=>!x.seen)) out.push(ico('missed'));
   if(S.alarm.on) out.push(ico('alarm')); if(voip.ready()) out.push(ico('voip')); if(torchOn) out.push(ico('torch')); if(S.timer) out.push(ico('timer'));
-  if(music.playing||radioP.playing) out.push(ico('note')); if(prof().alert==='off'&&!prof().vol) out.push(ico('silent')); if(locked) out.push(ico('lock')); return out.join('') }
+  if(music.playing||radioP.playing) out.push(ico('note')); if((prof().alert==='off'&&!prof().vol)||hushed()) out.push(ico('silent')); if(locked) out.push(ico('lock')); return out.join('') }
 function nextEvents(){ const out=[]; const d=now();
   if(S.alarm.on) out.push([ico('alarm'),'Alarm '+fmtTime(new Date(2000,0,1,S.alarm.h,S.alarm.m))]);
   const today=dkey(d); const evs=S.cal.filter(n=>n.date>=today||n.type==='Birthday').sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
@@ -1462,7 +1634,7 @@ function NewMessage(text,to,draft){
 function saveDraft(t,to,draft){ if(draft){ draft.text=t; draft.t=Date.now() } else S.msgs.drafts.push({id:uid(),to:to||'',text:t,t:Date.now()}); save(); note('Message saved to Drafts') }
 function sendFlow(ed,to,draft){ ed.commit(); const text=ed.text; if(!text.trim()){ note('Message is empty','warn'); return }
   const finish=(nums,how)=>{ nums.forEach(n=>{ if(S.msgSet.saveSent) S.msgs.sent.push({id:uid(),to:n,text,t:Date.now()}); S.msgCount.sent++; S.logs.msgTo.unshift({num:n,t:Date.now()}) });
-    if(draft) S.msgs.drafts=S.msgs.drafts.filter(x=>x!==draft); save(); while(V.length>1&&V.includes(ed)) pop(); note(how,'ok'); const p=prof(); if(p.msg!=='Off'&&MSGT[p.msg]) playSeq(MSGT[p.msg],{vol:Math.max(volG(p.vol),.04)}) };
+    if(draft) S.msgs.drafts=S.msgs.drafts.filter(x=>x!==draft); save(); while(V.length>1&&V.includes(ed)) pop(); note(how,'ok'); const p=prof(); if(!hushed()&&p.msg!=='Off'&&MSGT[p.msg]) playSeq(MSGT[p.msg],{vol:Math.max(volG(p.vol),.04)}) };
   const go=nums=>{ if(S.profile==='flight'){ note('Flight profile is active','warn'); return }
     if(Host&&Host.sms){ Host.sms(nums,text).then(r=>{ if(r==='sent') finish(nums,'Message sent'); else if(r==='opened') finish(nums,'Opened in Messages'); else if(r==='cancelled') note('Message not sent','info'); else note('Message sending failed','warn') },()=>note('This device cannot send messages','warn')); return }
     const a=document.createElement('a'); a.href='sms:'+nums.map(n=>n.replace(/[^\d+]/g,'')).join(',')+'?&body='+encodeURIComponent(text); a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); finish(nums,'Opened in Messages') };
@@ -1475,15 +1647,16 @@ function ContactsMenu(){ const where=DEVC()?(Host.platform==='ios'?'iPhone Conta
   menu('Contacts',[['Names',()=>NamesList()],['Settings',()=>menu('Settings',[['Contacts view',()=>Radio('Contacts view',[['name','Name list'],['both','Name and number']],()=>S.cview,v=>S.cview=v)],['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.contacts,v=>S.fs.contacts=v)],['Memory status',()=>Info('Memory status',`<p><span class="lbl">Names</span>${S.contacts.length}</p><p><span class="lbl">Stored in</span>${where}</p>`)]])],
   ['Groups',()=>Groups()],['Speed dials',()=>SpeedDials()],['My numbers',()=>push(Editor({mode:'phone',title:'My numbers',label:'My number:',text:S.myNum,done(t){S.myNum=t;save();pop();note('Saved')}}))],
   ['Delete all contacts',()=>DEVC()?note('Delete contacts in the '+(Host.platform==='ios'?'iPhone':'Mac')+' Contacts app','info',2200):Ask('Delete all contacts?',()=>askCode(()=>{S.contacts=[];S.speed={};save();note('Deleted')}))]]) }
-function NamesList(pick){ let q='';
-  const items=()=>sortedContacts().filter(c=>!q||c.name.toLowerCase().split(/\s+/).some(w=>t9of(w).startsWith(q))).map(c=>({t:c.name,s:S.cview==='both'?c.num:'',c,ic:ico('person')}));
+function NamesList(pick,first){ let q='', ql=first||'';
+  const items=()=>sortedContacts().filter(c=>ql?c.name.toLowerCase().split(/\s+/).some(w=>w.startsWith(ql)):(!q||c.name.toLowerCase().split(/\s+/).some(w=>t9of(w).startsWith(q)))).map(c=>({t:c.name,s:S.cview==='both'?c.num:'',c,ic:ico('person')}));
   push(List(pick?'Select contact':'Names',items,{name:'names',two:S.cview==='both',empty:pick?'No names':'No names. Press Add to make one.',
-    foot:function(){ if(!q) return 'Find: '; const f=this.items()[0]; return 'Find: '+esc(f?f.c.name.split(/\s+/).find(w=>t9of(w).startsWith(q)).slice(0,q.length):q) },
+    letter(ch){ ql+=ch; q=''; this.i=0; render(); return true },
+    foot:function(){ if(ql) return 'Find: '+esc(ql); if(!q) return 'Find: '; const f=this.items()[0]; return 'Find: '+esc(f?f.c.name.split(/\s+/).find(w=>t9of(w).startsWith(q)).slice(0,q.length):q) },
     L:it=>pick?{t:''}:it?{t:'Options',f:()=>ContactOptions(it.c)}:{t:'Add',f:()=>AddContact()},
     Mempty:pick?{t:''}:{t:'Add',f:()=>AddContact()},
     M:it=>({t:pick?'Select':'Details',f:()=>pick?pick(it.c):ContactView(it.c)}),
-    R:()=>q?{t:'Clear',f:()=>{q=q.slice(0,-1);render()}}:{t:'Back',f:pop},
-    key(k){ if(/^[2-9]$/.test(k)){ q+=k; this.i=0; render(); return true } if(k==='CALL'){ const it=this.items()[this.i]; if(it) callNumber(it.c.num,it.c.name); return true } return false } })) }
+    R:()=>q||ql?{t:'Clear',f:()=>{ if(ql) ql=ql.slice(0,-1); else q=q.slice(0,-1); render() }}:{t:'Back',f:pop},
+    key(k){ if(/^[2-9]$/.test(k)&&!ql){ q+=k; this.i=0; render(); return true } if(k==='CALL'){ const it=this.items()[this.i]; if(it) callNumber(it.c.num,it.c.name); return true } return false } })) }
 function AddContact(num){ push(Editor({mode:'text',title:'Add contact',label:'Name:',noPred:true,done(name){ if(!name.trim()){note('Enter a name','warn');return}
     push(Editor({mode:'phone',title:'Add contact',label:'Number:',text:num||'',done(n){ const nc={id:uid(),name:name.trim(),num:n.trim()}; S.contacts.push(nc); pushContact(nc); save(); pop(2); note('Saved') }})) }})) }
 function ContactView(c){ const f=[['Mobile','num'],['Home','home'],['Work','work'],['E-mail','email'],['Note','note'],['Group','group']];
@@ -1700,9 +1873,9 @@ function CameraView(mode){ const v={name:'camera',media:true,mode,rec:false,recT
   switchMode(){ this.mode=this.mode==='photo'?'video':'photo'; if(this.started) Host.media({op:'mode',mode:this.mode}).catch(()=>{}); render() },
   shoot(){ if(this.busy) return; this.busy=true; shutter();
     Host.media({op:'capture'}).then(r=>{ this.busy=false; snapTaken(r) }).catch(e=>{ this.busy=false; note((e&&e.message)||'The photo was not taken','warn') }) },
-  selfTimer(){ let n=10; const t=setInterval(()=>{ if(tv()!==v){ clearInterval(t); return } n--; beep([1200],.05,.05,'square'); if(n<=0){ clearInterval(t); endNote(); v.shoot() } else note('Self-timer '+n,'info',1100) },1000); note('Self-timer 10','info',1100) },
-  startRec(){ Host.media({op:'recordVideo'}).then(()=>{ this.rec=true; this.recT=Date.now(); beep([880],.08,.06,'square'); render() }).catch(e=>note((e&&e.message)||'Could not record','warn')) },
-  stopRec(){ this.rec=false; render(); beep([660],.08,.06,'square'); note('Saving video','wait',30000);
+  selfTimer(){ let n=10; const t=setInterval(()=>{ if(tv()!==v){ clearInterval(t); return } n--; sfx([1200],.05,.05,'square'); if(n<=0){ clearInterval(t); endNote(); v.shoot() } else note('Self-timer '+n,'info',1100) },1000); note('Self-timer 10','info',1100) },
+  startRec(){ Host.media({op:'recordVideo'}).then(()=>{ this.rec=true; this.recT=Date.now(); sfx([880],.08,.06,'square'); render() }).catch(e=>note((e&&e.message)||'Could not record','warn')) },
+  stopRec(){ this.rec=false; render(); sfx([660],.08,.06,'square'); note('Saving video','wait',30000);
     Host.media({op:'stopVideo'}).then(r=>{ endNote(); note(r&&r.id?'Video saved to Gallery':'The video could not be saved to Photos',r&&r.id?'ok':'warn',2200) }).catch(()=>{ endNote(); note('The video was not saved','warn') }) },
   onPop(){ if(this.rec) Host.media({op:'stopVideo'}).catch(()=>{}); Host.media({op:'close'}).catch(()=>{}); mediaShown=false } };
   return v }
@@ -1828,16 +2001,27 @@ const music={get tracks(){ return S.music },cur:null,url:null,el:new Audio(),pla
   pause(){ this.el.pause(); if(this.playing){ this.playing=false; if(!radioP.playing) hostAudio(false) } rr() },
   stop(){ this.pause(); try{ this.el.currentTime=0 }catch(e){} },
   forget(id){ if(this.cur&&this.cur.id===id){ this.stop(); if(this.url) URL.revokeObjectURL(this.url); this.url=null; this.cur=null; this.el.removeAttribute('src') } },
-  step(d){ const a=S.music; if(!a.length) return; const i=this.cur?a.findIndex(x=>x.id===this.cur.id):-1; this.play(a[(i+d+a.length)%a.length]) } };
-music.el.addEventListener('ended',()=>{ music.playing=false; if(S.music.length>1) music.step(1); else { if(!radioP.playing) hostAudio(false); rr() } });
+  step(d,manual){ const a=S.music; if(!a.length) return; const i=this.cur?a.findIndex(x=>x.id===this.cur.id):-1;
+    if(S.mp.shuffle&&a.length>1&&d>0){ let j; do{ j=Math.floor(Math.random()*a.length) }while(j===i); return this.play(a[j]) }
+    let j=i+d; if(j>=a.length){ if(!manual&&S.mp.repeat==='off'){ this.stop(); rr(); return } j=0 } if(j<0) j=a.length-1; this.play(a[j]) } };
+music.el.addEventListener('ended',()=>{ music.playing=false; const r=S.mp.repeat||'all';
+  if(r==='one'||(r==='all'&&S.music.length===1)){ try{ music.el.currentTime=0 }catch(e){} music.play(); return }
+  if(S.music.length>1) music.step(1); else { if(!radioP.playing) hostAudio(false); rr() } });
+// music files show on the lock screen and in Control Center, with their buttons
+try{ if('mediaSession' in navigator){ const ms=navigator.mediaSession;
+  const H={play:()=>pCmdFiles('toggle'),pause:()=>pCmdFiles('toggle'),previoustrack:()=>pCmdFiles('prev'),nexttrack:()=>pCmdFiles('next'),seekbackward:()=>pCmdFiles('seek',-10),seekforward:()=>pCmdFiles('seek',10),seekto:d=>pCmdFiles('seekTo',d.seekTime)};
+  for(const k in H) try{ ms.setActionHandler(k,H[k]) }catch(e){}
+  music.el.addEventListener('play',()=>{ try{ ms.metadata=new MediaMetadata({title:music.cur?music.cur.name:'',artist:'KeyPhone'}); ms.playbackState='playing' }catch(e){} });
+  music.el.addEventListener('pause',()=>{ try{ ms.playbackState='paused' }catch(e){} }) } }catch(e){}
+function pCmdFiles(op,arg){ if(msrc()!=='files'){ const was=S.msrc; S.msrc='files'; pCmd(op,arg); S.msrc=was; return } pCmd(op,arg) }
 const MUSIC_RE=/\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|mp4a)$/i;
 async function saveMusic(f){ const id=uid(); await Blobs.put('mus:'+id,await f.arrayBuffer()); S.music.push({id,name:f.name.replace(/\.[^.]+$/,''),size:f.size,type:f.type||'',added:Date.now()}); save() }
 function pickMusic(){ try{ $('#mus').click() }catch(e){ note('Could not open files','warn') } }
 $('#mus').addEventListener('change',async e=>{ const files=[...e.target.files]; e.target.value=''; if(!files.length) return; note('Saving','wait',120000); let ok=0;
   for(const f of files){ try{ await saveMusic(f); ok++ }catch(err){} } endNote(); rr(); note(ok===files.length?(ok>1?ok+' music files added':'Music file added'):ok+' of '+files.length+' music files added',ok?'ok':'warn',1800) });
 function Tracks(){ push(List('Music files',()=>S.music.map(t=>({t:t.name,s:bytes(t.size),tr:t,ic:ico('note'),on:music.cur&&music.cur.id===t.id})),{name:'tracks',two:true,empty:'No music files. Press Add to choose audio files.',Mempty:{t:'Add',f:()=>pickMusic()},
-  M:it=>({t:'Play',f:()=>{music.play(it.tr);MusicPlayer()}}),
-  L:it=>it?{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();music.play(it.tr);MusicPlayer()}],['Add music',()=>{pop();pickMusic()}],
+  M:it=>({t:'Play',f:()=>{music.play(it.tr);openPlayer()}}),
+  L:it=>it?{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();music.play(it.tr);openPlayer()}],['Add music',()=>{pop();pickMusic()}],
     ['Rename',()=>{pop();push(Editor({mode:'text',noPred:true,title:'Rename',text:it.tr.name,done(t){ if(t.trim()) it.tr.name=t.trim(); save(); pop(); note('Saved') }}))}],
     ['Details',()=>{pop();Info('Details',`<p><b>${esc(it.tr.name)}</b></p><p><span class="lbl">Size</span>${bytes(it.tr.size)}</p><p><span class="lbl">Format</span>${esc(it.tr.type||'Audio')}</p><p><span class="lbl">Added</span>${esc(fmtStamp(it.tr.added||Date.now()))}</p>`)}],
     ['Delete',()=>{pop();Ask('Delete '+it.tr.name+'?',()=>{ music.forget(it.tr.id); Blobs.del('mus:'+it.tr.id); S.music=S.music.filter(x=>x!==it.tr); save(); note('Deleted') })}]],{nums:false})}:{t:'Add',f:()=>pickMusic()} })) }
@@ -1860,7 +2044,8 @@ async function xmPoll(art){ const src=msrc(); if(src==='files') return;
     if(!n.art&&same) n.art=XM.now.art;
     if(n.id&&!same&&!n.art&&!art&&src!=='spotify'){ XM.now=n; XM.t=Date.now(); return xmPoll(true) }
     XM.now=n; XM.t=Date.now(); rr() }catch(e){ if(src==='spotify'&&spOn()) XM.err=e.message } }
-async function xmCmd(op){ const src=msrc();
+async function xmCmd(op){ return pCmd(op==='play'||op==='pause'?'toggle':op) }
+async function xmCmdOld(op){ const src=msrc();
   try{ if(src==='apple') XM.now={...(XM.now||{}),...await Host.music({src:'apple',op})};
     else if(spOn()) await spCmd(op);
     else if(spMac()) XM.now={...(XM.now||{}),...await Host.music({src:'spotify',op})};
@@ -1871,28 +2056,147 @@ function xmPos(){ const n=XM.now; if(!n||!n.dur) return 0; return Math.min(n.dur
 function MusicSources(){ const opts=[['files','Music files']]; if(hasApple()) opts.push(['apple',Host.platform==='mac'?'Apple Music (Music app)':'Apple Music']); opts.push(['spotify','Spotify']);
   Radio('Music source',opts,()=>msrc(),v=>{ S.msrc=v; XM.now=null; if(v!=='files'&&music.playing) music.pause() },{after:v=>{ if(v==='spotify'&&!spOn()&&!spMac()) SpotifyMenu(); else { const m=V.find(x=>x.name==='music'); if(m){ render(); m.poll&&m.poll() } } }}) }
 function MusicLibrary(){ const src=msrc(); if(src==='apple') AppleLib(); else if(src==='spotify') SpotifyMenu(); else Tracks() }
-function MusicPlayer(){ if(msrc()!=='files') return ExtPlayer(); push({name:'music',title:'Music player',
-  draw(el){ const t=music.cur; const e=music.el; const pr=e.duration?e.currentTime/e.duration*100:0;
-    el.innerHTML=t?`<div class="mp${music.playing?' play':''}"><div class="disc"></div><div class="ti">${esc(t.name)}</div><div class="pr"><i style="width:${pr}%"></i></div><div class="tm">${fmtDur(e.currentTime||0).slice(3)} / ${fmtDur(e.duration||0).slice(3)} · Vol ${music.vol}</div></div>`
-      :`<div class="empty">${S.music.length?'Press Play to start':'No music files.<br>Press Options › Add music.'}</div>` },
-  tick(){ if(music.playing) render() },
-  soft(){ return [{t:'Options',f:()=>menu('Options',[['Track list',()=>{pop();Tracks()}],['Add music',()=>{pop();pickMusic()}],['Music source',()=>{pop();pop();MusicSources()}],music.cur?['Stop',()=>{music.stop();pop()}]:null,['Equaliser',()=>{pop();Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})}]],{nums:false})},
-    {t:music.playing?'Pause':(S.music.length?'Play':''),f:()=>{ if(music.playing) music.pause(); else if(S.music.length) music.play(music.cur||S.music[0]) }},{t:'Back',f:pop}] },
-  key(k){ if(k==='LT'){music.step(-1);return true} if(k==='RT'){music.step(1);return true} if(k==='VUP'||k==='U'){music.vol=Math.min(10,music.vol+1);music.el.volume=music.vol/10;render();return true} if(k==='VDN'||k==='D'){music.vol=Math.max(0,music.vol-1);music.el.volume=music.vol/10;render();return true} return false } }) }
-function ExtPlayer(){ let timer=null; const v={name:'music',title:SRCN[msrc()],
-  hdText(){ const n=XM.now; return SRCN[msrc()]+(n&&n.dev?' · '+n.dev:'') },
-  poll(){ xmPoll(!(XM.now&&XM.now.art)) },
-  draw(el){ if(!timer){ this.poll(); timer=setInterval(()=>{ if(tv()===v) xmPoll() },msrc()==='apple'?4000:3000) }
-    const n=XM.now, src=msrc();
-    if(!n||n.none){ el.innerHTML=`<div class="empty">${src==='spotify'&&!spOn()&&!spMac()?'Not signed in to Spotify.<br>Press Options › Spotify.':src==='spotify'?'Nothing playing on Spotify.<br>Press Options › Library.':'Nothing playing.<br>Press Options › Library.'}</div>`; return }
-    const pos=xmPos(), pr=n.dur?pos/n.dur*100:0;
-    el.innerHTML=`<div class="mp xm${n.playing?' play':''}">${n.art?`<div class="art" style="background-image:url('${esc(n.art)}')"></div>`:'<div class="disc"></div>'}<div class="ti">${esc(n.t||'')}</div><div class="ar">${esc([n.s,n.a].filter(Boolean).join(' · '))}</div><div class="pr"><i style="width:${pr}%"></i></div><div class="tm">${mmss(pos)} / ${mmss(n.dur||0)}${n.shuffle?' · Shuffle':''}</div></div>` },
-  tick(){ if(XM.now&&XM.now.playing) render() },
-  soft(){ const n=XM.now, src=msrc(); return [{t:'Options',f:()=>menu('Options',[['Library',()=>{pop();MusicLibrary()}],['Music source',()=>{pop();pop();MusicSources()}],
-      src!=='files'?['Shuffle',()=>{pop();xmCmd('shuffle')}]:null,src==='spotify'&&spOn()?['Devices',()=>{pop();spDevices()}]:null,n&&!n.none?['Stop',()=>{pop();xmCmd(src==='spotify'?'pause':'stop')}]:null],{nums:false})},
-    {t:n&&!n.none?(n.playing?'Pause':'Play'):'Library',f:()=>{ if(!n||n.none) return MusicLibrary(); xmCmd(n.playing?'pause':'play') }},{t:'Back',f:pop}] },
-  key(k){ if(k==='LT'){ xmCmd('prev'); return true } if(k==='RT'){ xmCmd('next'); return true } return false },
-  onPop(){ clearInterval(timer); timer=null } }; push(v) }
+/* ---- the music player: one screen for music files, Apple Music and Spotify ----
+   ◂ ▸ previous / next (hold to rewind / fast-forward) · ▴ ▾ or the side keys volume · 1 shuffle · 3 repeat
+   4 / 6 back / forward 10 seconds · 5 play / pause · 2 like (Spotify) · 7 sleep timer · 8 stop · 0 up next · * library · # details */
+const MPI={
+  prev:'<path d="M6.5 5.5v13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M19 5.8v12.4L9 12z" fill="currentColor"/>',
+  next:'<path d="M17.5 5.5v13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M5 5.8v12.4L15 12z" fill="currentColor"/>',
+  play:'<path d="M8 5v14l11.5-7z" fill="currentColor"/>',
+  pause:'<rect x="6.5" y="5" width="4" height="14" rx="1.1" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.1" fill="currentColor"/>',
+  shuffle:'<path d="M3 7h3.5c3 0 4.5 10 8 10H20M3 17h3.5c1.4 0 2.4-1.8 3.2-3.8M13.4 9.8C14.2 8.4 15 7 16.5 7H20M17.5 4.5 20 7l-2.5 2.5M17.5 14.5 20 17l-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
+  repeat:'<path d="M5 11V9.5A2.5 2.5 0 0 1 7.5 7H19M16.5 4.5 19 7l-2.5 2.5M19 13v1.5a2.5 2.5 0 0 1-2.5 2.5H5M7.5 19.5 5 17l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
+  vol:'<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>',
+  heart:'<path d="M12 19.5s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 7.5 2.5c0 5.6-7.5 10-7.5 10z" fill="currentColor"/>',
+  sleep:'<path d="M15.5 4.5A8 8 0 1 0 19.5 15 6.5 6.5 0 0 1 15.5 4.5z" fill="currentColor"/>'
+};
+const mpi=(k,z)=>`<svg viewBox="0 0 24 24" width="${z||16}" height="${z||16}" aria-hidden="true">${MPI[k]}</svg>`;
+const MP={sleepAt:0,sleepMin:0,hit:'',hitT:0,seek:0,seekT:null,dir:1};
+// what is playing now, whichever source it comes from
+function pState(){ const src=msrc();
+  if(src==='files'){ const t=music.cur, e=music.el; if(!t) return {none:true}; const d=isFinite(e.duration)?e.duration:0;
+    return {t:t.name,s:'',a:'',dur:d,pos:e.currentTime||0,playing:music.playing,shuffle:!!S.mp.shuffle,repeat:S.mp.repeat||'all',vol:music.vol/10} }
+  const n=XM.now; if(!n||n.none) return {none:true,dev:n&&n.dev}; return {...n,pos:xmPos()} }
+const NEXTREP={off:'all',all:'one',one:'off'};
+async function pCmd(op,arg){ const src=msrc(), n=pState();
+  if(src==='files'){ const e=music.el;
+    if(op==='toggle'){ if(music.playing) music.pause(); else if(S.music.length) music.play(music.cur||S.music[0]) }
+    else if(op==='next') music.step(1,true);
+    else if(op==='prev'){ if((e.currentTime||0)>3) e.currentTime=0; else music.step(-1,true) }
+    else if(op==='seek'||op==='seekTo'){ if(music.cur&&isFinite(e.duration)) e.currentTime=Math.max(0,Math.min(e.duration-.3,op==='seek'?(e.currentTime||0)+arg:arg)) }
+    else if(op==='shuffle'){ S.mp.shuffle=!S.mp.shuffle; save() }
+    else if(op==='repeat'){ S.mp.repeat=arg||NEXTREP[S.mp.repeat||'all']; save() }
+    else if(op==='vol'){ music.vol=Math.max(0,Math.min(10,Math.round(music.vol+arg*10))); music.el.volume=music.vol/10 }
+    else if(op==='stop') music.stop();
+    rr(); return }
+  if(src==='spotify'&&spOn()) return spOp(op,arg,n);
+  if(src==='spotify'&&!spMac()){ note('Sign in to Spotify first','info'); return }
+  const h={src:src==='apple'?'apple':'spotify'};
+  try{ let r;
+    if(op==='toggle') r=await Host.music({...h,op:n.playing?'pause':'play'});
+    else if(op==='seek'||op==='seekTo') r=await Host.music({...h,op:'seek',to:Math.max(0,op==='seek'?(n.pos||0)+arg:arg)});
+    else if(op==='shuffle') r=await Host.music({...h,op:'shuffle',on:!n.shuffle});
+    else if(op==='repeat') r=await Host.music({...h,op:'repeat',mode:arg||NEXTREP[n.repeat||'off']});
+    else if(op==='vol') r=await Host.music({...h,op:'volume',delta:arg});
+    else r=await Host.music({...h,op});
+    if(r&&typeof r==='object'){ XM.now={...(XM.now||{}),...r}; XM.t=Date.now() } }
+  catch(e){ note(e.message||'Not available','warn',2400) }
+  rr(); if(op==='next'||op==='prev') setTimeout(()=>xmPoll(true),700) }
+async function spOp(op,arg,n){ const set=o=>{ if(XM.now){ Object.assign(XM.now,o); XM.t=Date.now() } };
+  try{
+    if(op==='toggle') await spCmd(n.playing?'pause':'play');
+    else if(op==='next'||op==='prev'||op==='stop') await spCmd(op);
+    else if(op==='seek'||op==='seekTo'){ const to=Math.max(0,op==='seek'?(n.pos||0)+arg:arg); await spApi('/me/player/seek?position_ms='+Math.round(to*1000),{method:'PUT'}); set({pos:to}) }
+    else if(op==='shuffle'){ await spApi('/me/player/shuffle?state='+(!n.shuffle),{method:'PUT'}); set({shuffle:!n.shuffle}) }
+    else if(op==='repeat'){ const m=arg||NEXTREP[n.repeat||'off']; await spApi('/me/player/repeat?state='+({off:'off',all:'context',one:'track'}[m]),{method:'PUT'}); set({repeat:m}) }
+    else if(op==='vol'){ if(n.vol==null) throw new Error('This Spotify device has its own volume'); const v=Math.max(0,Math.min(1,Math.round((n.vol+arg)*20)/20)); await spApi('/me/player/volume?volume_percent='+Math.round(v*100),{method:'PUT'}); set({vol:v}) } }
+  catch(e){ note(e.message==='NO_ACTIVE_DEVICE'?'Nothing is playing on Spotify':e.message,'warn',2400) }
+  rr(); if(op==='next'||op==='prev') setTimeout(()=>xmPoll(true),800) }
+async function spLike(){ const n=XM.now; if(!n||!n.id) return; const on=!n.liked;
+  try{ await spApi('/me/tracks?ids='+encodeURIComponent(n.id),{method:on?'PUT':'DELETE'}); n.liked=on; note(on?'Saved to Liked Songs':'Removed from Liked Songs','ok',1400) }
+  catch(e){ note(/scope|permission|insufficient|forbidden|403/i.test(e.message)?'Sign in to Spotify again to allow saving songs':e.message,'warn',2600) } rr() }
+async function spQueue(uri){ try{ await spApi('/me/player/queue?uri='+encodeURIComponent(uri),{method:'POST'}); note('Added to queue','ok',1300) }
+  catch(e){ note(e.message==='NO_ACTIVE_DEVICE'?'Start playing on Spotify first':e.message,'warn',2400) } }
+function flash(w){ MP.hit=w; MP.hitT=Date.now(); rr(); setTimeout(rr,260) }
+function MusicPlayer(){ let timer=null; const v={name:'music',hold:['LT','RT'],
+  hdText(){ const src=msrc(), n=XM.now; return src==='files'?'Music player':SRCN[src]+(src!=='files'&&n&&n.dev?' · '+n.dev:'') },
+  hdRight(){ return MP.sleepAt?mpi('sleep',11)+' '+Math.max(1,Math.ceil((MP.sleepAt-Date.now())/60000))+'m':'' },
+  poll(){ if(msrc()!=='files') xmPoll(!(XM.now&&XM.now.art)) },
+  draw(el){ const src=msrc();
+    if(!timer&&src!=='files'){ this.poll(); timer=setInterval(()=>{ if(tv()===v) xmPoll() },src==='apple'?4000:3000) }
+    const n=pState();
+    if(n.none){ el.innerHTML=`<div class="empty">${src==='files'?(S.music.length?'Press Play to start':'No music files.<br>Press Options › Add music.'):src==='spotify'&&!spOn()&&!spMac()?'Not signed in to Spotify.<br>Press Options › Music source.':src==='spotify'?'Nothing playing on Spotify.<br>Press Library.':'Nothing playing.<br>Press Library to choose songs.'}</div>`; return }
+    const pos=MP.seekT?Math.max(0,Math.min(n.dur||0,(n.pos||0)+MP.seek)):(n.pos||0), pr=n.dur?Math.min(100,pos/n.dur*100):0, hit=Date.now()-MP.hitT<240?MP.hit:'';
+    const cover=n.art?`<div class="art" style="background-image:url('${esc(n.art)}')"></div>`:'<div class="disc"></div>';
+    el.innerHTML=`<div class="mp2${n.playing?' play':''}"><div class="cov">${cover}</div><div class="inf">`+
+      `<div class="ti">${esc(n.t||'')}</div><div class="ar">${esc([n.s,n.a].filter(Boolean).join(' · '))||'&nbsp;'}</div>`+
+      `<div class="pr"><i style="width:${pr}%"></i></div><div class="tm"><span>${mmss(pos)}</span><span>${n.dur?'−'+mmss(Math.max(0,n.dur-pos)):''}</span></div>`+
+      `<div class="tr"><i class="${hit==='prev'||(MP.seekT&&MP.dir<0)?'hit':''}">${mpi('prev',18)}</i><i class="pp${hit==='toggle'?' hit':''}">${mpi(n.playing?'pause':'play',20)}</i><i class="${hit==='next'||(MP.seekT&&MP.dir>0)?'hit':''}">${mpi('next',18)}</i></div>`+
+      `<div class="st"><span class="${n.shuffle?'on':''}" title="Shuffle">${mpi('shuffle',14)}</span><span class="${n.repeat&&n.repeat!=='off'?'on':''}" title="Repeat">${mpi('repeat',14)}${n.repeat==='one'?'<sup>1</sup>':''}</span>`+
+      `${n.liked?`<span class="on">${mpi('heart',13)}</span>`:''}${n.vol!=null?`<span class="vl">${mpi('vol',14)}<b><i style="width:${Math.round(n.vol*100)}%"></i></b></span>`:''}</div></div></div>` },
+  tick(){ const n=pState(); if(n.playing||MP.seekT||MP.sleepAt) render() },
+  soft(){ const n=pState(), src=msrc();
+    const mid=n.none?(src==='files'?(S.music.length?{t:'Play',f:()=>pCmd('toggle')}:{t:'Add',f:()=>pickMusic()}):{t:'Library',f:()=>MusicLibrary()}):{t:n.playing?'Pause':'Play',f:()=>{ flash('toggle'); pCmd('toggle') }};
+    return [{t:'Options',f:()=>PlayerOptions()},mid,{t:'Back',f:pop}] },
+  key(k,long){ const src=msrc(), n=pState();
+    if(k==='LT'||k==='RT'){ if(n.none) return true;
+      if(long){ MP.seek=0; MP.dir=k==='RT'?1:-1; clearInterval(MP.seekT); MP.seekT=setInterval(()=>{ if(msrc()==='files') pCmd('seek',MP.dir*5); else MP.seek+=MP.dir*5; render() },320); return true }
+      flash(k==='RT'?'next':'prev'); pCmd(k==='RT'?'next':'prev'); return true }
+    if(['U','D','VUP','VDN'].includes(k)){ if(n.none||n.vol==null) return true; const up=k==='U'||k==='VUP'; pCmd('vol',(up?1:-1)*(src==='apple'&&Host&&Host.platform==='ios'?1/16:.1)); return true }
+    if(k==='*'){ MusicLibrary(); return true }
+    if(k==='7'){ SleepTimer(); return true }
+    if(n.none) return false;
+    if(k==='1'){ pCmd('shuffle').then(()=>note(pState().shuffle?'Shuffle on':'Shuffle off','info',800)); return true }
+    if(k==='3'){ pCmd('repeat').then(()=>note({off:'Repeat off',all:'Repeat all songs',one:'Repeat this song'}[pState().repeat||'off'],'info',900)); return true }
+    if(k==='4'||k==='6'){ flash(k==='6'?'next':'prev'); pCmd('seek',k==='6'?10:-10); return true }
+    if(k==='5'){ flash('toggle'); pCmd('toggle'); return true }
+    if(k==='2'&&src==='spotify'&&spOn()){ spLike(); return true }
+    if(k==='8'){ pCmd('stop'); return true }
+    if(k==='0'){ UpNext(); return true }
+    if(k==='#'){ SongDetails(); return true }
+    return false },
+  keyUp(k){ if(MP.seekT&&(k==='LT'||k==='RT')){ clearInterval(MP.seekT); MP.seekT=null; const d=MP.seek; MP.seek=0; if(d&&msrc()!=='files') pCmd('seek',d); render() } },
+  onPop(){ clearInterval(timer); timer=null; clearInterval(MP.seekT); MP.seekT=null; MP.seek=0 } };
+  push(v) }
+function PlayerOptions(){ const n=pState(), src=msrc(), sp=src==='spotify'&&spOn(), on=!n.none;
+  menu('Options',[['Library',()=>{pop();MusicLibrary()}],
+    on?['Up next',()=>{pop();UpNext()}]:null,
+    on?[n.shuffle?'Shuffle: On':'Shuffle: Off',()=>{pop();pCmd('shuffle')}]:null,
+    on?['Repeat',()=>{pop();Radio('Repeat',[['off','Off'],['all','All songs'],['one','This song']],()=>pState().repeat||'off',v=>{ pCmd('repeat',v) })}]:null,
+    ['Sleep timer',()=>{pop();SleepTimer()}],
+    on&&n.vol!=null?['Volume',()=>{pop();VolumeLevel()}]:null,
+    sp&&on?[n.liked?'Remove from Liked Songs':'Save to Liked Songs',()=>{pop();spLike()}]:null,
+    on?['Song details',()=>{pop();SongDetails()}]:null,
+    sp?['Devices',()=>{pop();spDevices()}]:null,
+    src==='files'?['Add music',()=>{pop();pickMusic()}]:null,
+    src==='files'?['Equaliser',()=>{pop();Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})}]:null,
+    ['Music source',()=>{pop();pop();MusicSources()}],
+    on?['Stop',()=>{pop();pCmd('stop')}]:null,
+    ['Player keys',()=>{pop();Info('Player keys','<p><span class="lbl">◂ ▸</span>Previous, next. Hold to rewind or fast-forward</p><p><span class="lbl">▴ ▾ and side keys</span>Volume</p><p><span class="lbl">1 · 3</span>Shuffle · Repeat</p><p><span class="lbl">4 · 6</span>Back or forward 10 seconds</p><p><span class="lbl">5 · 8</span>Play or pause · Stop</p><p><span class="lbl">7</span>Sleep timer</p><p><span class="lbl">0 · * · #</span>Up next · Library · Song details</p>'+(sp?'<p><span class="lbl">2</span>Save to Liked Songs</p>':''))}]],{nums:false}) }
+function VolumeLevel(){ const src=msrc(), step=src==='apple'&&Host&&Host.platform==='ios'?1/16:.1;
+  push({name:'level',title:'Volume',draw(el){ const v=Math.round((pState().vol||0)*10); let s='<div class="lv">'; for(let i=1;i<=10;i++) s+=`<i class="${i<=v?'on':''}" style="height:${18+i*7}%"></i>`; el.innerHTML=s+`</div><div class="lvl">Volume ${v}</div>` },
+    soft(){ return [{t:''},{t:'OK',f:pop},{t:'Back',f:pop}] },
+    key(k){ const up=k==='U'||k==='RT'||k==='VUP', dn=k==='D'||k==='LT'||k==='VDN'; if(!up&&!dn) return false; pCmd('vol',up?step:-step); return true } }) }
+function SleepTimer(){ Radio('Sleep timer',[[0,'Off'],[10,'10 minutes'],[15,'15 minutes'],[30,'30 minutes'],[45,'45 minutes'],[60,'1 hour'],[90,'1½ hours']],()=>MP.sleepAt?MP.sleepMin:0,
+  v=>{ MP.sleepMin=v; MP.sleepAt=v?Date.now()+v*60e3:0 },{after:v=>note(v?'Music stops in '+(v<60?v+' minutes':v===60?'1 hour':'1½ hours'):'Sleep timer off','ok',1400)}) }
+function sleepCheck(){ if(!MP.sleepAt||Date.now()<MP.sleepAt) return; MP.sleepAt=0; MP.sleepMin=0; let any=false;
+  if(pState().playing){ any=true; pCmd('toggle') } if(radioP.playing||radioP.loading){ any=true; radioP.stop() }
+  if(any&&S.on) note('Sleep timer: music stopped','info',2000) }
+function SongDetails(){ const n=pState(), src=msrc(); if(n.none) return;
+  Info('Song details',`<p><b>${esc(n.t||'')}</b></p>${n.s?`<p><span class="lbl">Artist</span>${esc(n.s)}</p>`:''}${n.a?`<p><span class="lbl">Album</span>${esc(n.a)}</p>`:''}<p><span class="lbl">Length</span>${mmss(n.dur||0)}</p><p><span class="lbl">Playing from</span>${esc(SRCN[src]+(n.dev?' · '+n.dev:''))}</p>${src==='files'&&music.cur?`<p><span class="lbl">File size</span>${bytes(music.cur.size)}</p>`:''}`) }
+async function UpNext(){ const src=msrc();
+  if(src==='files'){ if(!S.music.length){ note('No music files','info'); return } const cur=()=>music.cur&&music.cur.id;
+    push(List('Up next',()=>S.music.map(t=>({t:t.name,s:cur()===t.id?'Now playing':bytes(t.size),tr:t,bold:cur()===t.id,ic:ico('note')})),{two:true,i:Math.max(0,S.music.findIndex(t=>t.id===cur())),M:it=>({t:'Play',f:()=>{ music.play(it.tr); pop() }})})); return }
+  if(src==='spotify'&&spOn()){ note('Loading','wait',15000); let j; try{ j=await spApi('/me/player/queue') }catch(e){ endNote(); note(e.message==='NO_ACTIVE_DEVICE'?'Nothing is playing on Spotify':e.message,'warn',2400); return } endNote();
+    const cur=j&&j.currently_playing, q=((j&&j.queue)||[]).slice(0,30);
+    const items=[cur?{t:cur.name,s:'Now playing',bold:true,k:-1,ic:ico('note')}:null].concat(q.map((x,i)=>({t:x.name,s:(x.artists||[]).map(a=>a.name).join(', ')||(x.show&&x.show.name)||'',k:i,ic:ico('note')}))).filter(Boolean);
+    push(List('Up next',items,{two:true,empty:'Nothing queued',M:it=>it.k<0?{t:''}:{t:'Play',f:async()=>{ note('Skipping','wait',15000); try{ for(let i=0;i<=it.k;i++) await spApi('/me/player/next',{method:'POST'}) }catch(e){} endNote(); pop(); setTimeout(()=>xmPoll(true),800) }}})); return }
+  if(src==='spotify'){ note('Up next isn’t available for the Spotify app','info',2200); return }
+  note('Loading','wait',15000); let r; try{ r=await Host.music({src:'apple',op:'queue'}) }catch(e){ endNote(); note(e.message||'Not available','warn',2400); return } endNote();
+  const items=(r.items||[]).map(x=>({t:x.t,s:x.on?'Now playing':x.s,bold:!!x.on,x,ic:ico('note')}));
+  push(List('Up next',items,{two:true,empty:'Nothing queued',i:Math.max(0,items.findIndex(x=>x.x.on)),M:it=>it.x.on?{t:''}:{t:'Play',f:async()=>{ try{ const n=await Host.music({src:'apple',op:'jump',i:it.x.i}); XM.now={...(XM.now||{}),...n}; XM.t=Date.now() }catch(e){ note(e.message,'warn') } pop() }}})) }
+async function appleQueue(kind,id,index,next,one){ try{ const n=await Host.music({src:'apple',op:next?'playNext':'addQueue',kind,id,index,one:!!one}); if(n&&typeof n==='object'){ XM.now={...(XM.now||{}),...n}; XM.t=Date.now() } S.msrc='apple'; save(); note(next?'Plays next':'Added to Up next','ok',1300) }
+  catch(e){ note(e.message||'Not available','warn',2400) } }
 function openPlayer(){ const m=V.find(x=>x.name==='music'); if(m){ while(tv()!==m) pop(); render() } else MusicPlayer() }
 
 /* Apple Music library */
@@ -1906,17 +2210,19 @@ async function AppleList(kind){ note('Loading','wait',20000); let r;
   const more=async()=>{ if(busy) return; busy=true; note('Loading','wait',20000); try{ const x=await Host.music({src:'apple',op:'browse',kind,offset:items.length,limit:300}); items.push(...(x.items||[])) }catch(e){} busy=false; endNote(); render() };
   push(List(AKIND[kind],()=>items.map(x=>({t:x.t,s:x.s,x,ic:ico(kind==='songs'?'note':'folder')})).concat(items.length<total?[{t:'More…',more:true}]:[]),{two:true,empty:'Nothing here',
     M:it=>it.more?{t:'Load',f:more}:{t:kind==='songs'?'Play':'Open',f:()=>kind==='songs'?appleStart('songs','',it.x.i):AppleTracks(kind,it.x.id,it.x.t)},
-    L:it=>it&&!it.more&&kind!=='songs'?{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();appleStart(kind,it.x.id,0)}],['Shuffle play',()=>{pop();appleStart(kind,it.x.id,0,true)}]],{nums:false})}:{t:''} })) }
+    L:it=>{ if(!it||it.more) return {t:''}; const q=Host.platform==='ios';
+      if(kind==='songs') return {t:'Options',f:()=>menu('Options',[['Play',()=>{pop();appleStart('songs','',it.x.i)}],q?['Play next',()=>{pop();appleQueue('songs','',it.x.i,true,true)}]:null,q?['Add to Up next',()=>{pop();appleQueue('songs','',it.x.i,false,true)}]:null],{nums:false})};
+      return {t:'Options',f:()=>menu('Options',[['Play',()=>{pop();appleStart(kind,it.x.id,0)}],['Shuffle play',()=>{pop();appleStart(kind,it.x.id,0,true)}],q?['Play next',()=>{pop();appleQueue(kind,it.x.id,0,true)}]:null,q?['Add to Up next',()=>{pop();appleQueue(kind,it.x.id,0,false)}]:null],{nums:false})} } })) }
 async function AppleTracks(kind,id,title){ note('Loading','wait',20000); let r;
   try{ r=await Host.music({src:'apple',op:'tracks',kind,id}) }catch(e){ endNote(); note(e.message||'Not available','warn'); return } endNote();
   push(List(title,()=>(r.items||[]).map(x=>({t:x.t,s:x.s,x,ic:ico('note')})),{two:true,empty:'No songs',
-    M:it=>({t:'Play',f:()=>appleStart(kind,id,it.x.i)}),L:()=>({t:'Options',f:()=>menu('Options',[['Play all',()=>{pop();appleStart(kind,id,0)}],['Shuffle play',()=>{pop();appleStart(kind,id,0,true)}]],{nums:false})}) })) }
+    M:it=>({t:'Play',f:()=>appleStart(kind,id,it.x.i)}),L:it=>({t:'Options',f:()=>{ const q=Host.platform==='ios'&&it; menu('Options',[['Play all',()=>{pop();appleStart(kind,id,0)}],['Shuffle play',()=>{pop();appleStart(kind,id,0,true)}],q?['Play next',()=>{pop();appleQueue(kind,id,it.x.i,true,true)}]:null,q?['Add to Up next',()=>{pop();appleQueue(kind,id,it.x.i,false,true)}]:null],{nums:false}) }}) })) }
 async function appleStart(kind,id,index,shuffle){ if(music.playing) music.pause(); if(radioP.playing||radioP.loading) radioP.stop();
-  try{ XM.now=await Host.music({src:'apple',op:'start',kind,id,index:index||0}); XM.t=Date.now(); if(shuffle) await Host.music({src:'apple',op:'shuffle'}) }catch(e){ note(e.message||'Could not play','warn',2400); return }
+  try{ XM.now=await Host.music({src:'apple',op:'start',kind,id,index:index||0}); XM.t=Date.now(); if(shuffle){ const r=await Host.music({src:'apple',op:'shuffle',on:true}); if(r&&typeof r==='object') XM.now={...XM.now,...r} } }catch(e){ note(e.message||'Could not play','warn',2400); return }
   S.msrc='apple'; save(); openPlayer() }
 
 /* Spotify: your own Spotify app's Client ID, PKCE sign-in, Web API playback control (Premium) on your Spotify devices */
-const SP_SCOPES='user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative user-library-read user-read-private';
+const SP_SCOPES='user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative user-library-read user-library-modify user-read-private';
 function spRedirect(){ return Host&&Host.oauth?'keyphone://spotify':location.origin+location.pathname.replace(/index\.html$/,'') }
 const b64url=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 function saveNow(){ try{ localStorage.setItem('larchK7',JSON.stringify(S)) }catch(e){} if(Host&&Host.persist) Host.persist(JSON.stringify(S)) }
@@ -1945,7 +2251,11 @@ async function spApi(path,opt,retry){ opt=opt||{}; const tok=await spAccess();
   return j }
 async function spNow(){ const j=await spApi('/me/player?additional_types=episode'); if(!j||!j.item) return {none:true,dev:j&&j.device&&j.device.name};
   const it=j.item, imgs=(it.album&&it.album.images)||(it.images)||[], img=imgs.slice().sort((a,b)=>(a.width||0)-(b.width||0)).find(x=>(x.width||300)>=200)||imgs[0];
-  return {id:it.id,t:it.name,s:(it.artists||[]).map(a=>a.name).join(', ')||(it.show&&it.show.name)||'',a:it.album?it.album.name:'',dur:(it.duration_ms||0)/1000,pos:(j.progress_ms||0)/1000,playing:!!j.is_playing,art:img&&img.url,dev:j.device&&j.device.name,shuffle:!!j.shuffle_state} }
+  const out={id:it.id,uri:it.uri,t:it.name,s:(it.artists||[]).map(a=>a.name).join(', ')||(it.show&&it.show.name)||'',a:it.album?it.album.name:'',dur:(it.duration_ms||0)/1000,pos:(j.progress_ms||0)/1000,playing:!!j.is_playing,art:img&&img.url,dev:j.device&&j.device.name,shuffle:!!j.shuffle_state,
+    repeat:({off:'off',context:'all',track:'one'})[j.repeat_state]||'off',vol:j.device&&j.device.volume_percent!=null&&j.device.supports_volume!==false?j.device.volume_percent/100:null};
+  if(XM.now&&XM.now.id===it.id&&XM.now.liked!=null) out.liked=XM.now.liked;
+  else if(it.type==='track'){ try{ const c=await spApi('/me/tracks/contains?ids='+encodeURIComponent(it.id)); out.liked=!!(c&&c[0]) }catch(e){} }
+  return out }
 async function spCmd(op){ const n=XM.now||{};
   if(op==='play') await spPlay(null); else if(op==='pause'||op==='stop') await spApi('/me/player/pause',{method:'PUT'});
   else if(op==='next') await spApi('/me/player/next',{method:'POST'}); else if(op==='prev') await spApi('/me/player/previous',{method:'POST'});
@@ -1977,10 +2287,12 @@ async function spList(title,path,map,onPick,opts){ note('Loading','wait',20000);
 function spPlaylists(){ spList('Playlists','/me/playlists?limit=50',j=>(j.items||[]).filter(Boolean).map(p=>({t:p.name,s:(p.tracks&&p.tracks.total!=null?p.tracks.total+' songs · ':'')+((p.owner&&p.owner.display_name)||''),p,ic:ico('folder')})),
   it=>spTracks(it.p.name,'/playlists/'+it.p.id+'/tracks?limit=100',it.p.uri),
   {M:it=>it.more?{t:'Load',f:()=>{}}:{t:'Open',f:()=>spTracks(it.p.name,'/playlists/'+it.p.id+'/tracks?limit=100',it.p.uri)},L:it=>it&&it.p?{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();spStart({context_uri:it.p.uri})}]],{nums:false})}:{t:''}}) }
-function spTracks(title,path,context){ spList(title,path,j=>(j.items||[]).map((x,i)=>x&&x.track?({t:x.track.name,s:(x.track.artists||[]).map(a=>a.name).join(', '),tr:x.track,i,ic:ico('note')}):null).filter(Boolean),
-  it=>spStart(context?{context_uri:context,offset:{uri:it.tr.uri}}:{uris:[it.tr.uri]})) }
+const spTrackOpts=play=>({L:it=>it&&it.tr?{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();play(it)}],['Add to queue',()=>{pop();spQueue(it.tr.uri)}]],{nums:false})}:{t:''}});
+function spTracks(title,path,context){ const play=it=>spStart(context?{context_uri:context,offset:{uri:it.tr.uri}}:{uris:[it.tr.uri]});
+  spList(title,path,j=>(j.items||[]).map((x,i)=>x&&x.track?({t:x.track.name,s:(x.track.artists||[]).map(a=>a.name).join(', '),tr:x.track,i,ic:ico('note')}):null).filter(Boolean),play,spTrackOpts(play)) }
 function spSearch(){ push(Editor({mode:'text',title:'Search Spotify',label:'Song, artist or album:',done(t){ pop(); t=t.trim(); if(!t) return;
-  spList('“'+t+'”','/search?type=track&limit=30&q='+encodeURIComponent(t),j=>((j.tracks&&j.tracks.items)||[]).map(x=>({t:x.name,s:(x.artists||[]).map(a=>a.name).join(', '),tr:x,ic:ico('note')})),it=>spStart({uris:[it.tr.uri]})) }})) }
+  const play=it=>spStart({uris:[it.tr.uri]});
+  spList('“'+t+'”','/search?type=track&limit=30&q='+encodeURIComponent(t),j=>((j.tracks&&j.tracks.items)||[]).map(x=>({t:x.name,s:(x.artists||[]).map(a=>a.name).join(', '),tr:x,ic:ico('note')})),play,spTrackOpts(play)) }})) }
 async function spDevices(){ note('Loading','wait',15000); let d; try{ d=await spApi('/me/player/devices') }catch(e){ endNote(); note(e.message,'warn'); return } endNote();
   const list=(d&&d.devices)||[]; if(!list.length){ note('No Spotify devices. Open Spotify on a phone, computer or speaker.','info',2600); return }
   Radio('Play on',list.map(x=>[x.id,x.name+(x.is_active?' (playing)':'')]),()=>S.spotify.dev||(list.find(x=>x.is_active)||{}).id,v=>{ S.spotify.dev=v; spApi('/me/player',{method:'PUT',body:{device_ids:[v],play:!!(XM.now&&XM.now.playing)}}).then(()=>setTimeout(()=>xmPoll(true),800)).catch(e=>note(e.message,'warn')) },{note:'Device chosen'}) }
@@ -2170,7 +2482,8 @@ const JVM=$('#jvm'); let jvmFrame=null, jvmApp=null;
    Automatic tries built-in first and moves an application to the full engine if it fails there. */
 const LITE_URL=(()=>{ try{ return new URL('j2me-lite/index.html',location.href).href }catch(e){ return '' } })();
 function engineFor(j){ const pref=S.java||'auto'; if(pref==='lite'||pref==='full') return pref; return j.engine==='full'?'full':'lite' }
-function JavaSettings(){ Radio('Java engine',[['auto','Automatic'],['lite','Built-in only (works offline)'],['full','Full only (needs internet)']],()=>S.java||'auto',v=>S.java=v,{note:'Saved'}) }
+function JavaSettings(){ menu('Java engine',[['Engine',()=>Radio('Java engine',[['auto','Automatic'],['lite','Built-in only (works offline)'],['full','Full only (needs internet)']],()=>S.java||'auto',v=>{ S.java=v; coolJava(); warmJava(500) },{note:'Saved'})],
+  ['Keep Java ready',()=>Radio('Keep Java ready',[[true,'On: applications open at once'],[false,'Off: start Java when needed']],()=>S.javaWarm!==false,v=>{ S.javaWarm=v; if(v) warmJava(300); else coolJava() },{note:'Saved'})]],{nums:false}) }
 async function openJar(j,engine){
   engine=engine||engineFor(j);
   if(engine==='full'&&!dev.online){ note(S.java==='full'?'The full Java engine needs an internet connection':'Connect to the internet to run this application','warn',2200); return }
@@ -2180,23 +2493,51 @@ async function openJar(j,engine){
 function JavaView(j,buf,engine){ return {name:'java',full:true,noSoft:true,
   draw(el){ el.style.background='#000'; if(jvmApp!==j.id) mountJava(j,buf,engine) },
   onPop(){ unmountJava() } } }
+/* Java stays ready in the background: a runner for each engine is loaded ahead of time (hidden), so an
+   application opens straight away. After an application closes, a fresh runner is warmed up again. */
+const warm={lite:null,full:null};
+const runnerURL=engine=>engine==='lite'?LITE_URL:J2ME_URL;
+const javaMuted=()=>hushed()||(!prof().vol&&!prof().keys);
+function javaMute(){ const on=javaMuted(); for(const f of JVM.querySelectorAll('iframe')) try{ f.contentWindow.postMessage({t:'mute',on},'*') }catch(e){} }
+function makeRunner(engine){ const f=document.createElement('iframe'); f.allow='autoplay; fullscreen'; f.className='warm'; f.tabIndex=-1; f.setAttribute('aria-hidden','true');
+  f._engine=engine; f._ready=false; f._t0=Date.now(); f.src=runnerURL(engine); JVM.appendChild(f); return f }
+const needFull=()=>S.java==='full'||(S.java!=='lite'&&S.jars.some(j=>j.engine==='full'));
+let warmT=null;
+function warmJava(delay){ clearTimeout(warmT); warmT=setTimeout(()=>{ if(!S.on||S.javaWarm===false||!S.jars.length) return;
+    if(!warm.lite&&LITE_URL&&S.java!=='full') warm.lite=makeRunner('lite');
+    if(!warm.full&&dev.online&&needFull()) warm.full=makeRunner('full');
+    if(warm.full&&!needFull()){ warm.full.remove(); warm.full=null } },delay==null?0:delay) }
+function coolJava(){ clearTimeout(warmT); for(const k in warm) if(warm[k]){ warm[k].remove(); warm[k]=null } }
+function jsplash(j,text){ let s=JVM.querySelector('.jsplash'); if(!j){ if(s) s.remove(); return }
+  if(!s){ s=document.createElement('div'); s.className='jsplash'; JVM.appendChild(s) }
+  s.innerHTML=`<div class="ji">${j.icon?`<img src="${j.icon}" alt="">`:ico(j.game?'game':'java',40)}</div><b>${esc(j.name)}</b><span>${esc(text||(j.vendor||''))}</span><i><u></u></i>` }
 function mountJava(j,buf,engine){ unmountJava(); jvmApp=j.id;
-  const f=document.createElement('iframe'); f.title=j.name; f.allow='autoplay; fullscreen'; f.src=engine==='lite'?LITE_URL:J2ME_URL; JVM.appendChild(f); jvmFrame=f;
-  f._run={t:'run',id:j.id,name:j.name,jar:buf}; f._heard=false; f._engine=engine; f._jar=j; f._t0=Date.now();
-  setTimeout(()=>{ if(jvmFrame===f&&!f._heard){ exitJava(); note(engine==='lite'?'Java could not start':'Java could not start. Check the internet connection.','warn',2400) } },engine==='lite'?8000:20000) }
-// The built-in engine reports an application it can't run; Automatic then remembers to use the full engine for it.
+  let f=warm[engine]; if(f) warm[engine]=null; else f=makeRunner(engine);
+  f.classList.remove('warm'); f.removeAttribute('aria-hidden'); f.tabIndex=0; f.title=j.name; jvmFrame=f;
+  f._run={t:'run',id:j.id,name:j.name,jar:buf}; f._heard=f._ready; f._jar=j; f._t0=Date.now(); f._started=false;
+  jsplash(j); javaMute();
+  if(f._ready) startRun(f);
+  // the built-in engine shows its first screen at once; the full engine says when it has started
+  const lite=engine==='lite';
+  setTimeout(()=>{ if(jvmFrame===f&&!f._heard){ exitJava(); note(lite?'Java could not start':'Java could not start. Check the internet connection.','warn',2400) } },lite?8000:45000) }
+function startRun(f){ const r=f._run; if(!r) return; f._run=null; f._heard=true; f.contentWindow.postMessage({...r,jar:r.jar.slice(0)},'*');
+  if(f._engine==='lite') setTimeout(()=>{ if(jvmFrame===f) jsplash(null) },2500) }
 function liteFailed(f,text){ const j=f._jar; exitJava();
   if((S.java||'auto')==='auto'&&j&&j.engine!=='lite'){ j.engine='full'; save();
     if(dev.online){ note('Switching to the full Java engine','wait',1500,()=>openJar(j,'full')); return }
     note('This application needs the full Java engine, which needs an internet connection','warn',2800); return }
   note(text||'The application closed','warn',2200) }
-function unmountJava(){ if(jvmFrame){ jvmFrame.remove(); jvmFrame=null } jvmApp=null }
+function unmountJava(){ jsplash(null); if(jvmFrame){ jvmFrame.remove(); jvmFrame=null; warmJava(1500) } jvmApp=null }
 const javaOn=()=>!!jvmFrame&&S.on&&tv()&&tv().name==='java';
 const JKEY={'0':'Digit0','1':'Digit1','2':'Digit2','3':'Digit3','4':'Digit4','5':'Digit5','6':'Digit6','7':'Digit7','8':'Digit8','9':'Digit9','*':'NumpadMultiply','#':'NumpadDivide',U:'ArrowUp',D:'ArrowDown',LT:'ArrowLeft',RT:'ArrowRight',M:'Enter',L:'F1',R:'F2',CALL:'Enter'};
 function javaKey(k,down){ const code=JKEY[k]; if(code&&jvmFrame&&jvmFrame.contentWindow) jvmFrame.contentWindow.postMessage({t:'key',code,down},'*') }
 function exitJava(){ const v=tv(); if(v&&v.name==='java') pop() }
-addEventListener('message',e=>{ if(!jvmFrame||e.source!==jvmFrame.contentWindow) return; const m=e.data||{}; jvmFrame._heard=true;
-  if(m.t==='ready'&&jvmFrame._run){ const r=jvmFrame._run; jvmFrame._run=null; jvmFrame.contentWindow.postMessage({...r,jar:r.jar.slice(0)},'*') }
+addEventListener('message',e=>{ const f=[...JVM.querySelectorAll('iframe')].find(x=>x.contentWindow===e.source); if(!f) return; const m=e.data||{};
+  if(m.t==='ready'){ f._ready=true; try{ f.contentWindow.postMessage({t:'mute',on:javaMuted()},'*') }catch(err){} if(f===jvmFrame) startRun(f); return }
+  if(f!==jvmFrame){ if(m.t==='error'){ f.remove(); for(const k in warm) if(warm[k]===f) warm[k]=null } return }
+  jvmFrame._heard=true;
+  if(m.t==='started'){ f._started=true; jsplash(null) }
+  else if(m.t==='status'){ if(!f._started) jsplash(f._jar,/^Installing/.test(m.text||'')?'Installing…':'Loading…') }
   else if(m.t==='exit') exitJava();
   else if(m.t==='error'){ if(jvmFrame._engine==='lite') liteFailed(jvmFrame,m.text); else { exitJava(); note(m.text||'The application closed','warn',2200) } } });
 /* Blocks: falling-block puzzle. 4/6 or ◂ ▸ move, 2/5 or ▴ rotate, 8 or ▾ drop faster, 0 drops. */
@@ -2241,8 +2582,8 @@ function Mines(){ const W=9,H=10,N=12,C=24,OX=12,OY=8; let g,open,flag,cx,cy,sta
   const reveal=i=>{ if(open[i]||flag[i]) return; open[i]=true; if(g[i]===0) nb(i).forEach(reveal) };
   const elapsed=()=>t0?Math.floor((Date.now()-t0)/1000):0;
   const poke=()=>{ const i=cy*W+cx; if(dead||won||flag[i]) return; if(!started){ started=true; plant(i); t0=Date.now(); tm=setInterval(()=>{ if(tv()===v) paint() },1000) }
-    if(g[i]===-1){ dead=true; clearInterval(tm); open=open.map((o,j)=>o||g[j]===-1); beep([200],.35,.06,'square') } else { reveal(i); beep([900],.03,.03,'square') }
-    if(!dead&&open.filter(Boolean).length===W*H-N){ won=true; clearInterval(tm); const t=elapsed(); if(!S.games.mines||t<S.games.mines){ S.games.mines=t; save() } beep([1200,1500],.15,.05,'square') } paint() };
+    if(g[i]===-1){ dead=true; clearInterval(tm); open=open.map((o,j)=>o||g[j]===-1); sfx([200],.35,.06,'square') } else { reveal(i); beep([900],.03,.03,'square') }
+    if(!dead&&open.filter(Boolean).length===W*H-N){ won=true; clearInterval(tm); const t=elapsed(); if(!S.games.mines||t<S.games.mines){ S.games.mines=t; save() } sfx([1200,1500],.15,.05,'square') } paint() };
   const NC=['','#2f6fd8','#2f9a4a','#d33b2f','#6b3fb8','#9a2a1a','#1f8a8a','#222','#777'];
   function paint(){ const cv=SCR.querySelector('canvas'); if(!cv) return; const x=cv.getContext('2d'); const st=getComputedStyle($('#lcd'));
     x.fillStyle=st.getPropertyValue('--tsolid')||'#eee'; x.fillRect(0,0,240,262);
@@ -2264,8 +2605,8 @@ function Snake(){ const W=20,H=21,C=12; let sn,dir,nd,food,score,dead,paused,tim
   const reset=()=>{ sn=[{x:6,y:10},{x:5,y:10},{x:4,y:10}]; dir={x:1,y:0}; nd=dir; food=spawn(); score=0; dead=false; paused=false; clearInterval(timer); timer=setInterval(step,300-S.snake.lvl*26) };
   function spawn(){ let p; do{ p={x:Math.floor(Math.random()*W),y:Math.floor(Math.random()*H)} }while(sn&&sn.some(s=>s.x===p.x&&s.y===p.y)); return p }
   function step(){ if(paused||dead||tv()!==v) return; dir=nd; const h={x:sn[0].x+dir.x,y:sn[0].y+dir.y};
-    if(h.x<0||h.y<0||h.x>=W||h.y>=H||sn.some(s=>s.x===h.x&&s.y===h.y)){ dead=true; clearInterval(timer); if(score>S.snake.best){S.snake.best=score;save()} beep([220],.3,.06,'square'); render(); return }
-    sn.unshift(h); if(h.x===food.x&&h.y===food.y){ score+=S.snake.lvl; food=spawn(); beep([1200],.05,.04,'square') } else sn.pop(); paint() }
+    if(h.x<0||h.y<0||h.x>=W||h.y>=H||sn.some(s=>s.x===h.x&&s.y===h.y)){ dead=true; clearInterval(timer); if(score>S.snake.best){S.snake.best=score;save()} sfx([220],.3,.06,'square'); render(); return }
+    sn.unshift(h); if(h.x===food.x&&h.y===food.y){ score+=S.snake.lvl; food=spawn(); sfx([1200],.05,.04,'square') } else sn.pop(); paint() }
   function paint(){ const cv=SCR.querySelector('canvas'); if(!cv) return; const x=cv.getContext('2d'); x.fillStyle='#a9c47f'; x.fillRect(0,0,240,252);
     x.fillStyle='#9ab86f'; for(let i=0;i<W;i++) for(let j=0;j<H;j++) if((i+j)%2) x.fillRect(i*C,j*C,C,C);
     x.fillStyle='#1d2a12'; sn.forEach((s,i)=>{ x.fillRect(s.x*C+1,s.y*C+1,C-2,C-2) }); x.fillStyle='#5a1b12'; x.beginPath(); x.arc(food.x*C+C/2,food.y*C+C/2,C/2-2,0,7); x.fill();
@@ -2335,13 +2676,14 @@ function WebPage(u){ let i=0; const start=u==='start'; const native=!!(Host&&Hos
 /* ---------------- power, boot, screen saver ---------------- */
 let booting=false;
 function powerOn(){ if(S.on&&V.length) return; S.on=true; save(); V=[]; booting=true; locked=false; applyTheme();
-  SCR.className='full'; SCR.innerHTML='<div class="boot"><canvas width="240" height="320"></canvas></div>';
-  const cv=SCR.querySelector('canvas'), x=hiDPI(cv,240,320); const t0=performance.now();
+  const BW=LW(), BH=LH();
+  SCR.className='full'; SCR.innerHTML=`<div class="boot"><canvas width="${BW}" height="${BH}"></canvas></div>`;
+  const cv=SCR.querySelector('canvas'), x=hiDPI(cv,BW,BH); const t0=performance.now();
   const ease=u=>u<0?0:u>1?1:1-Math.pow(1-u,3);
   const mono=uiOf()==='mono', cs=getComputedStyle($('#lcd')), BG=mono?cs.getPropertyValue('--tsolid').trim()||'#bfd78a':'#000', FG=mono?cs.getPropertyValue('--tfg').trim()||'#1b2611':'#f5f5f7';
-  (function fr(){ const t=(performance.now()-t0)/1000; x.fillStyle=BG; x.fillRect(0,0,240,320);
-    phoneLogo(x,120,138,96,ease(t/.45),FG,BG);
-    const bw=92, bx=120-bw/2, by=232, p=ease((t-.35)/1.6);
+  (function fr(){ const t=(performance.now()-t0)/1000; x.fillStyle=BG; x.fillRect(0,0,BW,BH);
+    phoneLogo(x,BW/2,BH*.431,BH===320?96:84,ease(t/.45),FG,BG);
+    const bw=92, bx=BW/2-bw/2, by=BH===320?232:178, p=ease((t-.35)/1.6);
     x.globalAlpha=ease((t-.25)/.3)*(mono?.3:1); x.fillStyle=mono?FG:'#3a3a3c'; rrect(x,bx,by,bw,3,1.5); x.fill(); x.globalAlpha=ease((t-.25)/.3); x.fillStyle=FG; if(p>0){ rrect(x,bx,by,Math.max(3,bw*p),3,1.5); x.fill() } x.globalAlpha=1;
     if(t<2.15) requestAnimationFrame(fr); else bootTail() })() }
 function rrect(x,X,Y,W,H,R){ R=Math.min(R,W/2,H/2); x.beginPath(); x.moveTo(X+R,Y); x.arcTo(X+W,Y,X+W,Y+H,R); x.arcTo(X+W,Y+H,X,Y+H,R); x.arcTo(X,Y+H,X,Y,R); x.arcTo(X,Y,X+W,Y,R); x.closePath() }
@@ -2353,13 +2695,13 @@ function phoneLogo(x,cx,cy,h,a,fg,bg){ fg=fg||'#f5f5f7'; bg=bg||'#000'; const w=
   x.strokeStyle=bg; x.lineWidth=w*.022; x.beginPath(); x.arc(w/2,h*.546,w*.074,0,7); x.stroke();
   for(let r=0;r<4;r++) for(let c=0;c<3;c++){ x.beginPath(); x.arc(w/2+(c-1)*w*.238,h*(.671+r*.077),w*.038,0,7); x.fill() }
   x.restore() }
-function bootTail(){ booting=false; S.on=true; V=[Standby()]; keyLight();
+function bootTail(){ booting=false; S.on=true; V=[Standby()]; keyLight(); warmJava(3000);
   const chain=[];
   if(S.sec.pinReq) chain.push(next=>{ const ask=()=>push(Editor({mode:'pass',title:'PIN code',label:'Enter PIN code:',max:8,cancel:()=>{ powerOff() },done(t){ if(t===S.sec.pin){ pop(); next() } else { note('Wrong PIN code','warn'); const e=tv(); e.text=''; e.caret=0; render() } }})); ask() });
   if(S.phone.flightQ) chain.push(next=>Ask('Activate phone?',()=>{ if(S.profile==='flight') S.profile='general'; save(); next() },()=>{ S.profile='flight'; save(); next() },{title:''}));
   if(S.phone.welcome) chain.push(next=>{ render(); note(S.phone.welcome,'info',1600,next) });
   const run=()=>{ const f=chain.shift(); if(f) f(run); else { home() } }; render(); run() }
-function powerOff(){ clearTimeout(litT); PHONE.classList.remove('lit'); stopRing(); stopRingback(); if(callObj){ clearTimeout(callObj.tm); callObj=null } V.forEach(v=>v.onPop&&v.onPop()); V=[]; S.on=false; save(); music.pause(); radioP.stop(); locked=false; NOTE.hidden=true; render() }
+function powerOff(){ clearTimeout(litT); PHONE.classList.remove('lit'); stopRing(); stopRingback(); if(callObj){ clearTimeout(callObj.tm); callObj=null } V.forEach(v=>v.onPop&&v.onPop()); V=[]; S.on=false; save(); music.pause(); radioP.stop(); coolJava(); locked=false; NOTE.hidden=true; render() }
 function ScreenSaver(){ let pos=[120,150];
   return {name:'ss',full:true,noSoft:true,
     draw(el){ const d=now(); const deep=S.sleep&&Date.now()-lastActivity>(S.ss.to+120)*1000;
@@ -2394,12 +2736,13 @@ setInterval(()=>{
   const today=dkey(d), hm=pad2(d.getHours())+':'+pad2(d.getMinutes());
   for(const n of S.cal){ if(n.alarm&&!n.fired&&n.date===today&&n.time<=hm&&!callObj){ n.fired=true; save(); wake(); startRing('ring'); push({name:'remind',full:true,draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico(NOTE_IC[n.type],36)}<div class="t2">${esc(n.type)} · ${esc(n.time)}</div><div style="font-size:18px">${esc(n.subject)}</div></div>` },soft(){ return [{t:'Stop',f:()=>{stopRing();pop()}},{t:''},{t:'Exit',f:()=>{stopRing();pop()}}] },onPop(){stopRing()}}); return } }
   // countdown timer
-  if(S.timer&&Date.now()>=S.timer.end){ const t=S.timer; S.timer=null; save(); wake(); startRing('ring'); push({name:'timerdone',full:true,draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico('timer',36)}<div class="t1" style="font-size:24px">Timer expired</div><div class="t2">${esc(t.note||'')}</div></div>` },soft(){ return [{t:''},{t:'OK',f:()=>{stopRing();pop()}},{t:''}] },onPop(){stopRing()}}); return }
+  if(S.timer&&Date.now()>=S.timer.end){ const t=S.timer; S.timer=null; save(); wake(); startRing('timer'); push({name:'timerdone',full:true,draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="big">${ico('timer',36)}<div class="t1" style="font-size:24px">Timer expired</div><div class="t2">${esc(t.note||'')}</div></div>` },soft(){ return [{t:''},{t:'OK',f:()=>{stopRing();pop()}},{t:''}] },onPop(){stopRing()}}); return }
   // idle: backlight, screen saver, keyguard
   const idle=(Date.now()-lastActivity)/1000;
   if(S.phone.akg.on&&!locked&&idle>S.phone.akg.sec&&v&&(v.name==='standby'||v.name==='ss')){ locked=true; if(v.name==='standby') render() }
   if(S.ss.on&&idle>S.ss.to&&v&&v.name==='standby'){ push(ScreenSaver()) }
   if(v&&v.tick) v.tick();
+  sleepCheck();
 },1000);
 setInterval(()=>{ const v=tv(); if(S.on&&v&&v.tickFast) render() },100);
 
@@ -2413,6 +2756,8 @@ function dispatch(k,long){
   if(v.name==='ss'){ pop(); return }
   if(long&&(k==='END'||k==='PWR')&&!v.noPower){ powerOff(); return }
   if(k==='PWR'){ if(v.name==='standby'&&!locked) ProfilesQuick(); return }
+  if(k==='HOME'||k==='MAIL'){ if(locked){ note('Press Unlock, then *','info',1300); return } if(['call','alarmv','remind','timerdone'].includes(v.name)) return;
+    home(); if(k==='HOME') push(MainMenu()); else MENU.msg.f(); return }
   if(k==='EMU'){ if(locked){ note('Press Unlock, then *','info',1300); return } if(v.name==='call'||v.name==='alarmv') return; if(v.name==='emu') { pop(); return } EmulatorMenu(); return }
   if(v.key&&v.key(k,long)) return;
   if(long&&k!=='END') return dispatch(k,false);
@@ -2420,24 +2765,82 @@ function dispatch(k,long){
   if(k==='L'||k==='M'||k==='R'){ const s=v.soft?v.soft():[]; const x=s[{L:0,M:1,R:2}[k]]; if(x&&x.f) x.f() }
 }
 function down(k){ ac(); wake(); if(downK) return; downK=k; fired=false; if(Host&&Host.haptic&&S.on) Host.haptic('light');
-  if(javaOn()){ fired=true; if(k==='END'||k==='PWR') exitJava(); else javaKey(k,true); return }
+  if(javaOn()){ fired=true; if(k==='END'||k==='PWR'||k==='HOME') exitJava(); else javaKey(k,true); return }
   keyTone(k);
   const v=tv(); if(S.on&&!booting&&NOTE.hidden&&v&&v.instant&&v.instant(k)){ fired=true; return }
-  if(['U','D','LT','RT','VUP','VDN'].includes(k)&&S.on){ dispatch(k,false); fired=true; rpt=setTimeout(()=>{ rptI=setInterval(()=>dispatch(k,false),110) },450); return }
+  if(['U','D','LT','RT','VUP','VDN'].includes(k)&&S.on&&!(v&&v.hold&&v.hold.includes(k)&&!booting)){ dispatch(k,false); fired=true; rpt=setTimeout(()=>{ rptI=setInterval(()=>dispatch(k,false),110) },450); return }
   lt=setTimeout(()=>{ fired=true; dispatch(k,true) },650) }
-function up(k){ if(downK!==k) return; clearTimeout(lt); clearTimeout(rpt); clearInterval(rptI); downK=null; if(javaOn()){ javaKey(k,false); return } if(!fired) dispatch(k,false) }
+function up(k){ if(downK!==k) return; clearTimeout(lt); clearTimeout(rpt); clearInterval(rptI); downK=null; if(javaOn()){ javaKey(k,false); return } if(!fired) dispatch(k,false); const v=tv(); if(S.on&&v&&v.keyUp) v.keyUp(k) }
 document.querySelectorAll('[data-k]').forEach(el=>{ const k=el.dataset.k;
   el.addEventListener('pointerdown',e=>{ e.preventDefault(); el.setPointerCapture&&el.setPointerCapture(e.pointerId); el.classList.add('dn'); down(k) });
   const u=()=>{ el.classList.remove('dn'); up(k) }; el.addEventListener('pointerup',u); el.addEventListener('pointercancel',u) });
 const KP=[['1','',''],['2','abc'],['3','def'],['4','ghi'],['5','jkl'],['6','mno'],['7','pqrs'],['8','tuv'],['9','wxyz'],['*','+'],['0','␣'],['#','⇧']];
-$('#kp').innerHTML=KP.map(([d,l])=>`<div class="kk" data-k="${d}"><b>${d}</b><small>${l||''}</small></div>`).join('');
-$('#kp').querySelectorAll('[data-k]').forEach(el=>{ const k=el.dataset.k; el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('dn');down(k)}); const u=()=>{el.classList.remove('dn');up(k)}; el.addEventListener('pointerup',u); el.addEventListener('pointerleave',()=>{ if(el.classList.contains('dn')) u() }); el.addEventListener('pointercancel',u) });
+/* The Messenger's keyboard: letters type straight into text; W E R / S D F / Z X C with * 0 # are the phone keypad
+   (dialling, menus, games). Hold a key, or press Fn first, for the number or symbol printed on it; ⇧ once for a capital,
+   twice for caps lock. On the standby screen a letter starts a search of your contacts. */
+const QW=[[['q','+'],['w','1'],['e','2'],['r','3'],['t','('],['y',')'],['u','-'],['i','_'],['o','/'],['p',':']],
+  [['a','!'],['s','4'],['d','5'],['f','6'],['g','?'],['h','&'],['j',';'],['k',"'"],['l','"'],['BK','']],
+  [['SH',''],['z','7'],['x','8'],['c','9'],['v','='],['b','%'],['n','€'],['m','£'],[',',''],['EN','']],
+  [['FN',''],['*','Sym'],['0',''],['#',''],['SP',''],['.',''],['@','']]];
+const QSVG={BK:'<svg viewBox="0 0 24 24"><path d="M9 5.5h10.5a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5H9L3.5 12z"/><path d="m11.5 9.5 5 5M16.5 9.5l-5 5"/></svg>',
+  EN:'<svg viewBox="0 0 24 24"><path d="M19 5.5V12a2.5 2.5 0 0 1-2.5 2.5H5.5M9 10.5l-4 4 4 4"/></svg>',
+  SH:'<svg viewBox="0 0 24 24"><path d="M12 4.5 4.5 12H9v7h6v-7h4.5z"/></svg>',
+  SP:'<svg viewBox="0 0 24 24"><path d="M4.5 10.5v4h15v-4"/></svg>'};
+const QNAME={BK:'Backspace',EN:'Enter',SH:'Shift',SP:'Space',FN:'Function'};
+const QDIG={w:'1',e:'2',r:'3',s:'4',d:'5',f:'6',z:'7',x:'8',c:'9'};
+const QFN={}; for(const row of QW) for(const [k,f] of row) if(f&&/^[a-z]$/.test(k)) QFN[k]=f;
+const qm={sh:0,fn:0,shT:0,fnT:0}; let qh=null;
+function qwHTML(){ return QW.flat().map(([k,f])=>{ const g=QSVG[k], nk=QDIG[k]||'*0#'.includes(k);
+  const cls='kk q'+(nk?' nk':'')+(k==='SP'?' sp':'')+(g||k==='FN'?' fx':'');
+  const main=g||(k==='FN'?'<b>Fn</b>':`<b>${esc(k.toUpperCase())}</b>`);
+  return `<div class="${cls}" data-q="${esc(k)}" title="${esc(QNAME[k]||(QDIG[k]?k.toUpperCase()+' · '+QDIG[k]:k.toUpperCase()))}">${main}${f?`<small>${esc(f)}</small>`:''}</div>` }).join('') }
+function qLights(){ const kp=$('#kp'); for(const el of kp.querySelectorAll('[data-q="SH"],[data-q="FN"]')){ const v=el.dataset.q==='SH'?qm.sh:qm.fn; el.classList.toggle('on',v>0); el.classList.toggle('lock',v===2) } }
+const qTextView=v=>!!(v&&v.typeChar&&v.name!=='dialer');
+function qDown(k){ ac(); wake(); if(k==='SH'||k==='FN') return;
+  const v=tv(); if(!S.on||booting){ qh=null; return }
+  if(javaOn()){ const p=QDIG[k]||('*0#'.includes(k)?k:k==='EN'?'M':k==='SP'?'5':null); if(p){ qh={k,mode:'key',p}; down(p) } return }
+  if(qTextView(v)&&NOTE.hidden){
+    if(k==='*'){ qh={k,mode:'key',p:'*'}; down('*'); return }
+    if(k==='EN'&&!(v.o&&(v.o.sms||v.o.multi))){ qh={k,mode:'key',p:'M'}; down('M'); return }
+    if(Host&&Host.haptic) Host.haptic('light'); keyTone('Q');
+    if(k==='BK'){ qBack(v); qh={k,mode:'rep'}; qh.t=setTimeout(()=>{ if(qh&&qh.k==='BK') qh.i=setInterval(()=>qBack(tv()),90) },450); return }
+    qh={k,mode:'text'}; qh.t=setTimeout(()=>{ if(qh&&qh.k===k&&qh.mode==='text'){ qh.long=true; qType(k,true) } },480); return }
+  const p=QDIG[k]||('*0#'.includes(k)?k:k==='EN'?'M':k==='BK'?'R':null);
+  if(p){ qh={k,mode:'key',p}; down(p); return }
+  if(Host&&Host.haptic) Host.haptic('light'); keyTone('Q'); qh={k,mode:'find'} }
+function qUp(k){ if(k==='SH'||k==='FN'){ const n=k==='SH'?'sh':'fn', t=Date.now();
+    qm[n]=qm[n]===0?1:qm[n]===1&&t-qm[n+'T']<700?2:0; qm[n+'T']=t; qLights(); return }
+  if(!qh||qh.k!==k) return; const h=qh; qh=null; clearTimeout(h.t); clearInterval(h.i);
+  if(h.mode==='key') up(h.p); else if(h.mode==='text'){ if(!h.long) qType(k,false) } else if(h.mode==='find') qFind(k) }
+function qBack(v){ if(!qTextView(v)) return; if(v.text&&v.text.length&&v.clear) v.clear(); }
+function qType(k,long){ const v=tv(); if(!qTextView(v)) return;
+  if(k==='SP'){ v.typeChar(' '); return } if(k==='EN'){ v.typeChar('\n'); return }
+  if(k==='0'||k==='#'){ v.typeChar(k); return }
+  const numeric=!!(v.numeric&&v.numeric()), fn=qm.fn>0||long; let ch;
+  if(numeric) ch=QDIG[k]||(fn&&QFN[k])||k;
+  else if(fn) ch=QDIG[k]||QFN[k]||k;
+  else { ch=k; if(/^[a-z]$/.test(k)) ch=qm.sh?k.toUpperCase():v.cased?v.cased(k,v.caret):k }
+  if(qm.fn===1) qm.fn=0; if(qm.sh===1&&/^[a-z]$/.test(k)) qm.sh=0; qLights();
+  v.typeChar(ch) }
+// a letter where there is nothing to type into: find a contact from the standby screen, or jump through a list
+function qFind(k){ const v=tv(); if(!v||!S.on||!/^[a-z]$/.test(k)) return;
+  if(v.name==='standby'){ if(locked){ note('Press Unlock, then *','info',1300); return } NamesList(null,k); return }
+  const lf=v.letter||(v.o&&v.o.letter); if(lf&&lf.call(v,k)) return;
+  if(typeof v.items==='function'){ const it=v.items(), n=it.length; for(let j=1;j<=n;j++){ const i=(v.i+j)%n, x=it[i];
+      if(x&&String(x.t||'').replace(/^\d+\.\s*/,'').trim().toLowerCase().startsWith(k)){ v.i=i; v.moved=Date.now(); v.o&&v.o.onMove&&v.o.onMove.call(v,x); render(); return } } } }
+function wireKeys(kp){ kp.querySelectorAll('[data-k]').forEach(el=>{ const k=el.dataset.k; el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('dn');down(k)}); const u=()=>{el.classList.remove('dn');up(k)}; el.addEventListener('pointerup',u); el.addEventListener('pointerleave',()=>{ if(el.classList.contains('dn')) u() }); el.addEventListener('pointercancel',u) });
+  kp.querySelectorAll('[data-q]').forEach(el=>{ const k=el.dataset.q; el.addEventListener('pointerdown',e=>{ e.preventDefault(); try{ el.setPointerCapture(e.pointerId) }catch(err){} el.classList.add('dn'); qDown(k) });
+    const u=()=>{ if(!el.classList.contains('dn')) return; el.classList.remove('dn'); qUp(k) }; el.addEventListener('pointerup',u); el.addEventListener('pointercancel',u) }) }
+function buildKeys(){ const kp=$('#kp'), q=MODELS[modelId()].kb==='qwerty', want=q?'q':'n'; if(kp.dataset.kb===want) return; kp.dataset.kb=want; qm.sh=qm.fn=0; qh=null;
+  kp.innerHTML=q?qwHTML():KP.map(([d,l])=>`<div class="kk" data-k="${d}"><b>${d}</b><small>${l||''}</small></div>`).join(''); wireKeys(kp) }
+buildKeys();
 const KMAP={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'LT',ArrowRight:'RT',Enter:'M','[':'L',']':'R',Backspace:'R','=':'CALL',Escape:'END',PageUp:'VUP',PageDown:'VDN','\\':'EMU'};
 const held=new Set();
 document.addEventListener('keydown',e=>{ if(e.target.closest('input,textarea')||e.metaKey||e.ctrlKey||e.altKey) return;
   let k=KMAP[e.key]; if(!k&&/^[0-9*#]$/.test(e.key)) k=e.key;
   const v=tv();
   if(!k&&e.key.length===1&&S.on&&v&&v.typeChar&&NOTE.hidden){ e.preventDefault(); wake(); v.typeChar(e.key); return }
+  if(!k&&/^[a-z]$/i.test(e.key)&&S.on&&NOTE.hidden&&MODELS[modelId()].kb==='qwerty'&&!javaOn()){ e.preventDefault(); wake(); qFind(e.key.toLowerCase()); return }
   if(!k) return; e.preventDefault(); if(e.repeat||held.has(k)) return; held.add(k); down(k) });
 document.addEventListener('keyup',e=>{ let k=KMAP[e.key]; if(!k&&/^[0-9*#]$/.test(e.key)) k=e.key; if(!k||!held.has(k)) return; held.delete(k); up(k) });
 // clicks on the screen itself
@@ -2461,8 +2864,8 @@ function EmulatorMenu(){ menu('KeyPhone settings',[
   ['Phone model',()=>ModelMenu()],
   ['Phone colours',()=>SkinMenu()],
   ['Keypad light',()=>KeyLightMenu()],
-  FULL?['Display size',()=>Radio('Display size',[[false,'Phone size'],[true,'Whole screen']],()=>!!S.fill,v=>{ S.fill=v; fit(); syncOverlays() })]:null,
-  ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this device'}</p><p><span class="lbl">Connection</span>${!dev.online?'Offline':({wifi:'Wi-Fi',cellular:'Cellular',wired:'Wired'}[dev.net]||'Online')}</p><p><span class="lbl">Signal strength</span>${dev.sig!=null?dev.sig+' of 5 bars':'Not reported by this device'}</p><p><span class="lbl">VoIP</span>${esc(voip.label())}</p>`)],
+  FULL?['Display size',()=>Radio('Display size',[[true,'Whole screen'],[false,'Phone size']],()=>!!S.fill,v=>{ S.fill=v; fit(); syncOverlays() })]:null,
+  ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this device'}</p><p><span class="lbl">Connection</span>${!dev.online?'Offline':({wifi:'Wi-Fi',cellular:'Cellular',wired:'Wired'}[dev.net]||'Online')}</p><p><span class="lbl">Signal strength</span>${dev.sig!=null?dev.sig+' of 5 bars':'Not reported by this device'}</p>${dev.silent!=null?`<p><span class="lbl">Ring/Silent</span>${dev.silent?'Silent: key, message and ringing tones are off':'Ring'}</p>`:''}<p><span class="lbl">VoIP</span>${esc(voip.label())}</p>`)],
   Host&&Host.platform==='ios'?null:['Keyboard shortcuts',()=>Info('Keyboard shortcuts','<p><span class="lbl">Keypad</span>0–9, * and #</p><p><span class="lbl">Navigation key</span>Arrow keys</p><p><span class="lbl">Middle select key</span>Enter</p><p><span class="lbl">Left / right selection keys</span>[ and ]</p><p><span class="lbl">Clear / Back</span>Backspace</p><p><span class="lbl">Call key</span>=</p><p><span class="lbl">End key</span>Esc (hold to switch off or on)</p><p><span class="lbl">KeyPhone settings</span>\\ (backslash), or the three-line key above the screen</p><p><span class="lbl">Text fields</span>Type letters directly, or paste with ⌘V</p>')],
   ['About',()=>Info('About',`<p><b>KeyPhone</b> ${esc(window.LARCH_VERSION||'')}</p><p>Series 40–style phone shell.</p><p>Contacts, messages, settings and files are stored on this device.</p>`)]
 ],{name:'emu'}) }
@@ -2504,7 +2907,7 @@ async function readJar(f,z){ z=z||await unzip(f); const mfn=z.names.find(x=>x.to
   return {id:uid(),name:get('MIDlet-Name')||m1[0]||f.name.replace(/\.jar$/i,''),vendor:get('MIDlet-Vendor'),ver:get('MIDlet-Version'),main:m1[2]||'',profile:get('MicroEdition-Profile'),size:f.size,icon,file:f.name,game:false,added:Date.now()} }
 async function saveJar(j,f){ await Blobs.put('jar:'+j.id,await f.arrayBuffer()); const back=await Blobs.get('jar:'+j.id); if(!back||back.byteLength!==f.size) throw new Error('not saved');
   const old=S.jars.find(x=>x.name===j.name&&(x.vendor||'')===(j.vendor||'')); if(old){ j.game=old.game; Blobs.del('jar:'+old.id); S.jars=S.jars.filter(x=>x!==old) }
-  j.stored=true; S.jars.push(j); save(); return j }
+  j.stored=true; S.jars.push(j); save(); warmJava(1500); return j }
 const kb=n=>Math.max(1,Math.round(n/1024))+' kB';
 async function installFlow(f){ let j; try{ j=await readJar(f) }catch(e){ note('This file is not a Java application','warn',2200); return }
   const old=S.jars.find(x=>x.name===j.name&&(x.vendor||'')===(j.vendor||''));
@@ -2547,7 +2950,7 @@ async function importFile(f){ const n=f.name, ext=n.split('.').pop().toLowerCase
 const EMBED=/embed/.test(location.hash+location.search); if(EMBED) document.documentElement.classList.add('embed');
 const FULL=!EMBED&&(!!Host||(matchMedia('(pointer: coarse)').matches&&Math.min(screen.width,screen.height)<600));
 if(FULL){ document.documentElement.classList.add('fsm'); PHONE.classList.add('fs') }
-function fit(){ const W=280,H=742, wr=$('#wrap'), inn=$('#inner');
+function fit(){ const [W,H]=MODELS[modelId()].dim||[280,742], wr=$('#wrap'), inn=$('#inner');
   if(FULL){ const vw=innerWidth, vh=innerHeight; wr.style.width=vw+'px'; wr.style.height=vh+'px'; PHONE.classList.toggle('fill',!!S.fill);
     if(S.fill){ fitFull(vw,vh); return } clearFill();
     const s=Math.min(vw/W,vh/H), pw=vw/s, ph=vh/s;
@@ -2561,15 +2964,16 @@ function safeInsets(){ const d=document.createElement('div'); d.style.cssText='p
   if(Host&&Host.platform==='ios'&&!r.t&&innerHeight/innerWidth>2){ r.t=50; r.b=34 } return r }
 /* Full screen: the phone's screen spans the display's width, the keypad stretches to the same width,
    and the keys get shorter (never below two thirds) so everything fits between the camera cut-out and the home bar. */
-function fitFull(vw,vh){ const BZW=248, BZH=328, NAT=305, CMIN=.66, ins=safeInsets(), st=ins.t, sb=ins.b;
+function fitFull(vw,vh){ const q=MODELS[modelId()].kb==='qwerty', G=q?{BZW:328,BZH:248,CTL:94,GAP:10,COL:360}:{BZW:248,BZH:328,CTL:112,GAP:12,COL:300};
+  const BZW=G.BZW, BZH=G.BZH, NAT=q?317:305, CMIN=q?.6:.66, ins=safeInsets(), st=ins.t, sb=ins.b;
   const layout=s=>{ let top=st/s, emuTop; if(top>=24){ emuTop=(top-20)/2; top+=4 } else { emuTop=6; top=Math.max(top+4,32) }
     const bottom=vh/s-sb/s-6; return {top,emuTop,bottom,c:(bottom-top-BZH-10)/NAT} };
   let s=vw/(BZW+16), L=layout(s);
   if(L.c<CMIN){ let lo=.2, hi=s; for(let i=0;i<32;i++){ const m=(lo+hi)/2; if(layout(m).c>=CMIN) lo=m; else hi=m } s=lo; L=layout(s) }
   const c=Math.min(1,Math.max(CMIN,L.c)), top=L.top, emuTop=L.emuTop, bottom=L.bottom;
-  const Wi=vw/s, Hi=vh/s, colW=Math.min(Wi,300), colL=(Wi-colW)/2;
+  const Wi=vw/s, Hi=vh/s, colW=Math.min(Wi,G.COL), colL=(Wi-colW)/2;
   const extra=Math.max(0,bottom-(top+BZH)-10-NAT*c);
-  const ctlTop=top+BZH+10+extra*.4, ctlH=112*c, kpTop=ctlTop+ctlH+12*c+extra*.25, ctlW=colW-16;
+  const ctlTop=top+BZH+10+extra*.4, ctlH=G.CTL*c, kpTop=ctlTop+ctlH+G.GAP*c+extra*.25, ctlW=colW-16;
   PHONE.style.width=Wi+'px'; PHONE.style.height=Hi+'px'; PHONE.style.transform=`scale(${s})`; PHONE.style.setProperty('--sc',`scale(${s})`);
   PHONE.style.setProperty('--c',c.toFixed(4)); PHONE.style.setProperty('--sw',Math.max(56,(ctlW-110*c)/2-8)+'px');
   const set=(el,o)=>{ for(const k in o) el.style[k]=typeof o[k]==='number'?o[k]+'px':o[k] };
@@ -2578,11 +2982,11 @@ function fitFull(vw,vh){ const BZW=248, BZH=328, NAT=305, CMIN=.66, ins=safeInse
   set(PHONE.querySelector('.ctl'),{left:colL+8,right:'auto',width:ctlW,top:ctlTop,height:ctlH});
   set($('#kp'),{left:colL+10,right:'auto',width:colW-20,top:kpTop});
   set(PHONE.querySelector('.emu'),{top:emuTop,left:colL+14}) }
-addEventListener('resize',()=>{ fit(); syncOverlays() }); fit(); setTimeout(syncOverlays,0);
+layoutReady=true; addEventListener('resize',()=>{ fit(); syncOverlays() }); fit(); setTimeout(syncOverlays,0);
 
 /* ---------------- start ---------------- */
 applyModel(); applySkin(); applyTheme(); readNet(); refreshContacts(); audioMode(true);
 if(S.voip&&S.voip.on) setTimeout(()=>voip.start(),1200);
-addEventListener('online',()=>{ if(S.voip&&S.voip.on&&!voip.ready()) setTimeout(()=>voip.start(),1500) });
+addEventListener('online',()=>{ if(S.voip&&S.voip.on&&!voip.ready()) setTimeout(()=>voip.start(),1500); warmJava(2000) });
 if(S.on){ S.on=false; powerOn() } else render();
 </script>

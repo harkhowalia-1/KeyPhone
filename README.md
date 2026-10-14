@@ -65,5 +65,9 @@ lists calls made from KeyPhone (and VoIP calls with their numbers), and on iPhon
 status icon shows the connection type. VoIP needs a provider that supports SIP over
 secure WebSocket (WebRTC), and calls ring only while KeyPhone is open. Spotify needs
 your own Spotify developer app's Client ID, and playback control needs Premium.
+iOS has no API for the Ring/Silent switch, so the iPhone app checks it every two
+seconds while open (by timing a silent system sound) and mutes key, message and
+ringing tones while it is set to silent. On a Mac the music player drives the Music
+app, which can't have songs added to Up next from outside.
 
 KeyPhone is an original design and is not affiliated with any phone maker.

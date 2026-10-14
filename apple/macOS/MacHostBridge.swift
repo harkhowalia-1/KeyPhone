@@ -175,6 +175,78 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
             let verb = ["pause": "pause", "play": "play", "next": "next track", "prev": "previous track", "stop": spotify ? "pause" : "stop"][op] ?? "pause"
             _ = script("tell application \(quoted(app)) to \(verb)")
             reply(id, now(app, art: op == "next" || op == "prev"))
+        case "shuffle":
+            let prop = spotify ? "shuffling" : "shuffle enabled"
+            let on = (a["on"] as? Bool).map { $0 ? "true" : "false" } ?? "not \(prop)"
+            _ = script("tell application \(quoted(app)) to set \(prop) to \(on)")
+            reply(id, now(app, art: false))
+        case "repeat":
+            let mode = a["mode"] as? String ?? ""
+            if spotify {
+                let on = mode == "" ? "not repeating" : (mode == "off" ? "false" : "true")
+                _ = script("tell application \"Spotify\" to set repeating to \(on)")
+            } else if ["off", "all", "one"].contains(mode) {
+                _ = script("tell application \"Music\" to set song repeat to \(mode)")
+            } else {
+                _ = script("""
+                tell application "Music"
+                  if song repeat is off then
+                    set song repeat to all
+                  else if song repeat is all then
+                    set song repeat to one
+                  else
+                    set song repeat to off
+                  end if
+                end tell
+                """)
+            }
+            reply(id, now(app, art: false))
+        case "seek":
+            let to = max(0, (a["to"] as? NSNumber)?.doubleValue ?? 0)
+            _ = script("tell application \(quoted(app)) to set player position to \(String(format: "%.1f", to))")
+            reply(id, now(app, art: false))
+        case "volume":
+            let current = Double(script("tell application \(quoted(app)) to get sound volume")?.int32Value ?? 50) / 100
+            var value = current
+            if let to = (a["to"] as? NSNumber)?.doubleValue { value = to }
+            if let delta = (a["delta"] as? NSNumber)?.doubleValue { value = current + delta }
+            value = max(0, min(1, value))
+            _ = script("tell application \(quoted(app)) to set sound volume to \(Int((value * 100).rounded()))")
+            reply(id, ["vol": value])
+        case "queue":
+            guard !spotify else { return reply(id, "Up next isn't available for the Spotify app", ok: false) }
+            let text = script("""
+            tell application "Music"
+              if player state is stopped then return ""
+              set p to current playlist
+              set ci to index of current track
+              set total to count of tracks of p
+              set lastOne to ci + 100
+              if lastOne > total then set lastOne to total
+              set ns to name of tracks ci thru lastOne of p
+              set ars to artist of tracks ci thru lastOne of p
+            end tell
+            set out to {(ci as string)}
+            repeat with k from 1 to count of ns
+              set end of out to (item k of ns) & tab & (item k of ars)
+            end repeat
+            set AppleScript's text item delimiters to linefeed
+            return out as text
+            """)?.stringValue ?? ""
+            var lines = text.components(separatedBy: "\n")
+            let first = (Int(lines.first ?? "") ?? 1) - 1
+            if !lines.isEmpty { lines.removeFirst() }
+            let items: [[String: Any]] = lines.enumerated().map { k, line in
+                let parts = line.components(separatedBy: "\t")
+                return ["t": parts[0], "s": parts.count > 1 ? parts[1] : "", "i": first + k, "on": k == 0]
+            }
+            reply(id, ["items": items, "total": items.count])
+        case "jump":
+            guard !spotify else { return reply(id, "Not available", ok: false) }
+            _ = script("tell application \"Music\" to play track \(int("i", 0) + 1) of current playlist")
+            reply(id, now(app, art: true))
+        case "playNext", "addQueue":
+            reply(id, "Up next can only be changed in the Music app on a Mac", ok: false)
         case "auth":
             if script("tell application \(quoted(app)) to get name") != nil { reply(id, true) }
             else { reply(id, "Allow KeyPhone to control \(app) in System Settings › Privacy & Security › Automation.", ok: false) }
@@ -238,7 +310,7 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
           tell application \(quoted(app))
             if player state is stopped then return "stopped"
             set t to current track
-            return (name of t) & linefeed & (artist of t) & linefeed & (album of t) & linefeed & (((duration of t)\(durationUnit)) as string) & linefeed & (player position as string) & linefeed & (player state as string)
+            return (name of t) & linefeed & (artist of t) & linefeed & (album of t) & linefeed & (((duration of t)\(durationUnit)) as string) & linefeed & (player position as string) & linefeed & (player state as string) & linefeed & (\(app == "Spotify" ? "shuffling" : "shuffle enabled") as string) & linefeed & (\(app == "Spotify" ? "repeating" : "song repeat") as string) & linefeed & (sound volume as string)
           end tell
         end if
         return "off"
@@ -247,6 +319,11 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
         guard parts.count >= 6 else { return ["none": true, "app": text] }
         var out: [String: Any] = ["id": parts[0] + "|" + parts[1], "t": parts[0], "s": parts[1], "a": parts[2],
                                   "dur": number(parts[3]), "pos": number(parts[4]), "playing": parts[5] == "playing"]
+        if parts.count >= 9 {
+            out["shuffle"] = parts[6] == "true"
+            out["repeat"] = parts[7] == "true" ? "all" : parts[7] == "false" ? "off" : parts[7]
+            out["vol"] = number(parts[8]) / 100
+        }
         if art {
             if app == "Spotify", let url = script("tell application \"Spotify\" to artwork url of current track")?.stringValue {
                 out["art"] = url

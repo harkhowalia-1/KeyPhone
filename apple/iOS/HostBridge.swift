@@ -29,6 +29,7 @@ final class HostBridge: BridgeBase {
     private var overlay: WKWebView?
     private var statusTimer: Timer?
     private lazy var appleMusic = AppleMusic(bridge: self)
+    private let silentSwitch = SilentSwitch()
 
     init(webView: WKWebView, presenter: UIViewController) {
         self.presenter = presenter
@@ -47,6 +48,8 @@ final class HostBridge: BridgeBase {
         try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default)
         // iOS posts battery changes in steps, so the level is also re-read regularly.
         statusTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true) { [weak self] _ in self?.pushStatus() }
+        silentSwitch.onChange = { [weak self] silent in self?.evaluate("window.LarchSilent&&LarchSilent(\(silent))") }
+        silentSwitch.start()
     }
 
     deinit { statusTimer?.invalidate() }
@@ -63,12 +66,16 @@ final class HostBridge: BridgeBase {
         }
         // iOS gives apps no signal strength, so no bars are sent.
         evaluate("window.LarchStatus&&LarchStatus({\(parts.joined(separator: ","))})")
+        if let silent = silentSwitch.silent { evaluate("window.LarchSilent&&LarchSilent(\(silent))") }
     }
 
     func appResumed() {
         pushStatus()
+        silentSwitch.start()
         evaluate("window.LarchResume&&LarchResume()")
     }
+
+    func appPaused() { silentSwitch.stop() }
 
     // MARK: commands
 

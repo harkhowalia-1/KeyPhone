@@ -52,9 +52,12 @@ final class PhoneViewController: UIViewController, WKNavigationDelegate, WKUIDel
 
         NotificationCenter.default.addObserver(self, selector: #selector(resumed),
                                                name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(paused),
+                                               name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
 
     @objc private func resumed() { bridge.appResumed() }
+    @objc private func paused() { bridge.appPaused() }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         bridge.pushStatus()
