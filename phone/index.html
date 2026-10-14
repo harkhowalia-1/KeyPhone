@@ -495,7 +495,7 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
         <div class="ear"></div>
 
       </div>
-      <div class="k emu" data-k="EMU" title="Emulator settings"><svg viewBox="0 0 14 10" fill="#d6dde5"><rect y="0" width="14" height="2" rx="1"/><rect y="4" width="14" height="2" rx="1"/><rect y="8" width="14" height="2" rx="1"/></svg></div>
+      <div class="k emu" data-k="EMU" title="KeyPhone settings"><svg viewBox="0 0 14 10" fill="#d6dde5"><rect y="0" width="14" height="2" rx="1"/><rect y="4" width="14" height="2" rx="1"/><rect y="8" width="14" height="2" rx="1"/></svg></div>
       <div class="inner" id="inner">
       <div class="deco"><i class="d1"></i><i class="d2"></i><i class="d3"></i></div>
       <div class="bezel">
@@ -592,7 +592,7 @@ load();
 if(!S.mig4){ S.mig4=true; for(const k in S.profiles) if(S.profiles[k].tone==='Larch theme') S.profiles[k].tone='KeyPhone theme'; if(S.alarm.tone==='Larch theme') S.alarm.tone='KeyPhone theme' }
 if(!S.mig3){ S.mig3=true; if(S.wall&&S.wall.id==='w:dawn') S.wall.id='live:dawn' }
 if(!S.mig2){ S.mig2=true; S.ss.on=false; S.psaver=false; S.sleep=false; save() }
-if(!S.seeded){ S.seeded=true; if(0) S.msgs.inbox.push({id:uid(),from:'KeyPhone',text:'Welcome to your KeyPhone. Press Menu to explore. Add Java apps, pictures and music in Settings › Emulator › Add files.',t:Date.now(),read:false}); save() }
+if(!S.seeded){ S.seeded=true; if(0) S.msgs.inbox.push({id:uid(),from:'KeyPhone',text:'Welcome to your KeyPhone. Press Menu to explore. Add Java apps, pictures and music in Settings › KeyPhone settings › Add files.',t:Date.now(),read:false}); save() }
 
 /* ---------------- time ---------------- */
 const now=()=>new Date(Date.now()+S.clock.off);
@@ -1207,7 +1207,7 @@ const FEAT={
   notes:['Notes',()=>NotesMenu()], todo:['To-do list',()=>TodoList()], calc:['Calculator',()=>Calculator()], stopwatch:['Stopwatch',()=>Stopwatch()], timer:['Countdown timer',()=>TimerMenu()],
   gallery:['Gallery',()=>GalleryMenu()], music:['Music player',()=>MusicPlayer()], radio:['Radio',()=>RadioApp()], web:['Web',()=>WebMenu()], bookmarks:['Bookmarks',()=>Bookmarks()],
   profiles:['Profiles',()=>ProfilesMenu()], themes:['Themes',()=>ThemesMenu()], settings:['Settings',()=>SettingsMenu()], snake:['Snake',()=>SnakeMenu()], collection:['Collection',()=>Collection()],
-  camera:['Camera',()=>CameraApp('photo')], recorder:['Recorder',()=>Recorder()], emu:['Emulator',()=>EmulatorMenu()], menu:['Menu',()=>push(MainMenu())]
+  camera:['Camera',()=>CameraApp('photo')], recorder:['Recorder',()=>Recorder()], emu:['KeyPhone settings',()=>EmulatorMenu()], menu:['Menu',()=>push(MainMenu())]
 };
 const scSoft=id=>FEAT[id]?{t:FEAT[id][0],f:FEAT[id][1]}:{t:''};
 const runFeat=id=>FEAT[id]&&FEAT[id][1]();
@@ -1395,7 +1395,7 @@ function LogList(title,key){ if(key==='missed') { S.logs.missed.forEach(x=>x.see
     key(k){ if(k==='CALL'){ const it=this.items()[this.i]; if(it&&it.x.num) callNumber(it.x.num); return true } return false } })) }
 /* ---------------- settings ---------------- */
 function SettingsMenu(){ menu('Settings',[['Profiles',()=>ProfilesMenu()],['Themes',()=>ThemesMenu()],['Tones',()=>Personalise(S.profile,'Tones')],['Display',()=>DisplayMenu()],['Time and date',()=>TimeDateMenu()],['My shortcuts',()=>ShortcutsMenu()],
-  ['Sync and backup',()=>SyncMenu()],['Call',()=>CallMenu()],['Phone',()=>PhoneMenu()],['Security',()=>SecurityMenu()],['Restore factory settings',()=>RestoreFactory()],['Emulator',()=>EmulatorMenu()]]) }
+  ['Sync and backup',()=>SyncMenu()],['Call',()=>CallMenu()],['Phone',()=>PhoneMenu()],['Security',()=>SecurityMenu()],['Restore factory settings',()=>RestoreFactory()],['KeyPhone settings',()=>EmulatorMenu()]]) }
 const PROF_ORDER=['general','silent','meeting','outdoor','pager','flight'];
 function ProfilesMenu(){ push(List('Profiles',()=>PROF_ORDER.map(id=>({t:S.profiles[id].name,id,radio:true,on:S.profile===id})),{count:false,
   M:it=>({t:'Select',f:()=>menu(it.t,[['Activate',()=>{activateProfile(it.id)}],['Personalise',()=>Personalise(it.id)],['Timed',()=>{ if(it.id==='general'){ note('Not available for General','info'); return } TimeEntry('Profile expires',now().getHours(),now().getMinutes(),(h,m)=>{ const d=now(); d.setHours(h,m,0,0); if(d<=now()) d.setDate(d.getDate()+1); S.timedPrev='general'; activateProfile(it.id,true); S.timedUntil=d.getTime()-S.clock.off; save() }) }]])}) })) }
@@ -1413,7 +1413,7 @@ function Personalise(id,title){ const p=S.profiles[id]; const ringNames=Object.k
     ['Warning tones',()=>OnOff('Warning tones',p,'warn')],
     id!=='general'&&id!=='flight'?['Profile name',()=>push(Editor({mode:'text',noPred:true,title:'Profile name',text:p.name,max:16,done(t){ if(t.trim()) p.name=t.trim(); save(); pop(); note('Saved') }}))]:null
   ]) }
-function ThemesMenu(){ menu('Themes',[['Select theme',()=>SelectTheme()],['Phone model',()=>ModelMenu()],['Phone colours',()=>SkinMenu()],['Theme downloads',()=>note('Add .nth theme files in Settings › Emulator › Add files','info',2600)]]) }
+function ThemesMenu(){ menu('Themes',[['Select theme',()=>SelectTheme()],['Phone model',()=>ModelMenu()],['Phone colours',()=>SkinMenu()],['Theme downloads',()=>note('Add .nth theme files in Settings › KeyPhone settings › Add files','info',2600)]]) }
 function themeList(){ const ui=uiOf(); return Object.keys(THEMES).filter(k=>(THEMES[k].ui||'classic')===ui).map(k=>({id:k,n:THEMES[k].n})).concat(S.themes.map(t=>({id:t.id,n:t.n,user:true}))) }
 function SelectTheme(){ push(List('Select theme',()=>themeList().map(t=>({t:t.n,id:t.id,radio:true,on:S.theme===t.id,ic:ico('theme')})),{count:false,M:()=>({t:'Apply',f:()=>tv().select()}),
   onSel(it){ S.theme=it.id; const t=THEMES[it.id]; if(t&&t.wall){ S.wall={on:true,id:t.wall} } else { const u=S.themes.find(x=>x.id===it.id); if(u&&u.wall) S.wall={on:true,id:'t:'+u.id} } save(); render(); note('Theme applied') },
@@ -2020,8 +2020,8 @@ SCR.addEventListener('click',e=>{ if(!S.on||booting) return; wake(); if(!NOTE.hi
 addEventListener('blur',()=>{ clearTimeout(lt); clearTimeout(rpt); clearInterval(rptI); downK=null; held.clear(); document.querySelectorAll('.dn').forEach(x=>x.classList.remove('dn')) });
 NOTE.addEventListener('click',()=>endNote());
 
-/* ---------------- Emulator section (Settings › Emulator) ---------------- */
-function EmulatorMenu(){ menu('Emulator',[
+/* ---------------- KeyPhone settings (≡ key, or Settings › KeyPhone settings) ---------------- */
+function EmulatorMenu(){ menu('KeyPhone settings',[
   ['Add files',()=>pickFiles()],
   ['Add photos',()=>addPhotos()],
   ['Add music',()=>pickMusic()],
@@ -2032,7 +2032,7 @@ function EmulatorMenu(){ menu('Emulator',[
   ['Keypad light',()=>KeyLightMenu()],
   FULL?['Display size',()=>Radio('Display size',[[false,'Phone size'],[true,'Whole screen']],()=>!!S.fill,v=>{ S.fill=v; fit(); syncOverlays() })]:null,
   ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this device'}</p><p><span class="lbl">Connection</span>${!dev.online?'Offline':({wifi:'Wi-Fi',cellular:'Cellular',wired:'Wired'}[dev.net]||'Online')}</p><p><span class="lbl">Signal strength</span>${dev.sig!=null?dev.sig+' of 5 bars':'Not reported by this device'}</p>`)],
-  Host&&Host.platform==='ios'?null:['Keyboard shortcuts',()=>Info('Keyboard shortcuts','<p><span class="lbl">Keypad</span>0–9, * and #</p><p><span class="lbl">Navigation key</span>Arrow keys</p><p><span class="lbl">Middle select key</span>Enter</p><p><span class="lbl">Left / right selection keys</span>[ and ]</p><p><span class="lbl">Clear / Back</span>Backspace</p><p><span class="lbl">Call key</span>=</p><p><span class="lbl">End key</span>Esc (hold to switch off or on)</p><p><span class="lbl">Emulator key</span>\\ (backslash), or the three-line key above the screen</p><p><span class="lbl">Text fields</span>Type letters directly, or paste with ⌘V</p>')],
+  Host&&Host.platform==='ios'?null:['Keyboard shortcuts',()=>Info('Keyboard shortcuts','<p><span class="lbl">Keypad</span>0–9, * and #</p><p><span class="lbl">Navigation key</span>Arrow keys</p><p><span class="lbl">Middle select key</span>Enter</p><p><span class="lbl">Left / right selection keys</span>[ and ]</p><p><span class="lbl">Clear / Back</span>Backspace</p><p><span class="lbl">Call key</span>=</p><p><span class="lbl">End key</span>Esc (hold to switch off or on)</p><p><span class="lbl">KeyPhone settings</span>\\ (backslash), or the three-line key above the screen</p><p><span class="lbl">Text fields</span>Type letters directly, or paste with ⌘V</p>')],
   ['About',()=>Info('About',`<p><b>KeyPhone</b> ${esc(window.LARCH_VERSION||'')}</p><p>Series 40–style phone shell.</p><p>Contacts, messages, settings and files are stored on this device.</p>`)]
 ],{name:'emu'}) }
 
