@@ -1769,13 +1769,13 @@ async function MemoryStatus(){ const apps=S.jars.reduce((a,j)=>a+(j.size||0),0),
   try{ if(Host&&Host.storage){ const r=await Host.storage(); if(r&&r.free!=null) free=r.free } else if(navigator.storage&&navigator.storage.estimate){ const e=await navigator.storage.estimate(); if(e&&e.quota) free=e.quota-(e.usage||0) } }catch(e){}
   const msgs=S.msgs.inbox.length+S.msgs.sent.length+S.msgs.drafts.length+S.msgs.saved.length;
   Info('Memory status',`${free!=null?`<p><span class="lbl">Free memory</span>${bytes(free)}</p>`:''}<p><span class="lbl">Applications</span>${S.jars.length} · ${bytes(apps)}</p><p><span class="lbl">Music files</span>${S.music.length} · ${bytes(mus)}</p><p><span class="lbl">Images</span>${S.images.length}</p><p><span class="lbl">Contacts</span>${S.contacts.length}</p><p><span class="lbl">Messages</span>${msgs}</p><p><span class="lbl">Notes</span>${S.notes.length+S.cal.length+S.todo.length}</p>`) }
-const SITE_URL='https://harkhowalia-1.github.io/larch-k7/';
+const SITE_URL='https://harkhowalia-1.github.io/keyphone/';
 const verCmp=(a,b)=>{ const x=String(a).split('.').map(Number), y=String(b).split('.').map(Number); for(let i=0;i<3;i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d } return 0 };
 async function checkUpdates(){ const cur=String(window.LARCH_VERSION||''); const where=Host&&Host.platform==='ios'?'iPhone app':Host&&Host.platform==='mac'?'Mac app':'Web browser';
   const show=(latest,msg,dl)=>Info('Phone updates',`<p><span class="lbl">This phone</span>${esc(cur||'—')} · ${where}</p>${latest?`<p><span class="lbl">Latest version</span>${esc(latest)}</p>`:''}<p>${msg}</p>`,dl?{L:{t:'Download',f:()=>{pop();openExternal(SITE_URL)}}}:{});
   if(!dev.online){ show('','Connect to the internet to check for a new version.'); return }
   note('Checking for updates','wait',20000);
-  try{ const r=await fetch('https://api.github.com/repos/harkhowalia-1/larch-k7/releases/latest',{headers:{Accept:'application/vnd.github+json'}}); if(!r.ok) throw new Error(r.status); const j=await r.json(); const latest=String(j.tag_name||'').replace(/^v/,''); endNote();
+  try{ const r=await fetch('https://api.github.com/repos/harkhowalia-1/keyphone/releases/latest',{headers:{Accept:'application/vnd.github+json'}}); if(!r.ok) throw new Error(r.status); const j=await r.json(); const latest=String(j.tag_name||'').replace(/^v/,''); endNote();
     if(!latest) throw new Error('none'); const newer=cur&&/^\d/.test(cur)?verCmp(latest,cur)>0:false;
     show(latest,newer?'A new version is available. Press Download.':'This phone is up to date.',newer) }
   catch(e){ endNote(); show('','Could not reach the update server. Try again later.') } }
@@ -2501,7 +2501,7 @@ function appOptions(j){ menu('Options',[['Open',()=>{pop();openJar(j)}],
   ['Delete',()=>{pop();Ask('Delete '+j.name+'?',()=>{Blobs.del('jar:'+j.id);S.jars=S.jars.filter(x=>x!==j);save();note('Application deleted')})}],
   ['Install new',()=>{pop();pickApps()}],['Install from web',()=>{pop();installFromWeb()}]],{nums:false}) }
 function Collection(){ AppsMenu() }
-const J2ME_URL=(()=>{ if(window.LARCH_J2ME_URL) return window.LARCH_J2ME_URL; try{ if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)) return new URL('../j2me/larch.html',location.href).href }catch(e){} return 'https://harkhowalia-1.github.io/larch-k7/j2me/larch.html' })();
+const J2ME_URL=(()=>{ if(window.LARCH_J2ME_URL) return window.LARCH_J2ME_URL; try{ if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)) return new URL('../j2me/larch.html',location.href).href }catch(e){} return 'https://harkhowalia-1.github.io/keyphone/j2me/larch.html' })();
 const JVM=$('#jvm'); let jvmFrame=null, jvmApp=null;
 /* Two Java engines: the built-in one (JS2ME, bundled with the phone, works offline) and the
    full one (freej2me on CheerpJ, loaded from the internet, runs far more games).
