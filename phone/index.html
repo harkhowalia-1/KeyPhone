@@ -1710,6 +1710,8 @@ function pickFiles(){ try{ $('#fin').click() }catch(e){ note('Could not open fil
 function backupName(){ const d=now(); return 'Larch K7 backup '+d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'.json' }
 async function saveBackup(){ const txt=JSON.stringify(S), name=backupName();
   if(Host&&Host.saveFile){ try{ const r=await Host.saveFile(name,txt); if(r) note('Backup saved','ok',1600) }catch(e){ note('The backup was not saved','warn') } return }
+  let dl=null; try{ if(window.claude&&window.claude.use) dl=await window.claude.use('downloads') }catch(e){}
+  if(dl){ try{ await dl.save({filename:name,data:txt}); note('Backup saved','ok',1600) }catch(e){ if(!e||e.code!=='declined') note('The backup was not saved','warn') } return }
   try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); note('Backup downloaded','ok',1600) }catch(e){ note('The backup was not saved','warn') } }
 function restoreBackup(){ try{ $('#bin').click() }catch(e){ note('Could not open files','warn') } }
 function restoreFrom(t){ let o=null; try{ o=JSON.parse(t) }catch(e){} if(!o||typeof o!=='object'||!o.profiles){ note('That file is not a Larch backup','warn'); return }
