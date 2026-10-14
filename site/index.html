@@ -273,7 +273,7 @@ footer a{color:var(--text2)}
     <p class="sub">The phone is one HTML file. The Mac and iPhone apps wrap it and connect it to the system. On a Mac with Xcode:</p>
 <pre><span class="c"># get the code</span>
 git clone https://github.com/__REPO__.git
-cd <span id="reponame">keyphone</span>/apple
+cd <span id="reponame">KeyPhone</span>/apple
 <span class="c"># needs Homebrew</span>
 brew install xcodegen
 ./make_web.sh &amp;&amp; xcodegen generate
@@ -290,7 +290,7 @@ open Larch.xcodeproj</pre>
 
 <script>
 const REPO='__REPO__';
-document.getElementById('reponame').textContent=REPO.split('/')[1]||'keyphone';
+document.getElementById('reponame').textContent=REPO.split('/')[1]||'KeyPhone';
 document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>{
   const t=document.getElementById(b.dataset.copy).textContent;
   const done=()=>{ b.textContent='Copied'; setTimeout(()=>b.textContent='Copy',1600) };
