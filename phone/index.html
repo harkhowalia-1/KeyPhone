@@ -478,8 +478,8 @@ const THEMES={
 function rng(seed){ return ()=>{ seed=(seed*16807)%2147483647; return (seed-1)/2147483646 } }
 const WALLS={};
 function mkWalls(){
-  const W=240,H=320; const c=document.createElement('canvas'); c.width=W*2; c.height=H*2; const x=c.getContext('2d');
-  const out=(id,n,fn)=>{ x.save(); x.setTransform(2,0,0,2,0,0); x.clearRect(0,0,W,H); fn(); x.restore(); WALLS[id]={n,src:c.toDataURL('image/jpeg',.9)} };
+  const W=240,H=320; const c=document.createElement('canvas'); c.width=W*3; c.height=H*3; const x=c.getContext('2d');
+  const out=(id,n,fn)=>{ x.save(); x.setTransform(3,0,0,3,0,0); x.clearRect(0,0,W,H); fn(); x.restore(); WALLS[id]={n,src:c.toDataURL('image/jpeg',.9)} };
   out('w:dawn','Larch dawn',()=>{ let g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2b2a63'); g.addColorStop(.45,'#c4577a'); g.addColorStop(.7,'#ffb07a'); x.fillStyle=g; x.fillRect(0,0,W,H);
     x.fillStyle='rgba(255,236,190,.9)'; x.beginPath(); x.arc(150,200,26,0,7); x.fill();
     const r=rng(7); [['#3a2848',215],['#241a33',245],['#120d1c',280]].forEach(([col,base],li)=>{ x.fillStyle=col; x.beginPath(); x.moveTo(0,H); for(let i=0;i<=W;i+=8) x.lineTo(i,base+Math.sin(i/40+li)*10); x.lineTo(W,H); x.fill();
@@ -499,6 +499,11 @@ function mkWalls(){
     const r=rng(3); for(let i=0;i<500;i++){ x.fillStyle=`rgba(255,255,255,${r()*.06})`; x.fillRect(0,r()*H,W,1) } });
 }
 mkWalls();
+
+/* ---------------- drawing at the display's real resolution ---------------- */
+function pxScale(){ const s=parseFloat((PHONE.style.transform.match(/scale\(([\d.]+)\)/)||[])[1])||1; return Math.min(4,Math.max(1,s*(window.devicePixelRatio||1))) }
+function hiDPI(cv,w,h){ const k=pxScale(); cv.width=Math.round(w*k); cv.height=Math.round(h*k); cv.style.width=w+'px'; cv.style.height=h+'px'; const g=cv.getContext('2d'); g.setTransform(k,0,0,k,0,0); g.imageSmoothingQuality='high'; return g }
+const IMGW=()=>Host?720:480, IMGH=()=>Host?960:640;
 
 /* ---------------- live wallpapers: drawn every frame at full screen resolution ---------------- */
 const Live=(()=>{
@@ -1163,7 +1168,7 @@ function LibraryGrid(kind){ const v={name:'grid',kind,items:[],total:null,i:0,to
   title:kind==='video'?'Video clips':'Images',
   hdRight(){ return this.total?`${this.i+1}/${this.total}`:'' },
   load(){ if(this.loading||(this.total!==null&&this.items.length>=this.total)) return; this.loading=true;
-    Host.library({op:'list',kind,offset:this.items.length,limit:24,thumb:200}).then(r=>{ this.total=r.total; this.items=this.items.concat(r.items||[]); this.loading=false; if(tv()===this) render() })
+    Host.library({op:'list',kind,offset:this.items.length,limit:24,thumb:320}).then(r=>{ this.total=r.total; this.items=this.items.concat(r.items||[]); this.loading=false; if(tv()===this) render() })
       .catch(e=>{ this.loading=false; this.err=(e&&e.message)||'Gallery not available'; if(tv()===this) render() }) },
   draw(el){ el.style.background='var(--tbg)';
     if(this.err){ el.innerHTML=`<div class="empty">${esc(this.err)}</div>`; return }
@@ -1183,7 +1188,7 @@ function libOptions(g,it){ menu('Options',[[g.kind==='video'?'Play':'Open',()=>{
   ['Details',()=>{pop();Info('Details',`<p><span class="lbl">Date</span>${it.date?esc(fmtStamp(it.date-S.clock.off)):'—'}</p><p><span class="lbl">Resolution</span>${it.w}×${it.h}</p>${it.dur?`<p><span class="lbl">Length</span>${mmss(it.dur)}</p>`:''}`)}],
   ['Delete',()=>{pop();Ask(g.kind==='video'?'Delete video clip?':'Delete image?',()=>Host.library({op:'delete',id:it.id}).then(ok=>{ if(ok){ g.items.splice(g.items.indexOf(it),1); g.total--; g.i=Math.min(g.i,Math.max(0,g.items.length-1)); popTo('grid'); note('Deleted') } }))}]],{nums:false}) }
 async function libWallpaper(it){ note('Setting wallpaper','wait',30000);
-  try{ const r=it.big?{data:it.big}:await Host.library({op:'get',id:it.id,max:960}); it.big=r.data; const d=await shrink(r.data,480,640,.82); endNote(); if(!d) throw 0;
+  try{ const r=it.big?{data:it.big}:await Host.library({op:'get',id:it.id,max:960}); it.big=r.data; const d=await shrink(r.data,IMGW(),IMGH(),.82); endNote(); if(!d) throw 0;
     const im={id:'i:'+uid(),n:'Wallpaper '+fmtDate(now()),data:d}; S.images.push(im); S.wall={on:true,id:im.id}; save(); note('Wallpaper set') }
   catch(e){ endNote(); note('Could not set the wallpaper','warn') } }
 function LibImage(g){ const v={name:'libimg',
@@ -1212,7 +1217,7 @@ let photoCb=null;
 function addPhotos(cb){ photoCb=cb||null; if(Host&&Host.pickPhotos){ Host.pickPhotos().then(l=>storePhotos(l||[])).catch(()=>{}); return } try{ $('#pin').click() }catch(e){} }
 function takePhoto(){ photoCb=im=>{ if(im) Info('Camera','<p>Photo saved to Gallery › Images.</p>',{L:{t:'Images',f:()=>{pop();Images(false)}}}) };
   if(Host&&Host.camera){ Host.camera().then(p=>storePhotos(p?[p]:[])).catch(()=>note('Camera not available','warn')); return } try{ $('#cin').click() }catch(e){} }
-async function storePhotos(list){ let last=null; for(const p of list){ const d=await shrink(p.data,480,640,.82); if(!d) continue; last={id:'i:'+uid(),n:p.name||('Photo '+fmtDate(now())),data:d}; S.images.push(last) }
+async function storePhotos(list){ let last=null; for(const p of list){ const d=await shrink(p.data,IMGW(),IMGH(),.82); if(!d) continue; last={id:'i:'+uid(),n:p.name||('Photo '+fmtDate(now())),data:d}; S.images.push(last) }
   save(); if(S.on&&V.length) render(); const cb=photoCb; photoCb=null; if(cb) cb(last); else if(last) note(list.length>1?list.length+' images added':'Image added') }
 function imgOptions(im){ menu('Options',[['Set as wallpaper',()=>{S.wall={on:true,id:im.id};save();pop();note('Wallpaper set')}],['Details',()=>{pop();Info('Details',`<p><span class="lbl">Name</span>${esc(im.n)}</p><p><span class="lbl">Format</span>${im.builtin?'Built-in':'Imported image'}</p><p><span class="lbl">Resolution</span>240x320</p>`)}],
   !im.builtin?['Rename',()=>{pop();push(Editor({mode:'text',noPred:true,title:'Rename',text:im.n,done(t){ const x=S.images.find(y=>y.id===im.id); if(x&&t.trim()) x.n=t.trim(); save(); pop(); note('Saved') }}))}]:null,
@@ -1253,7 +1258,7 @@ function CameraView(mode){ const v={name:'camera',media:true,mode,rec:false,recT
   onPop(){ if(this.rec) Host.media({op:'stopVideo'}).catch(()=>{}); Host.media({op:'close'}).catch(()=>{}); mediaShown=false } };
   return v }
 async function snapTaken(r){ let local=null;
-  if(!r.id&&r.data){ const d=await shrink(r.data,480,640,.82); if(d){ local={id:'i:'+uid(),n:'Photo '+fmtDate(now()),data:d}; S.images.push(local); save() } }
+  if(!r.id&&r.data){ const d=await shrink(r.data,IMGW(),IMGH(),.82); if(d){ local={id:'i:'+uid(),n:'Photo '+fmtDate(now()),data:d}; S.images.push(local); save() } }
   push({name:'snap',title:'Camera',hdRight(){ return r.id?'Saved':'Phone memory' },
     draw(el){ el.innerHTML=`<div class="snap" style="background-image:url('${r.data}')"></div>` },
     soft(){ return [{t:'Options',f:()=>menu('Options',[['Set as wallpaper',()=>{ pop(); if(local){ S.wall={on:true,id:local.id}; save(); note('Wallpaper set') } else libWallpaper({id:r.id,big:r.data}) }],
@@ -1442,7 +1447,7 @@ function Snake(){ const W=20,H=21,C=12; let sn,dir,nd,food,score,dead,paused,tim
     const hd=SCR.querySelector('.hr'); if(hd) hd.textContent='Score '+score;
     if(dead||paused){ x.fillStyle='rgba(29,42,18,.75)'; x.fillRect(30,100,180,52); x.fillStyle='#d8eab8'; x.font='600 18px Fira Sans,sans-serif'; x.textAlign='center'; x.fillText(dead?'Game over · '+score:'Paused',120,132) } }
   const v={name:'snake',title:'Snake',hdRight(){ return 'Score '+score },
-    draw(el){ el.innerHTML='<canvas class="cv" width="240" height="252"></canvas>'; paint() },
+    draw(el){ el.innerHTML='<canvas class="cv" width="240" height="252"></canvas>'; hiDPI(el.firstChild,240,252); paint() },
     soft(){ return dead?[{t:''},{t:'Again',f:()=>{reset();render()}},{t:'Back',f:pop}]:[{t:''},{t:paused?'Continue':'Pause',f:()=>{paused=!paused;render()}},{t:'Back',f:pop}] },
     instant(k){ const m={U:[0,-1],'2':[0,-1],D:[0,1],'8':[0,1],LT:[-1,0],'4':[-1,0],RT:[1,0],'6':[1,0]}[k]; if(!m||dead||paused) return false; if(m[0]!==-dir.x||m[1]!==-dir.y) nd={x:m[0],y:m[1]}; return true },
     key(k){ if(k==='5'){ if(!dead){paused=!paused;render()} return true } return false },
@@ -1502,7 +1507,7 @@ function WebPage(u){ let i=0; const start=u==='start'; const native=!!(Host&&Hos
 let booting=false;
 function powerOn(){ if(S.on&&V.length) return; S.on=true; save(); V=[]; booting=true; locked=false; applyTheme();
   SCR.className='full'; SCR.innerHTML='<div class="boot"><canvas width="240" height="320"></canvas></div>';
-  const cv=SCR.querySelector('canvas'), x=cv.getContext('2d'); const t0=performance.now();
+  const cv=SCR.querySelector('canvas'), x=hiDPI(cv,240,320); const t0=performance.now();
   if(S.phone.startTone) playSeq('E5 16,B5 16,E6 16,G#6 8,B6 4',{vol:.07,wave:'triangle'});
   (function fr(){ const t=(performance.now()-t0)/1700; x.fillStyle='#000'; x.fillRect(0,0,240,320); const p=Math.min(1,t);
     x.save(); x.translate(120,170); x.strokeStyle='#cfe3c0'; x.fillStyle='#cfe3c0'; x.lineWidth=2;
@@ -1522,7 +1527,7 @@ function ScreenSaver(){ let pos=[120,150];
     draw(el){ const d=now(); const deep=S.sleep&&Date.now()-lastActivity>(S.ss.to+120)*1000;
       if(deep){ el.innerHTML='<div class="ss"></div>'; return }
       if(S.ss.type==='image'&&!S.psaver){ const w=wallSrc(S.wall.id); el.innerHTML=`<div class="ss" style="background:#000 url(${w}) center/cover"><div class="c" style="left:0;right:0;top:36px;text-shadow:0 2px 6px #000;color:#fff">${fmtTime(d)}</div></div>`; return }
-      if(S.ss.type==='analog'&&!S.psaver){ el.innerHTML='<div class="ss"><canvas width="240" height="320"></canvas></div>'; const x=el.querySelector('canvas').getContext('2d'); x.translate(120,150); x.strokeStyle='#8fa0b3'; x.lineWidth=2; x.beginPath(); x.arc(0,0,70,0,7); x.stroke();
+      if(S.ss.type==='analog'&&!S.psaver){ el.innerHTML='<div class="ss"><canvas width="240" height="320"></canvas></div>'; const x=hiDPI(el.querySelector('canvas'),240,320); x.translate(120,150); x.strokeStyle='#8fa0b3'; x.lineWidth=2; x.beginPath(); x.arc(0,0,70,0,7); x.stroke();
         for(let i=0;i<12;i++){ x.save(); x.rotate(i*Math.PI/6); x.fillStyle='#8fa0b3'; x.fillRect(-1,-66,2,i%3?6:10); x.restore() }
         const hand=(a,l,w)=>{ x.save(); x.rotate(a); x.strokeStyle='#e3eaf2'; x.lineWidth=w; x.lineCap='round'; x.beginPath(); x.moveTo(0,8); x.lineTo(0,-l); x.stroke(); x.restore() };
         hand((d.getHours()%12+d.getMinutes()/60)*Math.PI/6,38,4); hand(d.getMinutes()*Math.PI/30,56,3); return }
@@ -1680,14 +1685,14 @@ window.LarchOfferInstall=u=>{ Ask('Download and install this application?',()=>i
 function installFromWeb(){ push(Editor({mode:'text',noPred:true,lower:true,title:'Install from web',label:'Address of a .jar or .jad file:',text:'https://',done(t){ pop(); t=t.trim(); if(t&&t!=='https://') installFromUrl(/^https?:/i.test(t)?t:'https://'+t) }})) }
 
 async function importFile(f){ const n=f.name, ext=n.split('.').pop().toLowerCase();
-  if(f.type.startsWith('image/')){ const d=await shrink(await readAs(f,'readAsDataURL'),480,640,.82); if(!d) throw 0; S.images.push({id:'i:'+uid(),n:n.replace(/\.[^.]+$/,''),data:d}); save(); return n+' → Gallery' }
+  if(f.type.startsWith('image/')){ const d=await shrink(await readAs(f,'readAsDataURL'),IMGW(),IMGH(),.82); if(!d) throw 0; S.images.push({id:'i:'+uid(),n:n.replace(/\.[^.]+$/,''),data:d}); save(); return n+' → Gallery' }
   if(f.type.startsWith('audio/')){ music.tracks.push({name:n.replace(/\.[^.]+$/,''),url:URL.createObjectURL(f)}); return n+' → Music player (until the app closes)' }
   if(ext==='jad'){ const t=await readAs(f,'readAsText'); const nm=(t.match(/MIDlet-Name:\s*(.+)/)||[])[1]; return n+': '+(nm?nm.trim()+' needs its .jar file':'needs its .jar file') }
   if(ext==='jar'||ext==='nth'||ext==='zip'){ const z=await unzip(f); const mfn=z.names.find(x=>x.toUpperCase()==='META-INF/MANIFEST.MF');
     if(ext==='jar'||mfn){ const j=await readJar(f,z); await saveJar(j,f); return j.name+' installed' }
     const imgs=z.names.filter(x=>/\.(png|jpe?g|gif|bmp)$/i.test(x)); const tx=z.names.find(x=>/\.xml$/i.test(x)); const xml=tx?await z.text(tx):'';
     const pickBy=re=>imgs.find(x=>re.test(x.split('/').pop())); const wp=pickBy(/wall|wp|standby|idle/i)||imgs[0], bg=pickBy(/bg|back|main/i)||wp;
-    const toURL=async x=>x?await shrink('data:image/'+(/\.png$/i.test(x)?'png':'jpeg')+';base64,'+await z.b64(x),480,640,.8):null;
+    const toURL=async x=>x?await shrink('data:image/'+(/\.png$/i.test(x)?'png':'jpeg')+';base64,'+await z.b64(x),IMGW(),IMGH(),.8):null;
     const th={id:'u'+uid(),n:((xml.match(/name="([^"]+)"/)||[])[1]||n.replace(/\.[^.]+$/,'')).slice(0,24),wall:await toURL(wp),bg:await toURL(bg)};
     if(!th.wall&&!th.bg) throw 0; S.themes.push(th); save(); return th.n+' → Themes (wallpaper and background)' }
   return n+': this file type is not supported' }
