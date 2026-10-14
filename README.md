@@ -4,8 +4,11 @@ A Series 40–style keypad phone that runs on your Mac and iPhone. The phone's
 keypad, menus and screen are one HTML file; the Mac and iPhone apps wrap it and
 connect it to the system, so calls, messages, contacts, photos and alarms are real.
 
-**Website and downloads:** see the GitHub Pages site for this repository
-(Settings › Pages shows the address).
+**Website:** https://harkhowalia-1.github.io/KeyPhone/  
+**Play in your browser:** https://harkhowalia-1.github.io/KeyPhone/play/  
+**Downloads:** [Mac (KeyPhone.dmg)](https://github.com/harkhowalia-1/KeyPhone/releases/latest/download/KeyPhone.dmg) ·
+[iPhone (KeyPhone.ipa)](https://github.com/harkhowalia-1/KeyPhone/releases/latest/download/KeyPhone.ipa) ·
+[all releases](https://github.com/harkhowalia-1/KeyPhone/releases)
 
 ## Features
 
