@@ -199,7 +199,6 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 .gi.on .tile{transform:scale(1.1)}
 .gi span{font-size:11px;white-space:nowrap}
 .gm.lbl .tile{width:42px;height:42px}.gm.lbl .tile svg{width:24px;height:24px}
-.help{position:absolute;left:8px;right:8px;bottom:6px;background:#fffbe0;color:#2a2410;border:1px solid #c9b960;border-radius:6px;padding:6px 8px;font-size:12px;line-height:1.3;box-shadow:0 3px 10px rgba(0,0,0,.3)}
 /* call */
 .call{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:10px}
 .call .av{width:64px;height:64px;border-radius:50%;background:var(--thl);color:var(--thlfg);display:grid;place-items:center;margin-bottom:6px}
@@ -919,16 +918,14 @@ function MainMenu(){ const items=()=>S.menuOrder.map(k=>({k,...MENU[k]}));
     hdText(){ return S.menuView==='list'?'Menu':items()[this.i].t }, hdRight(){ return S.menuView==='list'?`${this.i+1}/9`:'' },
     draw(el){ const a=items();
       if(S.menuView==='list'){ const v=List('',a.map(x=>({t:x.t,ic:ico(x.ic)}))); v.i=this.i; v.top=this.top||0; v.draw(el); this.top=v.top }
-      else { el.innerHTML=`<div class="gm${S.menuView==='glabel'?' lbl':''}">`+a.map((x,j)=>`<div class="gi${j===this.i?' on':''}" data-i="${j}"><div class="tile" style="background:linear-gradient(160deg,${TILES[S.menuOrder.indexOf(x.k)%9]}cc,${TILES[S.menuOrder.indexOf(x.k)%9]})">${ico(x.ic)}</div>${S.menuView==='glabel'?`<span>${esc(x.t)}</span>`:''}</div>`).join('')+'</div>' }
-      if(S.phone.help&&this.showHelp) el.insertAdjacentHTML('beforeend',`<div class="help">${esc(a[this.i].h)}</div>`) },
+      else { el.innerHTML=`<div class="gm${S.menuView==='glabel'?' lbl':''}">`+a.map((x,j)=>`<div class="gi${j===this.i?' on':''}" data-i="${j}"><div class="tile" style="background:linear-gradient(160deg,${TILES[S.menuOrder.indexOf(x.k)%9]}cc,${TILES[S.menuOrder.indexOf(x.k)%9]})">${ico(x.ic)}</div>${S.menuView==='glabel'?`<span>${esc(x.t)}</span>`:''}</div>`).join('')+'</div>' } },
     soft(){ return [{t:'Options',f:()=>MenuOptions()},{t:'Select',f:()=>this.select()},{t:'Exit',f:pop}] },
     select(){ items()[this.i].f() },
-    tick(){ const show=Date.now()-this.moved>2500; if(show!==!!this.showHelp){ this.showHelp=show; render() } },
     key(k){ if(k==='*'&&Date.now()-this.opened<1600&&V.length===2){ lock(); return true }
       const n=9; let i=this.i;
       if(S.menuView==='list'){ if(k==='U') i=(i+n-1)%n; else if(k==='D') i=(i+1)%n; else if(/^[1-9]$/.test(k)){ this.i=+k-1; this.select(); return true } else return false }
       else { if(k==='U') i=(i+6)%9; else if(k==='D') i=(i+3)%9; else if(k==='LT') i=(i+8)%9; else if(k==='RT') i=(i+1)%9; else if(/^[1-9]$/.test(k)){ this.i=+k-1; this.select(); return true } else return false }
-      this.i=i; this.moved=Date.now(); this.showHelp=false; render(); return true },
+      this.i=i; this.moved=Date.now(); render(); return true },
     pick(j){ this.i=j; this.select() } } }
 function MenuOptions(){ menu('Options',[['Menu view',()=>Radio('Menu view',[['list','List'],['grid','Grid'],['glabel','Grid with labels']],()=>S.menuView,v=>S.menuView=v,{after:()=>pop()})],['Organise',()=>Organise()]],{nums:false}) }
 function Organise(){ let moving=-1;
@@ -1140,7 +1137,7 @@ function PhoneMenu(){ const p=S.phone; menu('Phone',[
   ['Welcome note',()=>push(Editor({mode:'text',title:'Welcome note',text:p.welcome,max:40,done(t){p.welcome=t;save();pop();note('Saved')}}))],
   ['Flight query',()=>OnOff('Flight query',p,'flightQ')],
   ['Phone updates',()=>checkUpdates()],
-  ['Help text activation',()=>OnOff('Help text activation',p,'help')],['Start-up tone',()=>OnOff('Start-up tone',p,'startTone')]]) }
+  ['Start-up tone',()=>OnOff('Start-up tone',p,'startTone')]]) }
 const bytes=n=>n>=1e9?(n/1e9).toFixed(1)+' GB':n>=1e6?(n/1e6).toFixed(1)+' MB':(n?Math.max(1,Math.round(n/1024)):0)+' kB';
 async function MemoryStatus(){ const apps=S.jars.reduce((a,j)=>a+(j.size||0),0), mus=S.music.reduce((a,m)=>a+(m.size||0),0); let free=null;
   try{ if(Host&&Host.storage){ const r=await Host.storage(); if(r&&r.free!=null) free=r.free } else if(navigator.storage&&navigator.storage.estimate){ const e=await navigator.storage.estimate(); if(e&&e.quota) free=e.quota-(e.usage||0) } }catch(e){}
