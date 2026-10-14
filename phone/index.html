@@ -329,7 +329,7 @@ const DEF={
   cal:[], weekStart:1, todo:[], notes:[],
   timer:null, swTimes:[],
   web:{home:'start',last:'',bm:[{t:'Wikipedia (mobile)',u:'https://en.m.wikipedia.org'},{t:'Weather',u:'https://wttr.in'},{t:'Hacker News',u:'https://news.ycombinator.com'}],wrap:true,img:true,cookies:true,dlsave:'ask'},
-  skin:{body:'midnight',keys:'black',btns:'black'},
+  skin:{body:'midnight',keys:'black',btns:'black'}, kpLight:'auto',
   jars:[], images:[], themes:[], snake:{lvl:5,best:0}, eq:'Normal', widen:false, t9:true, words:[], seeded:false
 };
 let S;
@@ -491,19 +491,20 @@ const BODY={
   pearl:{n:'Pearl white',edge:'linear-gradient(90deg,#c4c8cd 0%,#ffffff 3.5%,#eceef0 8%,#e3e6e9 50%,#eceef0 92%,#ffffff 96.5%,#c4c8cd 100%)',face:'linear-gradient(180deg,#f8f9fa,#e5e8eb)',flat:'#eef0f2',brand:'#8a9099'}
 };
 const KEYS={
-  black:{n:'Black',bg:'linear-gradient(180deg,#2a2b2e,#0b0b0c)',fg:'#f2f2f4',sub:'#8e8e93',sh:'inset 0 1px 0 rgba(255,255,255,.14),0 2px 0 #000,0 3px 4px rgba(0,0,0,.6)'},
-  silver:{n:'Silver',bg:'linear-gradient(180deg,#e9edf1,#b6bfc9)',fg:'#1a2027',sub:'#4a5562',sh:'inset 0 1px 0 #fff,0 2px 0 #6d7884,0 3px 4px rgba(0,0,0,.45)'},
-  backlit:{n:'Blue backlight',bg:'linear-gradient(180deg,#16191d,#060708)',fg:'#6cc0ff',sub:'#4797e0',sh:'inset 0 1px 0 rgba(255,255,255,.08),0 2px 0 #000,0 3px 4px rgba(0,0,0,.6)',glow:'0 0 6px rgba(80,170,255,.8)'},
-  white:{n:'White',bg:'linear-gradient(180deg,#ffffff,#e2e6ea)',fg:'#16191d',sub:'#6b7480',sh:'inset 0 1px 0 #fff,0 2px 0 #aab2bb,0 3px 4px rgba(0,0,0,.3)'},
-  gold:{n:'Champagne gold',bg:'linear-gradient(180deg,#f4e4bd,#c9a861)',fg:'#2b1e06',sub:'#6b5420',sh:'inset 0 1px 0 #fff6dc,0 2px 0 #8c7238,0 3px 4px rgba(0,0,0,.4)'}
+  black:{n:'Black',bg:'linear-gradient(180deg,#2a2b2e,#0b0b0c)',fg:'#c7c7cc',sub:'#6e6e73',sh:'inset 0 1px 0 rgba(255,255,255,.14),0 2px 0 #000,0 3px 4px rgba(0,0,0,.6)',key:'#ffffff',keysub:'#dfe9ff',glow:'rgba(190,220,255,.9)',btn:'#ffffff'},
+  silver:{n:'Silver',bg:'linear-gradient(180deg,#e9edf1,#b6bfc9)',fg:'#1a2027',sub:'#4a5562',sh:'inset 0 1px 0 #fff,0 2px 0 #6d7884,0 3px 4px rgba(0,0,0,.45)',key:'#1366d6',keysub:'#2a7fe8',glow:'rgba(60,150,255,.75)',btn:'#8ec5ff'},
+  backlit:{n:'Blue backlight',bg:'linear-gradient(180deg,#16191d,#060708)',fg:'#2f6a9f',sub:'#24527c',sh:'inset 0 1px 0 rgba(255,255,255,.08),0 2px 0 #000,0 3px 4px rgba(0,0,0,.6)',key:'#6cc0ff',keysub:'#4fa6f2',glow:'rgba(80,170,255,.9)',btn:'#6cc0ff'},
+  white:{n:'White',bg:'linear-gradient(180deg,#ffffff,#e2e6ea)',fg:'#16191d',sub:'#6b7480',sh:'inset 0 1px 0 #fff,0 2px 0 #aab2bb,0 3px 4px rgba(0,0,0,.3)',key:'#1366d6',keysub:'#2a7fe8',glow:'rgba(60,150,255,.6)',btn:'#8ec5ff'},
+  gold:{n:'Champagne gold',bg:'linear-gradient(180deg,#f4e4bd,#c9a861)',fg:'#2b1e06',sub:'#6b5420',sh:'inset 0 1px 0 #fff6dc,0 2px 0 #8c7238,0 3px 4px rgba(0,0,0,.4)',key:'#a24c00',keysub:'#b8600a',glow:'rgba(255,170,60,.75)',btn:'#ffc670'}
 };
 const BTNS={
   black:{n:'Black',key:'linear-gradient(180deg,#1f2023,#050506)',mark:'#8e8e93',ring:'conic-gradient(from 0deg,#2c2d30,#55575c,#2c2d30,#141516,#2c2d30,#55575c,#2c2d30,#141516,#2c2d30)',arrow:'#c7c7cc',ok:'radial-gradient(circle at 40% 35%,#2b2c2f,#000)',okring:'#000'},
   graphite:{n:'Graphite',key:'linear-gradient(180deg,#3a424c,#232930)',mark:'#c4ccd5',ring:'conic-gradient(from 0deg,#aab4bf,#e7ecf1,#aab4bf,#7d8895,#aab4bf,#e7ecf1,#aab4bf,#7d8895,#aab4bf)',arrow:'#3a434d',ok:'radial-gradient(circle at 40% 35%,#4a535e,#1c2127)',okring:'#11151a'},
-  chrome:{n:'Chrome',key:'linear-gradient(180deg,#f1f4f7,#aab3be)',mark:'#3a434d',ring:'conic-gradient(from 0deg,#b9c2cc,#f4f7fa,#b9c2cc,#8d98a5,#b9c2cc,#f4f7fa,#b9c2cc,#8d98a5,#b9c2cc)',arrow:'#3a434d',ok:'radial-gradient(circle at 40% 35%,#ffffff,#9aa4af)',okring:'#7d8895'},
-  white:{n:'White',key:'linear-gradient(180deg,#ffffff,#dde2e7)',mark:'#7a838d',ring:'conic-gradient(from 0deg,#e6e9ec,#ffffff,#e6e9ec,#c7cdd3,#e6e9ec,#ffffff,#e6e9ec,#c7cdd3,#e6e9ec)',arrow:'#59626c',ok:'radial-gradient(circle at 40% 35%,#ffffff,#d3d8de)',okring:'#b8bfc7'}
+  chrome:{n:'Chrome',light:true,key:'linear-gradient(180deg,#f1f4f7,#aab3be)',mark:'#3a434d',ring:'conic-gradient(from 0deg,#b9c2cc,#f4f7fa,#b9c2cc,#8d98a5,#b9c2cc,#f4f7fa,#b9c2cc,#8d98a5,#b9c2cc)',arrow:'#3a434d',ok:'radial-gradient(circle at 40% 35%,#ffffff,#9aa4af)',okring:'#7d8895'},
+  white:{n:'White',light:true,key:'linear-gradient(180deg,#ffffff,#dde2e7)',mark:'#7a838d',ring:'conic-gradient(from 0deg,#e6e9ec,#ffffff,#e6e9ec,#c7cdd3,#e6e9ec,#ffffff,#e6e9ec,#c7cdd3,#e6e9ec)',arrow:'#59626c',ok:'radial-gradient(circle at 40% 35%,#ffffff,#d3d8de)',okring:'#b8bfc7'}
 };
 function applySkin(sk){ sk=sk||S.skin||{}; const b=BODY[sk.body]||BODY.midnight, k=KEYS[sk.keys]||KEYS.black, t=BTNS[sk.btns]||BTNS.black;
+  const bl=t.light?'#1366d6':k.btn, bg=t.light?'rgba(60,150,255,.55)':k.glow, al=t.light?'#1366d6':k.btn;
   const css=`#phone .body{background:${b.edge}}
 #phone .face{background:${b.face}}
 #phone .brand{color:${b.brand}}
@@ -512,7 +513,15 @@ function applySkin(sk){ sk=sk||S.skin||{}; const b=BODY[sk.body]||BODY.midnight,
 html.fsm,html.fsm body{background:${b.flat}!important}
 #phone .kk{background:${k.bg};color:${k.fg};box-shadow:${k.sh}}
 #phone .kk small{color:${k.sub}}
-#phone .kk b,#phone .kk small{text-shadow:${k.glow||'none'}}
+#phone .kk b,#phone .kk small,#phone .soft i,#phone .dz i,#phone .emu svg,#phone .cl svg,#phone .en svg{transition:color .5s,background .5s,border-color .5s,text-shadow .5s,box-shadow .5s,filter .5s}
+#phone.lit .kk b{color:${k.key};text-shadow:0 0 7px ${k.glow},0 0 2px ${k.glow}}
+#phone.lit .kk small{color:${k.keysub};text-shadow:0 0 6px ${k.glow}}
+#phone.lit .soft i{background:${bl};box-shadow:0 0 7px ${bg}}
+#phone.lit .emu svg{fill:${bl};filter:drop-shadow(0 0 3px ${bg})}
+#phone.lit .dz.u i{border-bottom-color:${al}}#phone.lit .dz.d i{border-top-color:${al}}#phone.lit .dz.lt i{border-right-color:${al}}#phone.lit .dz.rt i{border-left-color:${al}}
+#phone.lit .dz i{filter:drop-shadow(0 0 3px ${bg})}
+#phone.lit .cl svg{filter:drop-shadow(0 0 5px rgba(70,225,110,.95))}
+#phone.lit .en svg{filter:drop-shadow(0 0 5px rgba(255,85,70,.95))}
 #phone .soft,#phone .cl,#phone .en,#phone .emu,#phone.fs .emu{background:${t.key}}
 #phone .soft i{background:${t.mark}}
 #phone .emu svg{fill:${t.mark}}
@@ -520,10 +529,11 @@ html.fsm,html.fsm body{background:${b.flat}!important}
 #phone .dz.u i{border-bottom-color:${t.arrow}}#phone .dz.d i{border-top-color:${t.arrow}}#phone .dz.lt i{border-right-color:${t.arrow}}#phone .dz.rt i{border-left-color:${t.arrow}}
 #phone .pad .ok{background:${t.ok};box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 2px ${t.okring}}`;
   const el=document.getElementById('skincss'); if(el&&el.textContent!==css) el.textContent=css }
-function SkinMenu(){ menu('Phone skin',[['Body colour',()=>skinRadio('Body colour','body',BODY)],['Keypad',()=>skinRadio('Keypad','keys',KEYS)],['Buttons',()=>skinRadio('Buttons','btns',BTNS)],
+function KeyLightMenu(){ Radio('Keypad light',[['auto','On when keys are pressed'],['on','Always on'],['off','Off']],()=>S.kpLight,v=>{ S.kpLight=v; keyLight() }) }
+function SkinMenu(){ menu('Phone skin',[['Body colour',()=>skinRadio('Body colour','body',BODY)],['Keypad',()=>skinRadio('Keypad','keys',KEYS)],['Buttons',()=>skinRadio('Buttons','btns',BTNS)],['Keypad light',()=>KeyLightMenu()],
   ['Restore default skin',()=>{ S.skin={body:'midnight',keys:'black',btns:'black'}; save(); applySkin(); note('Default skin restored') }]]) }
 function skinRadio(title,key,set){ Radio(title,Object.keys(set).map(id=>[id,set[id].n]),()=>S.skin[key],v=>{ S.skin[key]=v; applySkin() },
-  {onMove:it=>applySkin({...S.skin,[key]:it.val}),onPop:()=>applySkin(),note:'Skin saved'}) }
+  {onMove:it=>{ applySkin({...S.skin,[key]:it.val}); keyLight() },onPop:()=>applySkin(),note:'Skin saved'}) }
 
 function applyTheme(){ const lcd=$('#lcd'); let t=THEMES[S.theme]; let bg; if(!t){ const u=S.themes.find(x=>x.id===S.theme); t={...THEMES.steel,...(u?{n:u.n}:{})}; if(u&&u.bg) bg=`url(${u.bg}) center/cover`; }
   const m={tbg:bg||t.bg,tsolid:t.solid,tfg:t.fg,tsub:t.sub,thd:t.hd,thdfg:t.hdfg,thl:t.hl,thlfg:t.hlfg,tsk:t.sk,tskfg:t.skfg};
@@ -1003,6 +1013,7 @@ function DisplayMenu(){ menu('Display',[
   ['Navigation key icons',()=>OnOff('Navigation key icons',S,'navIcons')],
   ['Active standby',()=>OnOff('Active standby',S,'activeSb')],
   ['Screen saver',()=>menu('Screen saver',[['Screen saver',()=>OnOff('Screen saver',S.ss,'on')],['Screen savers',()=>Radio('Screen savers',[['digital','Digital clock'],['analog','Analogue clock'],['image','Wallpaper image']],()=>S.ss.type,v=>S.ss.type=v)],['Time-out',()=>Radio('Time-out',[[15,'15 seconds'],[30,'30 seconds'],[60,'1 minute'],[120,'2 minutes'],[300,'5 minutes'],[600,'10 minutes']],()=>S.ss.to,v=>S.ss.to=v)]])],
+  ['Keypad light',()=>KeyLightMenu()],
   ['Power saver',()=>OnOff('Power saver',S,'psaver')],['Sleep mode',()=>OnOff('Sleep mode',S,'sleep')],
   ['Font size',()=>menu('Font size',[['Messaging',()=>Radio('Messaging',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.msg,v=>S.fs.msg=v)],['Contacts',()=>Radio('Contacts',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.contacts,v=>S.fs.contacts=v)],['Web pages',()=>Radio('Web pages',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.web,v=>S.fs.web=v)]])],
   ['Operator logo',()=>Radio('Operator logo',[[true,'Show'],[false,'Hide']],()=>S.opLogo,v=>S.opLogo=v)]]) }
@@ -1291,13 +1302,13 @@ function powerOn(){ if(S.on&&V.length) return; S.on=true; save(); V=[]; booting=
     for(let i=0;i<6;i++){ const q=Math.max(0,Math.min(1,p*6-i)); const y=30-i*14, w=(34-i*5)*q; x.beginPath(); x.moveTo(0,y-12); x.lineTo(-w,y); x.lineTo(w,y); x.closePath(); x.globalAlpha=.25+.12*i; x.fill() }
     x.globalAlpha=Math.max(0,Math.min(1,(t-.6)*2)); x.font='600 16px Barlow Semi Condensed,Barlow,sans-serif'; x.textAlign='center'; x.fillText('L A R C H',0,78); x.restore();
     if(t<1.45) requestAnimationFrame(fr); else bootTail() })() }
-function bootTail(){ booting=false; S.on=true; V=[Standby()];
+function bootTail(){ booting=false; S.on=true; V=[Standby()]; keyLight();
   const chain=[];
   if(S.sec.pinReq) chain.push(next=>{ const ask=()=>push(Editor({mode:'pass',title:'PIN code',label:'Enter PIN code:',max:8,cancel:()=>{ powerOff() },done(t){ if(t===S.sec.pin){ pop(); next() } else { note('Wrong PIN code','warn'); const e=tv(); e.text=''; e.caret=0; render() } }})); ask() });
   if(S.phone.flightQ) chain.push(next=>Ask('Activate phone?',()=>{ if(S.profile==='flight') S.profile='general'; save(); next() },()=>{ S.profile='flight'; save(); next() },{title:''}));
   if(S.phone.welcome) chain.push(next=>{ render(); note(S.phone.welcome,'info',1600,next) });
   const run=()=>{ const f=chain.shift(); if(f) f(run); else { home() } }; render(); run() }
-function powerOff(){ stopRing(); stopRingback(); if(callObj){ clearTimeout(callObj.tm); callObj=null } V.forEach(v=>v.onPop&&v.onPop()); V=[]; S.on=false; save(); music.pause(); locked=false; NOTE.hidden=true; render() }
+function powerOff(){ clearTimeout(litT); PHONE.classList.remove('lit'); stopRing(); stopRingback(); if(callObj){ clearTimeout(callObj.tm); callObj=null } V.forEach(v=>v.onPop&&v.onPop()); V=[]; S.on=false; save(); music.pause(); locked=false; NOTE.hidden=true; render() }
 function ScreenSaver(){ let pos=[120,150];
   return {name:'ss',full:true,noSoft:true,
     draw(el){ const d=now(); const deep=S.sleep&&Date.now()-lastActivity>(S.ss.to+120)*1000;
@@ -1313,7 +1324,9 @@ function ScreenSaver(){ let pos=[120,150];
 
 /* ---------------- ticking ---------------- */
 let dimmed=false;
-function wake(){ lastActivity=Date.now(); if(dimmed){ dimmed=false; DIM.style.opacity=0 } }
+let litT=null;
+function keyLight(){ clearTimeout(litT); const on=S.on&&S.kpLight!=='off'; PHONE.classList.toggle('lit',on); if(on&&S.kpLight==='auto') litT=setTimeout(()=>PHONE.classList.remove('lit'),12000) }
+function wake(){ lastActivity=Date.now(); keyLight(); if(dimmed){ dimmed=false; DIM.style.opacity=0 } }
 setInterval(()=>{
   if(!S.on){ // alarm can switch the phone on
     const d=now(); if(S.alarm.on&&d.getHours()===S.alarm.h&&d.getMinutes()===S.alarm.m&&S.alarm.fired!==dkey(d)+d.getHours()+d.getMinutes()&&(!S.alarm.rep||S.alarm.days.includes(d.getDay()))){
