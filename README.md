@@ -45,15 +45,25 @@ Pick the **Larch** target for iPhone or **LarchMac** for Mac, set your Team unde
 Signing & Capabilities, and press Run. After editing `phone/index.html`, run
 `./make_web.sh` again.
 
+## Bundled components
+
+| Folder | What | Licence |
+|---|---|---|
+| `site/j2me/lite/` | [JS2ME](https://github.com/szatkus/js2me), the built-in Java ME engine (works offline) | MIT |
+| `site/j2me/` | [freej2me-web](https://github.com/zb3/freej2me-web), the full Java engine; it runs on CheerpJ, which is loaded from the internet because its free licence doesn't allow bundling | GPL-3.0 |
+| `site/voip/` | [JsSIP](https://github.com/versatica/JsSIP) with sdp-transform and events, for VoIP calls | MIT |
+| `phone/fonts/` | Jersey 10, Nunito, Inter and Titillium Web, embedded in the phone | SIL OFL 1.1 |
+
+`apple/make_web.sh` copies the Java engine and the VoIP library next to the phone in
+the apps, and the website workflow does the same for the playable copy.
+
 ## What the system doesn't allow
 
 iOS and macOS don't let apps read your text messages or full call history, and iOS
-doesn't expose signal strength, so the Inbox holds messages saved on the phone,
-the Log lists calls made from KeyPhone, and on iPhone the signal bars show online
-or offline. Java `.jar` games run on the phone's own screen through
-[freej2me-web](https://github.com/zb3/freej2me-web) (GPL-3.0, bundled in
-`site/j2me/`), which runs on CheerpJ loaded from the internet, so Java needs a
-connection when an app starts. The browser shows real websites on the phone's
-screen in the Mac and iPhone apps.
+doesn't expose signal strength or the caller's number, so there is no Inbox, the Log
+lists calls made from KeyPhone (and VoIP calls with their numbers), and on iPhone the
+status icon shows the connection type. VoIP needs a provider that supports SIP over
+secure WebSocket (WebRTC), and calls ring only while KeyPhone is open. Spotify needs
+your own Spotify developer app's Client ID, and playback control needs Premium.
 
 KeyPhone is an original design and is not affiliated with any phone maker.

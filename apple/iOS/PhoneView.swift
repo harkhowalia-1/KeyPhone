@@ -8,7 +8,7 @@ struct PhoneView: UIViewControllerRepresentable {
     func updateUIViewController(_ vc: PhoneViewController, context: Context) {}
 }
 
-final class PhoneViewController: UIViewController, WKNavigationDelegate {
+final class PhoneViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
     private var webView: WKWebView!
     private var bridge: HostBridge!
 
@@ -40,6 +40,7 @@ final class PhoneViewController: UIViewController, WKNavigationDelegate {
         webView.scrollView.bounces = false
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         view.addSubview(webView)
 
         bridge = HostBridge(webView: webView, presenter: self)
@@ -57,6 +58,13 @@ final class PhoneViewController: UIViewController, WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         bridge.pushStatus()
+    }
+
+    // VoIP calls use the microphone from the phone's own page; iOS still asks the user once.
+    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+                 initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType,
+                 decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        decisionHandler(type == .microphone ? .grant : .prompt)
     }
 
     // Links the page opens (tel:, sms:, http) go to iOS rather than replacing the phone.

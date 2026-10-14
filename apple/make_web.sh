@@ -14,4 +14,8 @@ mkdir -p Web
   cat "$SRC"
   printf '%s\n' '</body></html>'
 } > Web/index.html
-echo "Wrote apple/Web/index.html"
+# The built-in Java engine ships with the apps so Java runs offline.
+rm -rf Web/j2me-lite && cp -R ../site/j2me/lite Web/j2me-lite
+# The VoIP (SIP) library, loaded only when VoIP is switched on.
+rm -rf Web/voip && cp -R ../site/voip Web/voip
+echo "Wrote apple/Web/index.html and Web/j2me-lite"

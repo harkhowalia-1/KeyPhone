@@ -79,6 +79,7 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
             reply(id, true)
         case "web": web(id, args)
         case "saveFile": saveFile(id, args["name"] as? String ?? "KeyPhone backup.json", args["text"] as? String ?? "")
+        case "music": DispatchQueue.main.async { self.music(id, args) }
         default: return false
         }
         return true
@@ -147,6 +148,115 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
             return reply(id, "Invalid address", ok: false)
         }
         reply(id, NSWorkspace.shared.open(url))
+    }
+
+    // MARK: music: the Music app and the Spotify app, through AppleScript
+
+    private func script(_ source: String) -> NSAppleEventDescriptor? {
+        var error: NSDictionary?
+        let result = NSAppleScript(source: source)?.executeAndReturnError(&error)
+        return error == nil ? result : nil
+    }
+
+    private func quoted(_ s: String) -> String {
+        "\"" + s.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"") + "\""
+    }
+
+    private func number(_ s: String) -> Double { Double(s.replacingOccurrences(of: ",", with: ".")) ?? 0 }
+
+    private func music(_ id: Int, _ a: [String: Any]) {
+        let spotify = (a["src"] as? String) == "spotify"
+        let app = spotify ? "Spotify" : "Music"
+        let op = a["op"] as? String ?? ""
+        let int = { (k: String, d: Int) in (a[k] as? NSNumber)?.intValue ?? d }
+        switch op {
+        case "now": reply(id, now(app, art: (a["art"] as? Bool) == true))
+        case "pause", "play", "next", "prev", "stop":
+            let verb = ["pause": "pause", "play": "play", "next": "next track", "prev": "previous track", "stop": spotify ? "pause" : "stop"][op] ?? "pause"
+            _ = script("tell application \(quoted(app)) to \(verb)")
+            reply(id, now(app, art: op == "next" || op == "prev"))
+        case "auth":
+            if script("tell application \(quoted(app)) to get name") != nil { reply(id, true) }
+            else { reply(id, "Allow KeyPhone to control \(app) in System Settings › Privacy & Security › Automation.", ok: false) }
+        case "uri":
+            _ = script("tell application \"Spotify\" to play track \(quoted(a["uri"] as? String ?? ""))")
+            reply(id, now("Spotify", art: true))
+        case "browse":
+            if (a["kind"] as? String) == "playlists" {
+                let text = script("""
+                tell application "Music" to set out to name of user playlists
+                set AppleScript's text item delimiters to linefeed
+                return out as text
+                """)?.stringValue ?? ""
+                let items: [[String: Any]] = text.split(separator: "\n").map { line in
+                    let parts = line.components(separatedBy: "\t")
+                    return ["id": parts[0], "t": parts[0], "s": "Playlist"]
+                }
+                reply(id, ["total": items.count, "items": items])
+            } else {
+                reply(id, trackList("library playlist 1", offset: int("offset", 0), limit: int("limit", 200)))
+            }
+        case "tracks":
+            reply(id, trackList("user playlist \(quoted(a["id"] as? String ?? ""))", offset: 0, limit: 500))
+        case "start":
+            let index = int("index", 0) + 1
+            let kind = a["kind"] as? String ?? "songs"
+            let list = kind == "playlists" ? "user playlist \(quoted(a["id"] as? String ?? ""))" : "library playlist 1"
+            _ = script("tell application \"Music\" to play track \(index) of \(list)")
+            reply(id, now("Music", art: true))
+        default: reply(id, "Not available", ok: false)
+        }
+    }
+
+    private func trackList(_ list: String, offset: Int, limit: Int) -> [String: Any] {
+        let total = Int(script("tell application \"Music\" to count of tracks of \(list)")?.int32Value ?? 0)
+        guard total > offset else { return ["total": total, "items": []] }
+        let last = min(total, offset + limit)
+        let text = script("""
+        tell application "Music"
+          set ns to name of tracks \(offset + 1) thru \(last) of \(list)
+          set ars to artist of tracks \(offset + 1) thru \(last) of \(list)
+        end tell
+        set out to {}
+        repeat with k from 1 to count of ns
+          set end of out to (item k of ns) & tab & (item k of ars)
+        end repeat
+        set AppleScript's text item delimiters to linefeed
+        return out as text
+        """)?.stringValue ?? ""
+        let items: [[String: Any]] = text.split(separator: "\n", omittingEmptySubsequences: false).enumerated().map { i, line in
+            let parts = line.components(separatedBy: "\t")
+            return ["id": String(offset + i), "t": parts[0], "s": parts.count > 1 ? parts[1] : "", "i": offset + i]
+        }
+        return ["total": total, "items": items]
+    }
+
+    private func now(_ app: String, art: Bool) -> [String: Any] {
+        let durationUnit = app == "Spotify" ? " / 1000" : ""
+        let text = script("""
+        if application \(quoted(app)) is running then
+          tell application \(quoted(app))
+            if player state is stopped then return "stopped"
+            set t to current track
+            return (name of t) & linefeed & (artist of t) & linefeed & (album of t) & linefeed & (((duration of t)\(durationUnit)) as string) & linefeed & (player position as string) & linefeed & (player state as string)
+          end tell
+        end if
+        return "off"
+        """)?.stringValue ?? "off"
+        let parts = text.components(separatedBy: "\n")
+        guard parts.count >= 6 else { return ["none": true, "app": text] }
+        var out: [String: Any] = ["id": parts[0] + "|" + parts[1], "t": parts[0], "s": parts[1], "a": parts[2],
+                                  "dur": number(parts[3]), "pos": number(parts[4]), "playing": parts[5] == "playing"]
+        if art {
+            if app == "Spotify", let url = script("tell application \"Spotify\" to artwork url of current track")?.stringValue {
+                out["art"] = url
+            } else if let data = script("tell application \"Music\" to get data of artwork 1 of current track")?.data,
+                      let image = NSImage(data: data), let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil),
+                      let url = MediaController.jpegDataURL(cg, quality: 0.8) {
+                out["art"] = url
+            }
+        }
+        return out
     }
 
     // MARK: files
@@ -273,6 +383,13 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
     }
 
     // MARK: WKUIDelegate — "Add files" and other file inputs
+
+    // VoIP calls use the microphone from the phone's own page; macOS still asks the user once.
+    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+                 initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType,
+                 decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        decisionHandler(type == .microphone ? .grant : .prompt)
+    }
 
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters,
                  initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {

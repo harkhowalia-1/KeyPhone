@@ -28,6 +28,7 @@ final class HostBridge: BridgeBase {
     private var incoming: [UUID: (start: Date, connected: Date?)] = [:]
     private var overlay: WKWebView?
     private var statusTimer: Timer?
+    private lazy var appleMusic = AppleMusic(bridge: self)
 
     init(webView: WKWebView, presenter: UIViewController) {
         self.presenter = presenter
@@ -82,6 +83,11 @@ final class HostBridge: BridgeBase {
         case "web": web(id, args)
         case "saveFile": saveFile(id, args["name"] as? String ?? "KeyPhone backup.json", args["text"] as? String ?? "")
         case "audioSession": audioSession(id, (args["on"] as? Bool) ?? false)
+        case "audioRoute":
+            try? AVAudioSession.sharedInstance().overrideOutputAudioPort((args["speaker"] as? Bool) == true ? .speaker : .none)
+            reply(id, true)
+        case "torch": torch(id, (args["on"] as? Bool) ?? false)
+        case "music": DispatchQueue.main.async { self.appleMusic.handle(id, args) }
         default: return false
         }
         return true
@@ -170,6 +176,17 @@ final class HostBridge: BridgeBase {
             pop.sourceRect = CGRect(x: presenter.view.bounds.midX, y: presenter.view.bounds.midY, width: 1, height: 1)
         }
         (presenter.presentedViewController ?? presenter).present(sheet, animated: true)
+    }
+
+    /// The camera's light as a torch.
+    private func torch(_ id: Int, _ on: Bool) {
+        guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else { return reply(id, "No torch on this iPhone", ok: false) }
+        do {
+            try device.lockForConfiguration()
+            if on { try device.setTorchModeOn(level: 1.0) } else { device.torchMode = .off }
+            device.unlockForConfiguration()
+            reply(id, on)
+        } catch { reply(id, error.localizedDescription, ok: false) }
     }
 
     /// While the radio or music player is playing, sound keeps going with the

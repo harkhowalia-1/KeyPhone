@@ -3,17 +3,22 @@ import WebKit
 import Contacts
 import UserNotifications
 import Network
+import AuthenticationServices
+import CoreLocation
 
 /// Shared part of the bridge between the phone shell (Web/index.html) and the
 /// operating system. The page calls `window.PhoneHost.<name>(...)`, which posts
 /// a message here; every call returns a Promise that `reply` resolves.
 /// Platform subclasses handle calls, messages, photos, links and status.
-class BridgeBase: NSObject, WKScriptMessageHandler {
+class BridgeBase: NSObject, WKScriptMessageHandler, ASWebAuthenticationPresentationContextProviding, CLLocationManagerDelegate {
 
     weak var webView: WKWebView?
     let store = CNContactStore()
     lazy var media = MediaController(bridge: self)
     private var askedNotifications = false
+    private var authSession: ASWebAuthenticationSession?
+    private var locationManager: CLLocationManager?
+    private var locationReplies: [Int] = []
 
     // MARK: page-side shim
 
@@ -45,7 +50,12 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
           audio:function(o){return send('audio',o)},
           saveFile:function(name,text){return send('saveFile',{name:name,text:text})},
           storage:function(){return send('storage')},
-          audioSession:function(on){return send('audioSession',{on:!!on})}};
+          audioSession:function(on){return send('audioSession',{on:!!on})},
+          audioRoute:function(on){return send('audioRoute',{speaker:!!on})},
+          music:function(o){return send('music',o)},
+          oauth:function(url,scheme){return send('oauth',{url:url,scheme:scheme})},
+          location:function(){return send('location')},
+          torch:function(on){return send('torch',{on:!!on})}};
         })();
         """
     }
@@ -91,6 +101,8 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
         case "download": download(id, args["url"] as? String ?? "")
         case "media", "library", "audio": media.handle(cmd, id, args)
         case "storage": storage(id)
+        case "oauth": oauth(id, args["url"] as? String ?? "", args["scheme"] as? String ?? "keyphone")
+        case "location": location(id)
         case "audioSession": reply(id, true)
         default: reply(id, "Not available on this device", ok: false)
         }
@@ -111,6 +123,74 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
 
     func evaluate(_ js: String) {
         DispatchQueue.main.async { self.webView?.evaluateJavaScript(js) }
+    }
+
+    // MARK: sign-in sheets (Spotify): the system's secure web sign-in, returning the callback address
+
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        webView?.window ?? ASPresentationAnchor()
+    }
+
+    private func oauth(_ id: Int, _ address: String, _ scheme: String) {
+        guard let url = URL(string: address) else { return reply(id, "Invalid address", ok: false) }
+        DispatchQueue.main.async {
+            let session = ASWebAuthenticationSession(url: url, callbackURLScheme: scheme) { [weak self] callback, error in
+                self?.authSession = nil
+                if let callback = callback { self?.reply(id, callback.absoluteString); return }
+                let cancelled = (error as NSError?)?.code == ASWebAuthenticationSessionError.canceledLogin.rawValue
+                self?.reply(id, cancelled ? "cancelled" : (error?.localizedDescription ?? "Sign-in failed"), ok: false)
+            }
+            session.presentationContextProvider = self
+            self.authSession = session
+            if !session.start() { self.authSession = nil; self.reply(id, "Could not open sign-in", ok: false) }
+        }
+    }
+
+    // MARK: location (weather): one reading, with the town name
+
+    private func location(_ id: Int) {
+        DispatchQueue.main.async {
+            let manager = self.locationManager ?? CLLocationManager()
+            manager.delegate = self
+            manager.desiredAccuracy = kCLLocationAccuracyKilometer
+            self.locationManager = manager
+            self.locationReplies.append(id)
+            switch manager.authorizationStatus {
+            case .notDetermined: manager.requestWhenInUseAuthorization()
+            case .denied, .restricted: self.finishLocation("Location access is off. Turn it on in Settings › Privacy › Location Services.")
+            default: manager.requestLocation()
+            }
+        }
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        guard !locationReplies.isEmpty else { return }
+        switch manager.authorizationStatus {
+        case .notDetermined: return
+        case .denied, .restricted: finishLocation("Location access is off. Turn it on in Settings › Privacy › Location Services.")
+        default: manager.requestLocation()
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let place = locations.last, !locationReplies.isEmpty else { return }
+        let ids = locationReplies
+        locationReplies = []
+        CLGeocoder().reverseGeocodeLocation(place) { marks, _ in
+            let town = marks?.first?.locality ?? marks?.first?.administrativeArea ?? ""
+            let out: [String: Any] = ["lat": place.coordinate.latitude, "lon": place.coordinate.longitude, "city": town]
+            ids.forEach { self.reply($0, out) }
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        finishLocation("Location not available right now")
+    }
+
+    private func finishLocation(_ message: String) {
+        let ids = locationReplies
+        locationReplies = []
+        ids.forEach { reply($0, message, ok: false) }
     }
 
     // MARK: free space on the device (Phone › Memory status)

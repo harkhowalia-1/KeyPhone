@@ -377,6 +377,30 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 .ss .c small{display:block;font-size:13px;color:#7c8794}
 @media (prefers-reduced-motion: reduce){.cr,.ring .av,.mp.play .disc,.phone.vib{animation:none}}
 
+/* music from Apple Music / Spotify */
+.mp.xm{gap:6px}
+.mp .art{width:112px;height:112px;border-radius:8px;background:#222 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.mp .ar{font-size:12px;color:var(--tsub);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:-4px}
+/* weather */
+.wx{position:absolute;inset:0;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.wx .now{display:flex;align-items:center;gap:12px}
+.wx .now .t{font-size:40px;font-weight:300;line-height:1;font-variant-numeric:tabular-nums}
+.wx .now .c{font-size:14px;color:var(--tsub);margin-top:2px}
+.wx .det{font-size:12px;color:var(--tsub)}
+.wx .days{display:flex;flex-direction:column;border-top:1px solid rgba(127,127,127,.25)}
+.wx .days div{display:grid;grid-template-columns:52px 24px 1fr 38px;align-items:center;gap:6px;height:25px;border-bottom:1px solid rgba(127,127,127,.15);font-size:13px}
+.wx .days b{font-weight:500}.wx .days span{font-variant-numeric:tabular-nums}.wx .days small{color:var(--tsub);text-align:right;font-size:11px}
+/* converter */
+.cvt{position:absolute;inset:0;padding:10px;display:flex;flex-direction:column;gap:8px}
+.cvt .row{border-radius:8px;padding:6px 10px;border:1px solid rgba(127,127,127,.3);display:flex;flex-direction:column}
+.cvt .row.on{border-color:transparent;background:var(--thl);color:var(--thlfg)}
+.cvt .row small{font-size:11px;opacity:.75}.cvt .row b{font-size:26px;font-weight:300;font-variant-numeric:tabular-nums;word-break:break-all}.cvt .row span{font-size:13px}
+.cvt .h{margin-top:auto;font-size:11px;color:var(--tsub);line-height:1.4}
+/* composer */
+.cmp{position:absolute;inset:0;padding:10px;overflow:hidden}
+.cmp .nt{font-size:16px;line-height:1.7;word-spacing:4px;font-variant-numeric:tabular-nums}
+.cmp .nt i{font-style:normal;color:var(--tsub);font-size:13px;line-height:1.5}
+
 /* ================= system looks: one per phone model ================= */
 /* Mono: backlit monochrome LCD, pixel type, inverse highlight, one big menu icon at a time */
 #lcd.ui-mono{font-family:'KP Pixel',monospace;font-size:19px;font-synthesis:none}
@@ -550,7 +574,7 @@ const DEF={
     pager:{name:'Pager',tone:'KeyPhone theme',vol:0,alert:'off',vib:true,msg:'Beep',keys:2,warn:false,alertFor:'all'},
     flight:{name:'Flight',tone:'KeyPhone theme',vol:0,alert:'off',vib:false,msg:'Off',keys:1,warn:true,alertFor:'all'}
   },
-  model:'k7', fill:false, theme:'steel', wall:{on:true,id:'live:dawn'}, sfont:'#ffffff', navIcons:false, activeSb:true,
+  model:'k7', fill:false, java:'auto', msrc:'files', spotify:{cid:''}, weather:{place:null,unit:'c',sb:true}, wclock:['Europe/London','America/New_York','Asia/Tokyo'], tones:[], games:{blocks:0,mines:0}, voip:{on:false,uri:'',pass:'',ws:'',name:'',auth:'',ice:'',iceUser:'',icePass:'',mode:'ask'}, theme:'steel', wall:{on:true,id:'live:dawn'}, sfont:'#ffffff', navIcons:false, activeSb:true,
   ss:{on:false,type:'digital',to:60}, psaver:false, sleep:false,
   fs:{msg:'normal',contacts:'normal',web:'normal'}, opLogo:true,
   clock:{show:true,h24:true,off:0,tz:SYS_TZ}, date:{show:true,fmt:'DD-MM-YYYY',sep:'-'}, autoTime:'on',
@@ -589,6 +613,7 @@ function syncSchedule(){ if(!Host||!Host.schedule) return; const items=[], off=S
   for(const n of S.cal) if(n.alarm&&!n.fired&&n.time){ const [Y,M,D]=n.date.split('-').map(Number), [h,m]=n.time.split(':').map(Number); const at=new Date(Y,M-1,D,h,m).getTime()-off; if(at>Date.now()) items.push({id:'cal-'+n.id,title:n.type,body:n.subject,at}) }
   const js=JSON.stringify(items); if(js===lastSched) return; lastSched=js; Host.schedule(items).catch(()=>{}) }
 load();
+for(const t of S.tones||[]) RING[t.n]=t.seq;
 if(!S.mig4){ S.mig4=true; for(const k in S.profiles) if(S.profiles[k].tone==='Larch theme') S.profiles[k].tone='KeyPhone theme'; if(S.alarm.tone==='Larch theme') S.alarm.tone='KeyPhone theme' }
 if(!S.mig3){ S.mig3=true; if(S.wall&&S.wall.id==='w:dawn') S.wall.id='live:dawn' }
 if(!S.mig2){ S.mig2=true; S.ss.on=false; S.psaver=false; S.sleep=false; save() }
@@ -642,7 +667,8 @@ let ringH=null, ringing=false;
 /* Phone sounds (keys, tones, shutter) follow the device: the iPhone's silent switch mutes them.
    Music, radio, recordings, videos and a ringing alarm or timer keep playing, as they do on an iPhone. */
 const loudSet=new Set(); let lastLoud=null;
-function audioMode(force){ const loud=!!(loudSet.size||ringing||music.playing||radioP.playing||radioP.loading);
+function audioMode(force){ if(callObj&&callObj.voip){ try{ if(navigator.audioSession) navigator.audioSession.type='play-and-record' }catch(e){} lastLoud=null; return }
+  const loud=!!(loudSet.size||ringing||music.playing||radioP.playing||radioP.loading);
   try{ if(navigator.audioSession) navigator.audioSession.type=loud?'playback':'ambient' }catch(e){}
   if(loud!==lastLoud||force){ lastLoud=loud; if(Host&&Host.audioSession) Host.audioSession(loud).catch(()=>{}) } }
 let vibI=null;
@@ -689,6 +715,16 @@ const P={
   out:'<path d="M4 12h12M12 7l5 5-5 5"/><path d="M20 4v16"/>',
   inc:'<path d="M20 12H8M12 7l-5 5 5 5"/><path d="M4 4v16"/>',
   mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>',
+  voip:'<path d="M7 3.5h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A16 16 0 0 1 5.5 5.1 1.5 1.5 0 0 1 7 3.5z"/><path d="M15 3.5a6 6 0 0 1 5.5 5.5M15 7a2.6 2.6 0 0 1 2 2"/>',
+  torch:'<path d="M8 3h8l-1 5H9z"/><path d="M9 8h6l-1.2 12.5a.8.8 0 0 1-.8.5h-2a.8.8 0 0 1-.8-.5z"/><path d="M12 11v3"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>',
+  cloud:'<path d="M7 18.5h10a4 4 0 0 0 .4-8 6 6 0 0 0-11.5 1.6A3.3 3.3 0 0 0 7 18.5z"/>',
+  rain:'<path d="M7 15h10a3.6 3.6 0 0 0 .4-7.2 5.5 5.5 0 0 0-10.6 1.4A3 3 0 0 0 7 15z"/><path d="M9 18l-1 2.5M13 18l-1 2.5M17 18l-1 2.5"/>',
+  snow:'<path d="M7 14.5h10a3.6 3.6 0 0 0 .4-7.2 5.5 5.5 0 0 0-10.6 1.4A3 3 0 0 0 7 14.5z"/><path d="M8.5 18h.01M12 19.5h.01M15.5 18h.01M10 21h.01M14 21h.01"/>',
+  storm:'<path d="M7 14.5h10a3.6 3.6 0 0 0 .4-7.2 5.5 5.5 0 0 0-10.6 1.4A3 3 0 0 0 7 14.5z"/><path d="M12.5 15.5l-2 3.5h3l-2 3.5"/>',
+  fog:'<path d="M7 12h10a3.4 3.4 0 0 0 .4-6.8 5.3 5.3 0 0 0-10.2 1.3A2.8 2.8 0 0 0 7 12z"/><path d="M4 15.5h16M6 18.5h12M8 21.5h8"/>',
+  globe:'<circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.6" ry="8.5"/><path d="M3.8 9h16.4M3.8 15h16.4"/>',
+  conv:'<path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/>',
   cam:'<path d="M4 7.5h3l1.6-2.3h6.8L17 7.5h3a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8.5a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/>'
 };
 const ico=(n,w)=>`<svg viewBox="0 0 24 24" ${w?`width="${w}" height="${w}"`:''} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${P[n]||''}</svg>`;
@@ -1124,7 +1160,7 @@ const DEVC=()=>!!(Host&&Host.contacts);
 function refreshContacts(){ if(!DEVC()) return; Host.contacts().then(list=>{ const old={}; S.contacts.forEach(c=>old[c.id]=c); S.contacts=(list||[]).map(c=>({...c,group:(old[c.id]||{}).group||''})); save(); if(S.on&&V.length) render() }).catch(()=>{}) }
 function pushContact(c){ if(!DEVC()||!Host.saveContact) return; Host.saveContact(c).then(id=>{ if(id&&id!==c.id){ for(const k in S.speed) if(S.speed[k]===c.id) S.speed[k]=id; c.id=id; save() } },()=>note('Could not save to Contacts','warn')) }
 function dropContact(c){ if(DEVC()&&Host.deleteContact) Host.deleteContact(c.id).catch(()=>{}) }
-window.LarchResume=()=>{ refreshContacts(); if(typeof readNet==='function') readNet() };
+window.LarchResume=()=>{ refreshContacts(); if(typeof readNet==='function') readNet(); try{ if(S.voip&&S.voip.on&&!voip.ready()) setTimeout(()=>voip.start(),800); if(msrc()!=='files'&&tv()&&tv().name==='music') xmPoll(true) }catch(e){} };
 const norm=n=>String(n||'').replace(/[^\d+]/g,'').replace(/^\+?1(?=\d{10}$)/,'');
 function findContact(num){ const n=norm(num); if(!n) return null; return S.contacts.find(c=>['num','home','work'].some(f=>c[f]&&norm(c[f])===n))||null }
 const nameFor=num=>{ const c=findContact(num); return c?c.name:num };
@@ -1157,14 +1193,15 @@ function netSVG(){ const fl=S.profile==='flight';
 let locked=false, unlockAt=0, lastActivity=Date.now();
 function statusIcons(){ const out=[]; const unread=S.msgs.inbox.filter(m=>!m.read).length;
   if(unread) out.push(ico('msg')); if(S.logs.missed.some(x=>!x.seen)) out.push(ico('missed'));
-  if(S.alarm.on) out.push(ico('alarm')); if(S.timer) out.push(ico('timer'));
+  if(S.alarm.on) out.push(ico('alarm')); if(voip.ready()) out.push(ico('voip')); if(torchOn) out.push(ico('torch')); if(S.timer) out.push(ico('timer'));
   if(music.playing||radioP.playing) out.push(ico('note')); if(prof().alert==='off'&&!prof().vol) out.push(ico('silent')); if(locked) out.push(ico('lock')); return out.join('') }
 function nextEvents(){ const out=[]; const d=now();
   if(S.alarm.on) out.push([ico('alarm'),'Alarm '+fmtTime(new Date(2000,0,1,S.alarm.h,S.alarm.m))]);
   const today=dkey(d); const evs=S.cal.filter(n=>n.date>=today||n.type==='Birthday').sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
   const e=evs.find(n=>n.type!=='Birthday')||evs[0]; if(e) out.push([ico('cal'),(e.date===today?'Today':e.date.slice(5).replace('-','/'))+(e.time?' '+e.time:'')+' · '+e.subject]);
   if(S.timer){ const left=Math.max(0,Math.round((S.timer.end-Date.now())/1000)); out.push([ico('timer'),'Timer '+fmtDur(left)]) }
-  if(music.playing&&music.cur) out.push([ico('note'),music.cur.name]); else if(radioP.playing&&radioP.cur) out.push([ico('note'),radioP.cur.name]);
+  if(music.playing&&music.cur) out.push([ico('note'),music.cur.name]); else if(radioP.playing&&radioP.cur) out.push([ico('note'),radioP.cur.name]); else if(XM.now&&XM.now.playing&&XM.now.t) out.push([ico('note'),XM.now.t+(XM.now.s?' · '+XM.now.s:'')]);
+  const w=weatherLine(); if(w) out.unshift(w);
   return out.slice(0,3) }
 function Standby(){
   return {name:'standby',full:true,ovSoft:true,
@@ -1179,7 +1216,7 @@ function Standby(){
       else if(S.activeSb){ const ev=nextEvents(); if(ev.length) h+='<div class="as">'+ev.map(e=>`<div>${e[0]}<span>${esc(e[1])}</span></div>`).join('')+'</div>' }
       if(S.navIcons&&!locked) h+=`<svg class="nv" viewBox="0 0 56 56" fill="#fff"><path d="M28 4l6 8H22zM28 52l-6-8h12zM4 28l8-6v12zM52 28l-8 6V22z"/></svg>`;
       el.innerHTML=h+'</div>' },
-    tick(){ render() },
+    tick(){ if(S.weather&&S.weather.sb&&S.weather.place&&Date.now()-(S.weather.t||0)>30*60e3) wxRefresh(); render() },
     soft(){ if(locked) return [{t:''},{t:'Unlock',f:()=>{ unlockAt=Date.now(); note('Now press *','info',1500) }},{t:''}];
       return [scSoft(S.sc.L),{t:'Menu',f:()=>push(MainMenu())},scSoft(S.sc.R)] },
     key(k,long){
@@ -1207,7 +1244,7 @@ const FEAT={
   notes:['Notes',()=>NotesMenu()], todo:['To-do list',()=>TodoList()], calc:['Calculator',()=>Calculator()], stopwatch:['Stopwatch',()=>Stopwatch()], timer:['Countdown timer',()=>TimerMenu()],
   gallery:['Gallery',()=>GalleryMenu()], music:['Music player',()=>MusicPlayer()], radio:['Radio',()=>RadioApp()], web:['Web',()=>WebMenu()], bookmarks:['Bookmarks',()=>Bookmarks()],
   profiles:['Profiles',()=>ProfilesMenu()], themes:['Themes',()=>ThemesMenu()], settings:['Settings',()=>SettingsMenu()], snake:['Snake',()=>SnakeMenu()], collection:['Collection',()=>Collection()],
-  camera:['Camera',()=>CameraApp('photo')], recorder:['Recorder',()=>Recorder()], emu:['KeyPhone settings',()=>EmulatorMenu()], menu:['Menu',()=>push(MainMenu())]
+  camera:['Camera',()=>CameraApp('photo')], recorder:['Recorder',()=>Recorder()], torch:['Torch',()=>toggleTorch()], weather:['Weather',()=>Weather()], worldclock:['World clock',()=>WorldClock()], spotify:['Spotify',()=>SpotifyMenu()], applemusic:['Apple Music',()=>AppleLib()], emu:['KeyPhone settings',()=>EmulatorMenu()], menu:['Menu',()=>push(MainMenu())]
 };
 const scSoft=id=>FEAT[id]?{t:FEAT[id][0],f:FEAT[id][1]}:{t:''};
 const runFeat=id=>FEAT[id]&&FEAT[id][1]();
@@ -1265,7 +1302,13 @@ function stopRingback(){ if(ringback){ clearInterval(ringback.i); ringback.stop&
 function startRingback(){ stopRingback(); const g=volG(Math.max(1,Math.min(3,prof().vol||2)))*.6; const once=()=>beep([440,480],1.6,g||.02); once(); ringback={i:setInterval(once,4000)} }
 function callNumber(num,label){ num=String(num||'').trim(); if(!num) return;
   if(S.profile==='flight'){ note('Flight profile is active','warn'); return }
-  S.logs.dialled.unshift({num,t:Date.now(),dur:0}); S.logs.dialled=S.logs.dialled.slice(0,30); save();
+  const via=callVia(num);
+  if(via==='ask'){ menu('Call '+(label||nameFor(num)),[['Call with phone',()=>{pop();placeCall(num,label,'phone')}],['Call with VoIP',()=>{pop();placeCall(num,label,'voip')}]],{nums:false}); return }
+  placeCall(num,label,via) }
+function callVia(num){ const v=S.voip; if(!(v&&v.on&&voip.ready())) return 'phone'; if(/@|^sips?:/i.test(num)) return 'voip'; if(!(Host&&Host.call)) return 'voip'; return v.mode||'ask' }
+function placeCall(num,label,via){
+  S.logs.dialled.unshift({num,t:Date.now(),dur:0,voip:via==='voip'}); S.logs.dialled=S.logs.dialled.slice(0,30); save();
+  if(via==='voip'){ voipCall(num,label); return }
   const name=label||nameFor(num);
   if(Host&&Host.call){ Host.call(num).catch(()=>note('Could not place the call','warn')); home(); note('Calling '+name,'info',1600); return }
   const a=document.createElement('a'); a.href='tel:'+num.replace(/[^\d+*#,;]/g,''); a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove();
@@ -1275,28 +1318,110 @@ window.LarchCallMissed=o=>{ S.logs.missed.unshift({num:'',t:(o&&o.t)||Date.now()
   if(!S.on||!V.length) return; if(tv().name==='notice') pop(); render(); if(tv().name==='standby'){ const n=S.logs.missed.filter(x=>!x.seen).length; Notice(n+' missed call'+(n>1?'s':''),()=>LogList('Missed calls','missed')) } };
 window.LarchCallEnded=o=>{ const d=Math.round((o&&o.duration)||0); if(!d) return; S.dur.last=d; S.dur.dialled+=d; if(S.logs.dialled[0]) S.logs.dialled[0].dur=d; save(); if(S.call.summary&&S.on) note('Call duration '+fmtDur(d),'info',2200) };
 
-function answer(){ if(!callObj||callObj.state!=='ringing') return; stopRing(); clearTimeout(callObj.tm); callObj.state='active'; callObj.t0=Date.now();
+function answer(){ if(!callObj||callObj.state!=='ringing') return; stopRing(); clearTimeout(callObj.tm);
+  if(callObj.voip){ callObj.state='connecting'; try{ callObj.session.answer({mediaConstraints:{audio:true,video:false},pcConfig:{iceServers:voipIce()}}) }catch(e){ note('Could not answer','warn') } render(); return }
+  callObj.state='active'; callObj.t0=Date.now();
   S.logs.recv.unshift({num:callObj.num,t:Date.now(),dur:0}); S.logs.recv=S.logs.recv.slice(0,20); save(); render() }
 function endCall(silent){ if(!callObj) return; clearTimeout(callObj.tm); stopRing(); stopRingback();
+  if(callObj.voip){ const c=callObj; c.ending=true; try{ c.session.terminate(c.dir==='in'&&c.state==='ringing'?{status_code:486,reason_phrase:'Busy Here'}:undefined) }catch(e){} voipFinish(c,c.dir==='in'&&c.state==='ringing'?'rejected':'local'); return }
   const dur=callObj.state==='active'?Math.round((Date.now()-callObj.t0)/1000):0;
   if(dur){ S.dur.last=dur; if(callObj.dir==='in'){ S.dur.recv+=dur; if(S.logs.recv[0]) S.logs.recv[0].dur=dur } else { S.dur.dialled+=dur; if(S.logs.dialled[0]) S.logs.dialled[0].dur=dur } save() }
   callObj=null; home(); if(!silent){ if(dur&&S.call.summary) note('Call duration '+fmtDur(dur),'info',1800); else note('Call ended','info',900) } }
 function CallView(){ return {name:'call',full:true,noPower:true,cls:'',
   draw(el){ const c=callObj; if(!c){ return } el.style.background='var(--tbg)';
-    const st=c.state==='calling'?'Calling':c.state==='ringing'?'Calling…':(c.mute?'Muted':'Active call')+(c.spk?' · Loudspeaker':'');
+    const st=c.state==='calling'?(c.voip?'Calling (VoIP)':'Calling'):c.state==='alerting'?'Ringing…':c.state==='ringing'?(c.voip?'VoIP call…':'Calling…'):c.state==='connecting'?'Connecting…':(c.hold?'On hold':c.mute?'Muted':'Active call')+(c.spk?' · Loudspeaker':'');
     el.innerHTML=`<div class="call${c.state!=='active'?' ring':''}"><div class="av">${ico('person')}</div><div class="nm">${esc(c.name)}</div>${c.name!==c.num?`<div class="st">${esc(c.num)}</div>`:''}<div class="st">${st}</div>${c.state==='active'?`<div class="tm">${fmtDur((Date.now()-c.t0)/1000)}</div>`:''}</div>` },
   tick(){ render() },
   soft(){ const c=callObj; if(!c) return [{},{},{}];
     if(c.state==='ringing') return [{t:'Options',f:()=>menu('Options',[['Answer',()=>{pop();answer()}],['Reject',()=>{pop();endCall()}]],{nums:false})},{t:'Answer',f:answer},{t:c.silenced?'Reject':'Silence',f:()=>{ if(c.silenced) endCall(); else { c.silenced=true; stopRing(); render() } }}];
-    if(c.state==='calling') return [{t:''},{t:''},{t:'End',f:()=>endCall()}];
-    return [{t:'Options',f:()=>menu('Options',[[c.mute?'Unmute':'Mute',()=>{c.mute=!c.mute;pop()}],['Hold',()=>{pop();note('Call on hold','info')}],['Contacts',()=>{pop();NamesList()}],['Menu',()=>{pop();push(MainMenu())}],['End call',()=>{pop();endCall()}]],{nums:false})},{t:''},{t:c.spk?'Normal':'Loudsp.',f:()=>{c.spk=!c.spk;render()}}] },
+    if(c.state!=='active') return [{t:''},{t:''},{t:'End',f:()=>endCall()}];
+    const spk=Host&&Host.platform==='ios'&&Host.audioRoute;
+    return [{t:'Options',f:()=>menu('Options',[[c.mute?'Unmute':'Mute',()=>{pop();voipMute(!c.mute)}],[c.hold?'Resume call':'Hold',()=>{pop();voipHold(!c.hold)}],['Send DTMF',()=>{pop();note('Press the number keys','info',1400)}],['Contacts',()=>{pop();NamesList()}],['Menu',()=>{pop();push(MainMenu())}],['End call',()=>{pop();endCall()}]],{nums:false})},{t:''},spk?{t:c.spk?'Normal':'Loudsp.',f:()=>{c.spk=!c.spk;Host.audioRoute(c.spk).catch(()=>{});render()}}:{t:''}] },
   key(k){ const c=callObj; if(!c) return false;
     if(k==='END'){ endCall(); return true }
     if(k==='CALL'&&c.state==='ringing'){ answer(); return true }
     if(c.state==='ringing'&&S.call.anykey&&!['R','END','PWR','VUP','VDN'].includes(k)){ answer(); return true }
     if(c.state==='ringing'&&(k==='VUP'||k==='VDN')){ stopRing(); c.silenced=true; render(); return true }
-    if(c.state==='active'&&/^[\d*#]$/.test(k)) return true;
+    if(c.state==='active'&&/^[\d*#]$/.test(k)){ if(c.voip&&c.session){ try{ c.session.sendDTMF(k) }catch(e){} } return true }
     return false } } }
+/* ---------------- VoIP: SIP over secure WebSocket with WebRTC audio (JsSIP, MIT) ----------------
+   Works with any VoIP service or phone system that offers SIP over WebSocket (WSS) for WebRTC.
+   Calls go in and out while KeyPhone is open. */
+const VOIP_LIB=(()=>{ try{ return new URL('voip/jssip.js',location.href).href }catch(e){ return '' } })();
+const voipAudio=new Audio(); voipAudio.autoplay=true; voipAudio.playsInline=true;
+const voip={ua:null,state:'off',err:'',
+  load(){ if(window.JsSIP) return Promise.resolve(window.JsSIP); return new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src=VOIP_LIB; sc.onload=()=>window.JsSIP?res(window.JsSIP):rej(new Error('VoIP could not start')); sc.onerror=()=>rej(new Error('VoIP is not available in this version')); document.head.appendChild(sc) }) },
+  configured(){ const v=S.voip; return !!(v&&v.uri&&v.ws&&v.pass) },
+  ready(){ return this.state==='registered' },
+  async start(){ this.stop(); if(!S.voip.on) return; if(!this.configured()){ this.state='error'; this.err='Account details missing'; return }
+    if(!dev.online){ this.state='error'; this.err='No network connection'; return }
+    this.state='connecting'; this.err=''; rr();
+    let J; try{ J=await this.load() }catch(e){ this.state='error'; this.err=e.message; rr(); return }
+    const v=S.voip, uri=/^sips?:/i.test(v.uri)?v.uri:'sip:'+v.uri.trim();
+    let ua; try{ ua=new J.UA({sockets:[new J.WebSocketInterface(v.ws.trim())],uri,password:v.pass,authorization_user:v.auth||undefined,display_name:v.name||undefined,register:true,session_timers:false,user_agent:'KeyPhone/'+(window.LARCH_VERSION||'1')}) }
+    catch(e){ this.state='error'; this.err='Check the SIP address and the WebSocket server'; rr(); return }
+    this.ua=ua;
+    ua.on('connected',()=>{ if(this.ua===ua&&this.state!=='registered'){ this.state='connecting'; rr() } });
+    ua.on('disconnected',()=>{ if(this.ua===ua){ this.state='error'; this.err='Server not reachable'; rr() } });
+    ua.on('registered',()=>{ if(this.ua===ua){ this.state='registered'; this.err=''; rr() } });
+    ua.on('unregistered',()=>{ if(this.ua===ua&&this.state==='registered'){ this.state='connecting'; rr() } });
+    ua.on('registrationFailed',e=>{ if(this.ua===ua){ const c=e&&e.cause; this.state='error'; this.err=c==='Authentication Error'||c==='Rejected'?'Wrong user name or password':c==='Request Timeout'||c==='Connection Error'?'Server not reachable':c||'Registration failed'; rr() } });
+    ua.on('newRTCSession',e=>{ if(e.originator==='remote') voipIncoming(e.session) });
+    ua.start() },
+  stop(){ const ua=this.ua; this.ua=null; this.state='off'; if(ua){ try{ ua.stop() }catch(e){} } },
+  label(){ return {off:'Off',connecting:'Connecting…',registered:'Connected',error:'Not connected'}[this.state]+(this.state==='error'&&this.err?': '+this.err:'') } };
+function voipIce(){ const v=S.voip, out=[{urls:'stun:stun.l.google.com:19302'}]; if(v.ice) out.unshift({urls:v.ice.trim(),username:v.iceUser||undefined,credential:v.icePass||undefined}); return out }
+function voipTarget(num){ num=String(num).trim(); if(/^sips?:/i.test(num)) return num; if(num.includes('@')) return 'sip:'+num; const dom=(S.voip.uri.replace(/^sips?:/i,'').split('@')[1]||'').trim(); const user=/^[\d+*#\s().-]+$/.test(num)?num.replace(/[^\d+*#]/g,''):num.replace(/[^\w.+*#!~-]/g,''); return 'sip:'+user+'@'+dom }
+function attachRemote(pc){ if(!pc||pc._kp) return; pc._kp=true;
+  pc.addEventListener('track',e=>{ const st=e.streams&&e.streams[0]||new MediaStream([e.track]); voipAudio.srcObject=st; voipAudio.play().catch(()=>{}) }) }
+function hookSession(sess,c){
+  // Don't wait for every ICE candidate (slow STUN servers can take many seconds): send after a short gathering window.
+  let iceT=null; sess.on('icecandidate',e=>{ if(!iceT) iceT=setTimeout(()=>{ try{ e.ready() }catch(x){} },1500) });
+  sess.on('peerconnection',e=>attachRemote(e.peerconnection)); if(sess.connection) attachRemote(sess.connection);
+  sess.on('progress',e=>{ if(callObj!==c||c.dir!=='out') return; c.state='alerting'; if(!(e&&e.response&&e.response.body)) startRingback(); else stopRingback(); rr() });
+  sess.on('accepted',()=>{ if(callObj!==c) return; stopRingback(); stopRing(); c.state='active'; c.t0=Date.now(); if(c.dir==='in'){ S.logs.recv.unshift({num:c.num,t:Date.now(),dur:0,voip:true}); S.logs.recv=S.logs.recv.slice(0,30); save() } rr() });
+  sess.on('confirmed',()=>{ if(callObj===c&&c.state!=='active'){ c.state='active'; c.t0=Date.now(); rr() } });
+  sess.on('hold',()=>{ if(callObj===c){ c.hold=true; rr() } }); sess.on('unhold',()=>{ if(callObj===c){ c.hold=false; rr() } });
+  sess.on('ended',()=>voipFinish(c,'remote'));
+  sess.on('failed',e=>voipFinish(c,'failed',e&&e.cause,e&&e.originator)) }
+function voipCall(num,name){
+  if(!voip.ready()){ note(voip.state==='connecting'?'VoIP is still connecting':'VoIP account is not connected','warn',1800); return }
+  const c={num,name:name||nameFor(num),dir:'out',state:'calling',voip:true}; callObj=c; audioMode(); push(CallView());
+  try{ c.session=voip.ua.call(voipTarget(num),{mediaConstraints:{audio:true,video:false},rtcOfferConstraints:{offerToReceiveAudio:true,offerToReceiveVideo:false},pcConfig:{iceServers:voipIce()}}); hookSession(c.session,c) }
+  catch(e){ voipFinish(c,'failed','Could not place the call') } }
+function voipIncoming(sess){ if(callObj||S.profile==='flight'||!S.on){ try{ sess.terminate({status_code:486,reason_phrase:'Busy Here'}) }catch(e){} return }
+  const ri=sess.remote_identity, num=(ri&&ri.uri&&(ri.uri.user||String(ri.uri)))||'Unknown', name=(ri&&ri.display_name)||nameFor(num);
+  const c={num,name,dir:'in',state:'ringing',voip:true,session:sess}; callObj=c; hookSession(sess,c);
+  wake(); audioMode(); push(CallView()); startRing('ring') }
+function voipFinish(c,how,cause,origin){ if(c.done) return; c.done=true; stopRing(); stopRingback();
+  if(c.ending) how=c.dir==='in'&&!c.t0?'rejected':'local';
+  try{ voipAudio.srcObject=null }catch(e){}
+  const dur=c.t0?Math.round((Date.now()-c.t0)/1000):0;
+  if(dur){ S.dur.last=dur; if(c.dir==='in'){ S.dur.recv+=dur; if(S.logs.recv[0]&&S.logs.recv[0].num===c.num) S.logs.recv[0].dur=dur } else { S.dur.dialled+=dur; if(S.logs.dialled[0]) S.logs.dialled[0].dur=dur } }
+  if(c.dir==='in'&&!c.t0&&how!=='local'&&how!=='rejected'){ S.logs.missed.unshift({num:c.num,t:Date.now(),seen:false,voip:true}); S.logs.missed=S.logs.missed.slice(0,30) }
+  if(c.dir==='in'&&how==='rejected'){ S.logs.missed.unshift({num:c.num,t:Date.now(),seen:true,voip:true}); S.logs.missed=S.logs.missed.slice(0,30) }
+  save(); if(callObj===c) callObj=null; if(Host&&Host.audioRoute&&c.spk) Host.audioRoute(false).catch(()=>{}); audioMode(true);
+  if(!S.on) return; while(V.length>1&&V.some(v=>v.name==='call')) pop(); render();
+  const why={'Busy':'Number busy','Rejected':'Call rejected','Unavailable':'Not available','Not Found':'Number not found','User Denied Media Access':'Microphone access is off','Address Incomplete':'Number incomplete','Request Timeout':'No answer','No Answer':'No answer','Connection Error':'Network error','Canceled':''}[cause];
+  if(how==='rejected') note('Call rejected','info',900);
+  else if(how==='failed'&&c.dir==='out'&&cause!=='Canceled') note(why||String(cause||'Call failed'),'warn',2000);
+  else if(c.dir==='in'&&!c.t0&&how!=='local'&&how!=='rejected'){ if(tv().name==='standby') Notice('1 missed call',()=>LogList('Missed calls','missed')) }
+  else if(dur&&S.call.summary) note('Call duration '+fmtDur(dur),'info',1800);
+  else if(how!=='failed') note('Call ended','info',900) }
+function voipMute(on){ const c=callObj; if(!c) return; c.mute=on; if(c.voip&&c.session){ try{ on?c.session.mute({audio:true}):c.session.unmute({audio:true}) }catch(e){} } render() }
+function voipHold(on){ const c=callObj; if(!c||!c.voip||!c.session) return; try{ on?c.session.hold():c.session.unhold() }catch(e){} c.hold=on; render() }
+function VoipMenu(){ const v=S.voip; const ed=(key,label,mode,hint)=>push(Editor({mode:mode||'text',noPred:true,lower:mode!=='pass',title:'VoIP account',label,text:mode==='pass'?'':(v[key]||hint||''),done(t){ v[key]=t.trim(); save(); pop(); note('Saved'); if(v.on) voip.start() }}));
+  push(List('VoIP',()=>[
+    {t:'VoIP calls',s:v.on?'On · '+voip.label():'Off',f:()=>Radio('VoIP calls',[[true,'On'],[false,'Off']],()=>!!v.on,x=>{ v.on=x; if(x) voip.start(); else voip.stop() },{after:x=>{ if(x&&!voip.configured()) note('Enter the account details first','info',1800) }})},
+    {t:'SIP address',s:v.uri||'Not set',f:()=>ed('uri','SIP address (user@domain):','text','')},
+    {t:'Password',s:v.pass?'••••••':'Not set',f:()=>ed('pass','Password:','pass')},
+    {t:'WebSocket server',s:v.ws||'Not set',f:()=>ed('ws','Server (wss://…):','text','wss://')},
+    {t:'Display name',s:v.name||'None',f:()=>ed('name','Display name:','text','')},
+    {t:'Authentication user',s:v.auth||'Same as SIP user',f:()=>ed('auth','Authentication user (optional):','text','')},
+    {t:'Make calls with',s:{ask:'Ask each time',voip:'VoIP',phone:'Phone network'}[v.mode||'ask'],f:()=>Radio('Make calls with',[['ask','Ask each time'],['voip','VoIP'],['phone','Phone network']],()=>v.mode||'ask',x=>v.mode=x)},
+    {t:'TURN or STUN server',s:v.ice||'Default',f:()=>menu('TURN or STUN server',[['Server',()=>ed('ice','Server (turn:host:3478):','text','')],['User name',()=>ed('iceUser','User name:','text','')],['Password',()=>ed('icePass','Password:','pass')]])},
+    {t:'About VoIP',f:()=>Info('VoIP','<p>Use any VoIP service or phone system that supports SIP over secure WebSocket (WSS) for WebRTC. Your provider gives you the SIP address, password and WebSocket server.</p><p>Calls ring and can be made while KeyPhone is open. The password is kept on this device and left out of backups.</p>')}
+  ],{name:'voipm',two:true,count:false,tick(){ render() }})) }
 function Notice(text,show){ push({name:'notice',full:true,
   draw(el){ el.style.background='var(--tbg)'; el.innerHTML=`<div class="dlgw"><div class="dlg"><div class="dq">${ico(text.includes('call')?'missed':'msg',18)}</div><p>${esc(text)}</p></div></div>` },
   soft(){ return [{t:''},{t:'Show',f:()=>{pop();show()}},{t:'Exit',f:pop}] } }) }
@@ -1389,7 +1514,7 @@ function LogMenu(){ const io=inLog();
   ['Call duration',()=>Info('Call duration',`<p><span class="lbl">Last call</span>${fmtDur(S.dur.last)}</p>${io?`<p><span class="lbl">Received calls</span>${fmtDur(S.dur.recv)}</p>`:''}<p><span class="lbl">Dialled calls</span>${fmtDur(S.dur.dialled)}</p><p><span class="lbl">All calls</span>${fmtDur(S.dur.recv+S.dur.dialled)}</p>${Host&&Host.platform==='ios'?'':'<p>Durations are measured by the iPhone app. On this device calls are handed to another app.</p>'}`,{L:{t:'Clear',f:()=>askCode(()=>{S.dur={last:0,recv:0,dialled:0};save();pop();note('Timers cleared')})}})]]) }
 function LogList(title,key){ if(key==='missed') { S.logs.missed.forEach(x=>x.seen=true); save() }
   const label=x=>x.num?nameFor(x.num):'Number not shared';
-  push(List(title,()=>S.logs[key].map(x=>({t:label(x),s:fmtStamp(x.t)+(x.dur?' · '+fmtDur(x.dur):''),x,ic:ico(key==='missed'?'missed':key==='recv'?'inc':key==='msgTo'?'msg':'out')})),{two:true,empty:'No numbers',
+  push(List(title,()=>S.logs[key].map(x=>({t:label(x),s:fmtStamp(x.t)+(x.dur?' · '+fmtDur(x.dur):'')+(x.voip?' · VoIP':''),x,ic:ico(key==='missed'?'missed':key==='recv'?'inc':key==='msgTo'?'msg':'out')})),{two:true,empty:'No numbers',
     M:it=>it.x.num?{t:key==='msgTo'?'Send':'Call',f:()=>key==='msgTo'?NewMessage('',it.x.num):callNumber(it.x.num)}:{t:''},
     L:it=>it?{t:'Options',f:()=>menu('Options',[['Time of call',()=>Info('Time',`<p>${esc(fmtStamp(it.x.t))}</p>${it.x.dur?`<p><span class="lbl">Duration</span>${fmtDur(it.x.dur)}</p>`:''}${it.x.num?'':'<p>The iPhone does not share the caller\'s number with apps.</p>'}`)],it.x.num?['Send message',()=>{pop();NewMessage('',it.x.num)}]:null,it.x.num?['Save',()=>{pop();AddContact(it.x.num)}]:null,['Delete',()=>{S.logs[key]=S.logs[key].filter(y=>y!==it.x);save();pop()}]],{nums:false})}:{t:''},
     key(k){ if(k==='CALL'){ const it=this.items()[this.i]; if(it&&it.x.num) callNumber(it.x.num); return true } return false } })) }
@@ -1443,8 +1568,8 @@ function ShortcutsMenu(){ const opts=Object.keys(FEAT).filter(k=>k!=='menu').map
   menu('My shortcuts',[['Left selection key',()=>Radio('Left selection key',opts,()=>S.sc.L,v=>S.sc.L=v)],['Right selection key',()=>Radio('Right selection key',opts,()=>S.sc.R,v=>S.sc.R=v)],
     ['Navigation key',()=>menu('Navigation key',[['Up',()=>Radio('Up',opts,()=>S.sc.U,v=>S.sc.U=v)],['Down',()=>Radio('Down',opts,()=>S.sc.D,v=>S.sc.D=v)],['Left',()=>Radio('Left',opts,()=>S.sc.LT,v=>S.sc.LT=v)],['Right',()=>Radio('Right',opts,()=>S.sc.RT,v=>S.sc.RT=v)]])]]) }
 function SyncMenu(){ menu('Sync and backup',[['Create backup',()=>saveBackup()],['Restore backup',()=>restoreBackup()]]) }
-function CallMenu(){ const c=S.call; menu('Call',[['Speed dialling',()=>OnOff('Speed dialling',c,'speed')],
-  Host&&Host.platform==='ios'?['Call summary',()=>OnOff('Summary after call',c,'summary')]:null,
+function CallMenu(){ const c=S.call; menu('Call',[['VoIP account',()=>VoipMenu()],['Speed dialling',()=>OnOff('Speed dialling',c,'speed')],
+  ['Call summary',()=>OnOff('Summary after call',c,'summary')],
   ['Voice mailbox number',()=>push(Editor({mode:'phone',title:'Voice mailbox',label:'Voice mailbox number:',text:S.vmail,done(t){S.vmail=t;save();pop();note('Saved')}}))]]) }
 function PhoneMenu(){ const p=S.phone; menu('Phone',[
   ['Memory status',()=>MemoryStatus()],
@@ -1546,12 +1671,12 @@ function ImageView(list,i){ push({name:'imgview',hdText(){ return list[i]?list[i
   draw(el){ const it=list[i]; el.innerHTML=`<div class="img" style="background-image:url(${it.i.src})"></div>` },
   soft(){ return [{t:'Options',f:()=>imgOptions(list[i].i)},{t:''},{t:'Back',f:pop}] },
   key(k){ if(k==='LT'||k==='U'){ i=(i-1+list.length)%list.length; render(); return true } if(k==='RT'||k==='D'){ i=(i+1)%list.length; render(); return true } return false } }) }
-function Tones(){ let h=null; const stop=()=>{h&&h.stop();h=null};
+function Tones(){ let h=null; const stop=()=>{h&&h.stop();h=null}; const mine=n=>S.tones.find(x=>x.n===n);
   push(List('Tones',()=>Object.keys(RING).map(n=>({t:n,s:'Ringing tone',n,ic:ico('tone')})).concat(Object.keys(MSGT).map(n=>({t:n,s:'Message tone',n,msg:true,ic:ico('tone')}))),{two:true,onPop:stop,
     M:it=>({t:'Play',f:()=>{stop();h=playSeq(it.msg?MSGT[it.n]:RING[it.n],{vol:volG(Math.max(2,prof().vol))})}}),
-    L:it=>({t:'Options',f:()=>menu('Options',[it.msg?['Set as message tone',()=>{prof().msg=it.n;save();pop();note('Message tone set')}]:['Set as ring tone',()=>{prof().tone=it.n;save();pop();note('Ringing tone set')}]],{nums:false})}),
+    L:it=>({t:'Options',f:()=>menu('Options',[it.msg?['Set as message tone',()=>{prof().msg=it.n;save();pop();note('Message tone set')}]:['Set as ring tone',()=>{prof().tone=it.n;save();pop();note('Ringing tone set')}],!it.msg&&mine(it.n)?['Edit in Composer',()=>{pop();Composer(mine(it.n))}]:null,!it.msg&&mine(it.n)?['Delete',()=>{pop();Ask('Delete '+it.n+'?',()=>{ S.tones=S.tones.filter(x=>x.n!==it.n); delete RING[it.n]; for(const k in S.profiles) if(S.profiles[k].tone===it.n) S.profiles[k].tone='KeyPhone theme'; save(); note('Deleted') })}]:null,['Compose new',()=>{pop();Composer()}]],{nums:false})}),
     R:()=>({t:'Back',f:()=>{stop();pop()}}) })) }
-function MediaMenu(){ menu('Media',[['Camera',()=>CameraApp('photo')],['Video',()=>CameraApp('video')],['Music player',()=>MusicPlayer()],['Radio',()=>RadioApp()],['Recorder',()=>Recorder()],
+function MediaMenu(){ menu('Media',[['Camera',()=>CameraApp('photo')],['Video',()=>CameraApp('video')],['Music player',()=>MusicPlayer()],hasApple()?['Apple Music',()=>AppleLib()]:null,['Spotify',()=>SpotifyMenu()],['Radio',()=>RadioApp()],['Recorder',()=>Recorder()],['Composer',()=>Composer()],
   ['Equaliser',()=>Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})]]) }
 /* ---- camera: live viewfinder on the phone's screen; pictures go to the device's Photos */
 function shutter(){ if(Host&&Host.platform==='ios'&&Host.media) return; // iOS plays the system camera shutter itself
@@ -1716,16 +1841,246 @@ function Tracks(){ push(List('Music files',()=>S.music.map(t=>({t:t.name,s:bytes
     ['Rename',()=>{pop();push(Editor({mode:'text',noPred:true,title:'Rename',text:it.tr.name,done(t){ if(t.trim()) it.tr.name=t.trim(); save(); pop(); note('Saved') }}))}],
     ['Details',()=>{pop();Info('Details',`<p><b>${esc(it.tr.name)}</b></p><p><span class="lbl">Size</span>${bytes(it.tr.size)}</p><p><span class="lbl">Format</span>${esc(it.tr.type||'Audio')}</p><p><span class="lbl">Added</span>${esc(fmtStamp(it.tr.added||Date.now()))}</p>`)}],
     ['Delete',()=>{pop();Ask('Delete '+it.tr.name+'?',()=>{ music.forget(it.tr.id); Blobs.del('mus:'+it.tr.id); S.music=S.music.filter(x=>x!==it.tr); save(); note('Deleted') })}]],{nums:false})}:{t:'Add',f:()=>pickMusic()} })) }
-function MusicPlayer(){ push({name:'music',title:'Music player',
+/* Music sources. Apple Music: on iPhone the library plays inside KeyPhone; on a Mac, KeyPhone drives the Music app.
+   Spotify: sign in with your own Spotify app (Client ID) and KeyPhone plays on your Spotify devices through the Web API;
+   on a Mac it can also drive the Spotify app directly. */
+const XM={now:null,t:0};
+const hasApple=()=>!!(Host&&Host.music);
+const spOn=()=>!!(S.spotify&&S.spotify.refresh);
+const spMac=()=>!!(Host&&Host.platform==='mac'&&Host.music);
+const msrc=()=>{ const v=S.msrc||'files'; if(v==='apple'&&!hasApple()) return 'files'; return v };
+const SRCN={files:'Music files',apple:'Apple Music',spotify:'Spotify'};
+async function xmPoll(art){ const src=msrc(); if(src==='files') return;
+  try{ let n=null;
+    if(src==='apple') n=await Host.music({src:'apple',op:'now',art:!!art});
+    else if(spOn()) n=await spNow();
+    else if(spMac()) n=await Host.music({src:'spotify',op:'now',art:!!art});
+    if(!n) return;
+    const same=XM.now&&n.id&&XM.now.id===n.id;
+    if(!n.art&&same) n.art=XM.now.art;
+    if(n.id&&!same&&!n.art&&!art&&src!=='spotify'){ XM.now=n; XM.t=Date.now(); return xmPoll(true) }
+    XM.now=n; XM.t=Date.now(); rr() }catch(e){ if(src==='spotify'&&spOn()) XM.err=e.message } }
+async function xmCmd(op){ const src=msrc();
+  try{ if(src==='apple') XM.now={...(XM.now||{}),...await Host.music({src:'apple',op})};
+    else if(spOn()) await spCmd(op);
+    else if(spMac()) XM.now={...(XM.now||{}),...await Host.music({src:'spotify',op})};
+    else { note('Sign in to Spotify first','info'); return } XM.t=Date.now() }catch(e){ note(e.message||'Not available','warn',2400) }
+  rr(); setTimeout(()=>xmPoll(op==='next'||op==='prev'),700) }
+window.LarchMusic=n=>{ if(msrc()!=='apple'||!n) return; const same=XM.now&&XM.now.id===n.id; if(!n.art&&same) n.art=XM.now.art; XM.now=n; XM.t=Date.now(); rr() };
+function xmPos(){ const n=XM.now; if(!n||!n.dur) return 0; return Math.min(n.dur,(n.pos||0)+(n.playing?(Date.now()-XM.t)/1000:0)) }
+function MusicSources(){ const opts=[['files','Music files']]; if(hasApple()) opts.push(['apple',Host.platform==='mac'?'Apple Music (Music app)':'Apple Music']); opts.push(['spotify','Spotify']);
+  Radio('Music source',opts,()=>msrc(),v=>{ S.msrc=v; XM.now=null; if(v!=='files'&&music.playing) music.pause() },{after:v=>{ if(v==='spotify'&&!spOn()&&!spMac()) SpotifyMenu(); else { const m=V.find(x=>x.name==='music'); if(m){ render(); m.poll&&m.poll() } } }}) }
+function MusicLibrary(){ const src=msrc(); if(src==='apple') AppleLib(); else if(src==='spotify') SpotifyMenu(); else Tracks() }
+function MusicPlayer(){ if(msrc()!=='files') return ExtPlayer(); push({name:'music',title:'Music player',
   draw(el){ const t=music.cur; const e=music.el; const pr=e.duration?e.currentTime/e.duration*100:0;
     el.innerHTML=t?`<div class="mp${music.playing?' play':''}"><div class="disc"></div><div class="ti">${esc(t.name)}</div><div class="pr"><i style="width:${pr}%"></i></div><div class="tm">${fmtDur(e.currentTime||0).slice(3)} / ${fmtDur(e.duration||0).slice(3)} · Vol ${music.vol}</div></div>`
       :`<div class="empty">${S.music.length?'Press Play to start':'No music files.<br>Press Options › Add music.'}</div>` },
   tick(){ if(music.playing) render() },
-  soft(){ return [{t:'Options',f:()=>menu('Options',[['Track list',()=>{pop();Tracks()}],['Add music',()=>{pop();pickMusic()}],music.cur?['Stop',()=>{music.stop();pop()}]:null,['Equaliser',()=>{pop();Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})}]],{nums:false})},
+  soft(){ return [{t:'Options',f:()=>menu('Options',[['Track list',()=>{pop();Tracks()}],['Add music',()=>{pop();pickMusic()}],['Music source',()=>{pop();pop();MusicSources()}],music.cur?['Stop',()=>{music.stop();pop()}]:null,['Equaliser',()=>{pop();Radio('Equaliser',[['Normal','Normal'],['Pop','Pop'],['Rock','Rock'],['Jazz','Jazz'],['Classic','Classic'],['Bass boost','Bass boost']],()=>S.eq,v=>{S.eq=v;music.applyEq()})}]],{nums:false})},
     {t:music.playing?'Pause':(S.music.length?'Play':''),f:()=>{ if(music.playing) music.pause(); else if(S.music.length) music.play(music.cur||S.music[0]) }},{t:'Back',f:pop}] },
   key(k){ if(k==='LT'){music.step(-1);return true} if(k==='RT'){music.step(1);return true} if(k==='VUP'||k==='U'){music.vol=Math.min(10,music.vol+1);music.el.volume=music.vol/10;render();return true} if(k==='VDN'||k==='D'){music.vol=Math.max(0,music.vol-1);music.el.volume=music.vol/10;render();return true} return false } }) }
+function ExtPlayer(){ let timer=null; const v={name:'music',title:SRCN[msrc()],
+  hdText(){ const n=XM.now; return SRCN[msrc()]+(n&&n.dev?' · '+n.dev:'') },
+  poll(){ xmPoll(!(XM.now&&XM.now.art)) },
+  draw(el){ if(!timer){ this.poll(); timer=setInterval(()=>{ if(tv()===v) xmPoll() },msrc()==='apple'?4000:3000) }
+    const n=XM.now, src=msrc();
+    if(!n||n.none){ el.innerHTML=`<div class="empty">${src==='spotify'&&!spOn()&&!spMac()?'Not signed in to Spotify.<br>Press Options › Spotify.':src==='spotify'?'Nothing playing on Spotify.<br>Press Options › Library.':'Nothing playing.<br>Press Options › Library.'}</div>`; return }
+    const pos=xmPos(), pr=n.dur?pos/n.dur*100:0;
+    el.innerHTML=`<div class="mp xm${n.playing?' play':''}">${n.art?`<div class="art" style="background-image:url('${esc(n.art)}')"></div>`:'<div class="disc"></div>'}<div class="ti">${esc(n.t||'')}</div><div class="ar">${esc([n.s,n.a].filter(Boolean).join(' · '))}</div><div class="pr"><i style="width:${pr}%"></i></div><div class="tm">${mmss(pos)} / ${mmss(n.dur||0)}${n.shuffle?' · Shuffle':''}</div></div>` },
+  tick(){ if(XM.now&&XM.now.playing) render() },
+  soft(){ const n=XM.now, src=msrc(); return [{t:'Options',f:()=>menu('Options',[['Library',()=>{pop();MusicLibrary()}],['Music source',()=>{pop();pop();MusicSources()}],
+      src!=='files'?['Shuffle',()=>{pop();xmCmd('shuffle')}]:null,src==='spotify'&&spOn()?['Devices',()=>{pop();spDevices()}]:null,n&&!n.none?['Stop',()=>{pop();xmCmd(src==='spotify'?'pause':'stop')}]:null],{nums:false})},
+    {t:n&&!n.none?(n.playing?'Pause':'Play'):'Library',f:()=>{ if(!n||n.none) return MusicLibrary(); xmCmd(n.playing?'pause':'play') }},{t:'Back',f:pop}] },
+  key(k){ if(k==='LT'){ xmCmd('prev'); return true } if(k==='RT'){ xmCmd('next'); return true } return false },
+  onPop(){ clearInterval(timer); timer=null } }; push(v) }
+function openPlayer(){ const m=V.find(x=>x.name==='music'); if(m){ while(tv()!==m) pop(); render() } else MusicPlayer() }
+
+/* Apple Music library */
+const AKIND={playlists:'Playlists',artists:'Artists',albums:'Albums',songs:'Songs'};
+function AppleLib(){ if(!hasApple()){ note('Apple Music needs the iPhone or Mac app','info',2000); return }
+  const kinds=Host.platform==='mac'?['playlists','songs']:['playlists','artists','albums','songs'];
+  menu('Apple Music',[['Now playing',()=>{ S.msrc='apple'; save(); pop(); openPlayer() }]].concat(kinds.map(k=>[AKIND[k],()=>AppleList(k)]))) }
+async function AppleList(kind){ note('Loading','wait',20000); let r;
+  try{ r=await Host.music({src:'apple',op:'browse',kind,offset:0,limit:300}) }catch(e){ endNote(); note(e.message||'Music not available','warn',2600); return } endNote();
+  const items=r.items||[]; let total=r.total||items.length, busy=false;
+  const more=async()=>{ if(busy) return; busy=true; note('Loading','wait',20000); try{ const x=await Host.music({src:'apple',op:'browse',kind,offset:items.length,limit:300}); items.push(...(x.items||[])) }catch(e){} busy=false; endNote(); render() };
+  push(List(AKIND[kind],()=>items.map(x=>({t:x.t,s:x.s,x,ic:ico(kind==='songs'?'note':'folder')})).concat(items.length<total?[{t:'More…',more:true}]:[]),{two:true,empty:'Nothing here',
+    M:it=>it.more?{t:'Load',f:more}:{t:kind==='songs'?'Play':'Open',f:()=>kind==='songs'?appleStart('songs','',it.x.i):AppleTracks(kind,it.x.id,it.x.t)},
+    L:it=>it&&!it.more&&kind!=='songs'?{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();appleStart(kind,it.x.id,0)}],['Shuffle play',()=>{pop();appleStart(kind,it.x.id,0,true)}]],{nums:false})}:{t:''} })) }
+async function AppleTracks(kind,id,title){ note('Loading','wait',20000); let r;
+  try{ r=await Host.music({src:'apple',op:'tracks',kind,id}) }catch(e){ endNote(); note(e.message||'Not available','warn'); return } endNote();
+  push(List(title,()=>(r.items||[]).map(x=>({t:x.t,s:x.s,x,ic:ico('note')})),{two:true,empty:'No songs',
+    M:it=>({t:'Play',f:()=>appleStart(kind,id,it.x.i)}),L:()=>({t:'Options',f:()=>menu('Options',[['Play all',()=>{pop();appleStart(kind,id,0)}],['Shuffle play',()=>{pop();appleStart(kind,id,0,true)}]],{nums:false})}) })) }
+async function appleStart(kind,id,index,shuffle){ if(music.playing) music.pause(); if(radioP.playing||radioP.loading) radioP.stop();
+  try{ XM.now=await Host.music({src:'apple',op:'start',kind,id,index:index||0}); XM.t=Date.now(); if(shuffle) await Host.music({src:'apple',op:'shuffle'}) }catch(e){ note(e.message||'Could not play','warn',2400); return }
+  S.msrc='apple'; save(); openPlayer() }
+
+/* Spotify: your own Spotify app's Client ID, PKCE sign-in, Web API playback control (Premium) on your Spotify devices */
+const SP_SCOPES='user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative user-library-read user-read-private';
+function spRedirect(){ return Host&&Host.oauth?'keyphone://spotify':location.origin+location.pathname.replace(/index\.html$/,'') }
+const b64url=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+function saveNow(){ try{ localStorage.setItem('larchK7',JSON.stringify(S)) }catch(e){} if(Host&&Host.persist) Host.persist(JSON.stringify(S)) }
+async function spLogin(){ const cid=(S.spotify.cid||'').trim(); if(!cid){ note('Enter your Spotify Client ID first','info',1800); return }
+  if(!(window.crypto&&crypto.subtle)){ note('Sign-in is not available here','warn'); return }
+  const ver=b64url(crypto.getRandomValues(new Uint8Array(48))), ch=b64url(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(ver))), state=b64url(crypto.getRandomValues(new Uint8Array(12)));
+  const url='https://accounts.spotify.com/authorize?'+new URLSearchParams({client_id:cid,response_type:'code',redirect_uri:spRedirect(),code_challenge_method:'S256',code_challenge:ch,scope:SP_SCOPES,state});
+  if(Host&&Host.oauth){ let cb; try{ cb=await Host.oauth(url,'keyphone') }catch(e){ if(e.message!=='cancelled') note('Spotify sign-in failed','warn'); return }
+    const q=new URL(cb).searchParams; if(q.get('state')!==state||!q.get('code')){ note(q.get('error')==='access_denied'?'Sign-in cancelled':'Spotify sign-in failed','warn'); return }
+    return spToken({grant_type:'authorization_code',code:q.get('code'),redirect_uri:spRedirect(),client_id:cid,code_verifier:ver}) }
+  try{ localStorage.setItem('kpSpotify',JSON.stringify({ver,state})) }catch(e){} saveNow(); location.href=url }
+async function spToken(params){ note('Signing in','wait',20000);
+  try{ const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(params)}); const j=await r.json();
+    if(!r.ok||!j.access_token) throw new Error(j.error_description||j.error||'Sign-in failed');
+    const sp=S.spotify; sp.access=j.access_token; if(j.refresh_token) sp.refresh=j.refresh_token; sp.exp=Date.now()+(j.expires_in||3600)*1000-60000; save();
+    if(params.grant_type==='authorization_code'){ try{ const me=await spApi('/me'); sp.user=me.display_name||me.id; sp.premium=me.product==='premium' }catch(e){} save(); endNote(); note('Signed in to Spotify'+(sp.user?' as '+sp.user:''),'ok',1800); S.msrc='spotify'; render() } else endNote() }
+  catch(e){ endNote(); if(params.grant_type==='refresh_token'){ S.spotify={cid:S.spotify.cid}; save() } note(e.message||'Spotify sign-in failed','warn',2400); throw e } }
+async function spAccess(){ const sp=S.spotify; if(!sp.refresh) throw new Error('Sign in to Spotify first');
+  if(!sp.access||Date.now()>(sp.exp||0)) await spToken({grant_type:'refresh_token',refresh_token:sp.refresh,client_id:sp.cid}); return sp.access }
+async function spApi(path,opt,retry){ opt=opt||{}; const tok=await spAccess();
+  const r=await fetch('https://api.spotify.com/v1'+path,{method:opt.method||'GET',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:opt.body?JSON.stringify(opt.body):undefined});
+  if(r.status===401&&!retry){ S.spotify.exp=0; return spApi(path,opt,true) }
+  if(r.status===204||r.status===202) return null;
+  let j=null; try{ j=await r.json() }catch(e){}
+  if(!r.ok){ const reason=j&&j.error&&j.error.reason; const msg=reason==='PREMIUM_REQUIRED'?'Spotify Premium is needed to control playback':reason==='NO_ACTIVE_DEVICE'?'NO_ACTIVE_DEVICE':(j&&j.error&&j.error.message)||('Spotify error '+r.status); throw new Error(msg) }
+  return j }
+async function spNow(){ const j=await spApi('/me/player?additional_types=episode'); if(!j||!j.item) return {none:true,dev:j&&j.device&&j.device.name};
+  const it=j.item, imgs=(it.album&&it.album.images)||(it.images)||[], img=imgs.slice().sort((a,b)=>(a.width||0)-(b.width||0)).find(x=>(x.width||300)>=200)||imgs[0];
+  return {id:it.id,t:it.name,s:(it.artists||[]).map(a=>a.name).join(', ')||(it.show&&it.show.name)||'',a:it.album?it.album.name:'',dur:(it.duration_ms||0)/1000,pos:(j.progress_ms||0)/1000,playing:!!j.is_playing,art:img&&img.url,dev:j.device&&j.device.name,shuffle:!!j.shuffle_state} }
+async function spCmd(op){ const n=XM.now||{};
+  if(op==='play') await spPlay(null); else if(op==='pause'||op==='stop') await spApi('/me/player/pause',{method:'PUT'});
+  else if(op==='next') await spApi('/me/player/next',{method:'POST'}); else if(op==='prev') await spApi('/me/player/previous',{method:'POST'});
+  else if(op==='shuffle') await spApi('/me/player/shuffle?state='+(!n.shuffle),{method:'PUT'});
+  if(XM.now&&(op==='play'||op==='pause')) XM.now.playing=op==='play' }
+async function spPlay(body){ const dev=S.spotify.dev; const q=dev?'?device_id='+encodeURIComponent(dev):'';
+  try{ await spApi('/me/player/play'+q,{method:'PUT',body:body||undefined}) }
+  catch(e){ if(e.message!=='NO_ACTIVE_DEVICE'&&!/not found/i.test(e.message)) throw e;
+    const d=await spApi('/me/player/devices'); const list=(d&&d.devices)||[]; if(!list.length) throw new Error('Open Spotify on your phone, computer or speaker first');
+    const pick=list.find(x=>x.is_active)||list[0]; S.spotify.dev=pick.id; save(); await spApi('/me/player/play?device_id='+encodeURIComponent(pick.id),{method:'PUT',body:body||undefined}) } }
+async function spStart(body){ if(music.playing) music.pause(); if(radioP.playing||radioP.loading) radioP.stop(); note('Starting','wait',15000);
+  try{ await spPlay(body); endNote(); S.msrc='spotify'; save(); XM.now=null; openPlayer(); setTimeout(()=>xmPoll(true),900) }catch(e){ endNote(); note(e.message,'warn',2600) } }
+function SpotifyMenu(){
+  if(!spOn()) return SpotifySetup();
+  menu('Spotify',[['Now playing',()=>{ S.msrc='spotify'; save(); pop(); openPlayer() }],['Playlists',()=>spPlaylists()],['Liked songs',()=>spTracks('Liked songs','/me/tracks?limit=50',null)],['Search',()=>spSearch()],['Devices',()=>spDevices()],
+    ['Account',()=>Info('Spotify',`<p><span class="lbl">Signed in as</span>${esc(S.spotify.user||'Spotify user')}</p><p><span class="lbl">Plan</span>${S.spotify.premium?'Premium':'Free (playback control needs Premium)'}</p><p>Music plays on your Spotify devices: the Spotify app on this or another device, or a speaker.</p>`,{L:{t:'Sign out',f:()=>{ S.spotify={cid:S.spotify.cid}; if(S.msrc==='spotify') S.msrc='files'; save(); pop(); pop(); note('Signed out of Spotify') }}})]]) }
+function SpotifySetup(){ const sp=S.spotify; const web=/^https?:/.test(location.protocol)&&!/claude|anthropic/.test(location.hostname);
+  push(List('Spotify',()=>[
+    {t:'Client ID',s:sp.cid||'Not set',f:()=>push(Editor({mode:'text',noPred:true,lower:true,title:'Spotify',label:'Client ID:',text:sp.cid||'',done(t){ sp.cid=t.trim(); save(); pop(); note('Saved') }}))},
+    {t:'Sign in with Spotify',s:Host&&Host.oauth||web?'Opens Spotify\'s sign-in page':'Needs the iPhone or Mac app',f:()=>spLogin()},
+    spMac()?{t:'Use the Spotify app on this Mac',s:'Play, pause and skip without signing in',f:()=>{ S.msrc='spotify'; save(); pop(); openPlayer() }}:null,
+    {t:'How to set up',f:()=>Info('Set up Spotify',`<p>1. On developer.spotify.com, open the Dashboard and create an app. Choose Web API.</p><p>2. Add this Redirect URI: ${esc(Host&&Host.oauth?'keyphone://spotify':location.origin+location.pathname.replace(/index\.html$/,''))}</p><p>3. Copy the app's Client ID into KeyPhone and sign in.</p><p>Controlling playback needs Spotify Premium. Music plays through the Spotify app or a Spotify speaker.</p>`,{L:{t:'Open site',f:()=>openExternal('https://developer.spotify.com/dashboard')}})}
+  ].filter(Boolean),{name:'spsetup',two:true,count:false})) }
+async function spList(title,path,map,onPick,opts){ note('Loading','wait',20000); let j;
+  try{ j=await spApi(path) }catch(e){ endNote(); note(e.message,'warn',2400); return } endNote();
+  const items=map(j)||[]; let next=j&&j.next;
+  const more=async()=>{ if(!next) return; note('Loading','wait',20000); try{ const k=await spApi(next.replace('https://api.spotify.com/v1','')); items.push(...(map(k)||[])); next=k&&k.next }catch(e){} endNote(); render() };
+  push(List(title,()=>items.concat(next?[{t:'More…',more:true}]:[]),Object.assign({two:true,empty:'Nothing here',M:it=>it.more?{t:'Load',f:more}:{t:'Play',f:()=>onPick(it)}},opts||{}))) }
+function spPlaylists(){ spList('Playlists','/me/playlists?limit=50',j=>(j.items||[]).filter(Boolean).map(p=>({t:p.name,s:(p.tracks&&p.tracks.total!=null?p.tracks.total+' songs · ':'')+((p.owner&&p.owner.display_name)||''),p,ic:ico('folder')})),
+  it=>spTracks(it.p.name,'/playlists/'+it.p.id+'/tracks?limit=100',it.p.uri),
+  {M:it=>it.more?{t:'Load',f:()=>{}}:{t:'Open',f:()=>spTracks(it.p.name,'/playlists/'+it.p.id+'/tracks?limit=100',it.p.uri)},L:it=>it&&it.p?{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();spStart({context_uri:it.p.uri})}]],{nums:false})}:{t:''}}) }
+function spTracks(title,path,context){ spList(title,path,j=>(j.items||[]).map((x,i)=>x&&x.track?({t:x.track.name,s:(x.track.artists||[]).map(a=>a.name).join(', '),tr:x.track,i,ic:ico('note')}):null).filter(Boolean),
+  it=>spStart(context?{context_uri:context,offset:{uri:it.tr.uri}}:{uris:[it.tr.uri]})) }
+function spSearch(){ push(Editor({mode:'text',title:'Search Spotify',label:'Song, artist or album:',done(t){ pop(); t=t.trim(); if(!t) return;
+  spList('“'+t+'”','/search?type=track&limit=30&q='+encodeURIComponent(t),j=>((j.tracks&&j.tracks.items)||[]).map(x=>({t:x.name,s:(x.artists||[]).map(a=>a.name).join(', '),tr:x,ic:ico('note')})),it=>spStart({uris:[it.tr.uri]})) }})) }
+async function spDevices(){ note('Loading','wait',15000); let d; try{ d=await spApi('/me/player/devices') }catch(e){ endNote(); note(e.message,'warn'); return } endNote();
+  const list=(d&&d.devices)||[]; if(!list.length){ note('No Spotify devices. Open Spotify on a phone, computer or speaker.','info',2600); return }
+  Radio('Play on',list.map(x=>[x.id,x.name+(x.is_active?' (playing)':'')]),()=>S.spotify.dev||(list.find(x=>x.is_active)||{}).id,v=>{ S.spotify.dev=v; spApi('/me/player',{method:'PUT',body:{device_ids:[v],play:!!(XM.now&&XM.now.playing)}}).then(()=>setTimeout(()=>xmPoll(true),800)).catch(e=>note(e.message,'warn')) },{note:'Device chosen'}) }
+// Browser sign-in returns to this page with ?code=…
+(function(){ try{ const q=new URLSearchParams(location.search), code=q.get('code'), st=q.get('state'); if(!code||!st) return;
+  const saved=JSON.parse(localStorage.getItem('kpSpotify')||'null'); localStorage.removeItem('kpSpotify'); history.replaceState(null,'',location.pathname+location.hash);
+  if(saved&&saved.state===st) setTimeout(()=>spToken({grant_type:'authorization_code',code,redirect_uri:spRedirect(),client_id:S.spotify.cid,code_verifier:saved.ver}).catch(()=>{}),1500) }catch(e){} })();
+
 /* ---------------- organiser ---------------- */
-function OrganiserMenu(){ menu('Organiser',[['Alarm clock',()=>AlarmMenu()],['Calendar',()=>Calendar()],['To-do list',()=>TodoList()],['Notes',()=>NotesMenu()],['Calculator',()=>Calculator()],['Countdown timer',()=>TimerMenu()],['Stopwatch',()=>Stopwatch()]]) }
+function OrganiserMenu(){ menu('Organiser',[['Alarm clock',()=>AlarmMenu()],['Calendar',()=>Calendar()],['To-do list',()=>TodoList()],['Notes',()=>NotesMenu()],['Weather',()=>Weather()],['World clock',()=>WorldClock()],['Calculator',()=>Calculator()],['Converter',()=>ConverterMenu()],['Countdown timer',()=>TimerMenu()],['Stopwatch',()=>Stopwatch()],Host&&Host.torch?['Torch',()=>toggleTorch()]:null]) }
+/* torch: the iPhone's camera light */
+let torchOn=false;
+function toggleTorch(){ if(!(Host&&Host.torch)){ note('No torch on this device','info'); return } const on=!torchOn;
+  Host.torch(on).then(()=>{ torchOn=on; render(); note(on?'Torch on':'Torch off','ok',800) }).catch(e=>note(e.message||'Torch not available','warn')) }
+
+/* weather: Open-Meteo forecasts (free, no account), for your location or a chosen town */
+const WX={0:['Clear','sun'],1:['Mostly clear','sun'],2:['Partly cloudy','cloud'],3:['Cloudy','cloud'],45:['Fog','fog'],48:['Fog','fog'],51:['Drizzle','rain'],53:['Drizzle','rain'],55:['Drizzle','rain'],56:['Freezing drizzle','rain'],57:['Freezing drizzle','rain'],61:['Light rain','rain'],63:['Rain','rain'],65:['Heavy rain','rain'],66:['Freezing rain','rain'],67:['Freezing rain','rain'],71:['Light snow','snow'],73:['Snow','snow'],75:['Heavy snow','snow'],77:['Snow grains','snow'],80:['Showers','rain'],81:['Showers','rain'],82:['Heavy showers','rain'],85:['Snow showers','snow'],86:['Snow showers','snow'],95:['Thunderstorm','storm'],96:['Thunderstorm','storm'],99:['Thunderstorm','storm']};
+const wxOf=c=>WX[c]||['—','cloud'];
+let wxBusy=false;
+async function wxRefresh(force){ const w=S.weather; if(!w.place||wxBusy||!dev.online) return; if(!force&&w.t&&Date.now()-w.t<30*60e3) return; wxBusy=true;
+  try{ const u=`https://api.open-meteo.com/v1/forecast?latitude=${w.place.lat}&longitude=${w.place.lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=6${w.unit==='f'?'&temperature_unit=fahrenheit&wind_speed_unit=mph':''}`;
+    const r=await fetch(u); if(!r.ok) throw 0; w.data=await r.json(); w.t=Date.now(); save(); rr() }catch(e){} wxBusy=false }
+function weatherLine(){ const w=S.weather; if(!w||!w.sb||!w.data||!w.data.current) return null; if(Date.now()-(w.t||0)>3*3600e3) return null; const c=w.data.current;
+  return [ico(wxOf(c.weather_code)[1]),Math.round(c.temperature_2m)+'° '+wxOf(c.weather_code)[0]+(w.place.n?' · '+w.place.n:'')] }
+async function wxHere(){ note('Finding your location','wait',20000);
+  try{ let pos;
+    if(Host&&Host.location) pos=await Host.location();
+    else pos=await new Promise((res,rej)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lon:p.coords.longitude,city:''}),()=>rej(new Error('Location not available')),{timeout:15000}):rej(new Error('Location not available')));
+    S.weather.place={n:pos.city||'My location',lat:+pos.lat.toFixed(3),lon:+pos.lon.toFixed(3),mine:true}; S.weather.t=0; save(); endNote(); await wxRefresh(true); render() }
+  catch(e){ endNote(); note(e.message||'Location not available','warn',2400) } }
+function wxCity(){ push(Editor({mode:'text',noPred:true,title:'Weather',label:'Town or city:',done(t){ pop(); t=t.trim(); if(!t) return; note('Searching','wait',15000);
+  fetch('https://geocoding-api.open-meteo.com/v1/search?count=10&language=en&name='+encodeURIComponent(t)).then(r=>r.json()).then(j=>{ endNote(); const res=(j&&j.results)||[]; if(!res.length){ note('No places found','info'); return }
+    push(List('Choose place',res.map(x=>({t:x.name,s:[x.admin1,x.country].filter(Boolean).join(', '),x,ic:ico('globe')})),{two:true,M:it=>({t:'Select',f:()=>{ S.weather.place={n:it.x.name,lat:it.x.latitude,lon:it.x.longitude}; S.weather.t=0; save(); popTo('weather'); wxRefresh(true) }})})) }).catch(()=>{ endNote(); note('Weather service not reachable','warn') }) }})) }
+function Weather(){ wxRefresh(); push({name:'weather',hdText(){ return S.weather.place?S.weather.place.n:'Weather' },hdRight(){ return S.weather.t?fmtTime(new Date(S.weather.t)):'' },
+  draw(el){ const w=S.weather, d=w.data, u=w.unit==='f'?'°F':'°C';
+    if(!w.place){ el.innerHTML=`<div class="empty">No place chosen.<br>Press Options to use your location or choose a town.</div>`; return }
+    if(!d||!d.current){ el.innerHTML=`<div class="empty">${dev.online?'Loading the forecast…':'Connect to the internet to get the forecast'}</div>`; return }
+    const c=d.current, dl=d.daily||{};
+    let h=`<div class="wx"><div class="now">${ico(wxOf(c.weather_code)[1],52)}<div><div class="t">${Math.round(c.temperature_2m)}${u}</div><div class="c">${wxOf(c.weather_code)[0]}</div></div></div><div class="det">Feels ${Math.round(c.apparent_temperature)}° · Wind ${Math.round(c.wind_speed_10m)} ${w.unit==='f'?'mph':'km/h'} · Humidity ${c.relative_humidity_2m}%</div><div class="days">`;
+    (dl.time||[]).slice(0,6).forEach((t,i)=>{ const dd=new Date(t+'T12:00'); h+=`<div><b>${i?DAY[dd.getDay()].slice(0,3):'Today'}</b>${ico(wxOf(dl.weather_code[i])[1],18)}<span>${Math.round(dl.temperature_2m_max[i])}° / ${Math.round(dl.temperature_2m_min[i])}°</span><small>${dl.precipitation_probability_max&&dl.precipitation_probability_max[i]!=null?dl.precipitation_probability_max[i]+'%':''}</small></div>` });
+    el.innerHTML=h+'</div></div>' },
+  soft(){ return [{t:'Options',f:()=>menu('Options',[['Use my location',()=>{pop();wxHere()}],['Choose town',()=>{pop();wxCity()}],['Update now',()=>{pop();wxRefresh(true)}],
+      ['Units',()=>Radio('Units',[['c','Celsius'],['f','Fahrenheit']],()=>S.weather.unit,v=>{ S.weather.unit=v; S.weather.t=0; wxRefresh(true) })],
+      ['Show on standby',()=>OnOff('Weather on standby',S.weather,'sb')]],{nums:false})},{t:''},{t:'Back',f:pop}] } }) }
+
+/* world clock */
+const CITIES=[['Honolulu','Pacific/Honolulu'],['Anchorage','America/Anchorage'],['Los Angeles','America/Los_Angeles'],['Denver','America/Denver'],['Chicago','America/Chicago'],['Mexico City','America/Mexico_City'],['Toronto','America/Toronto'],['New York','America/New_York'],['Halifax','America/Halifax'],['São Paulo','America/Sao_Paulo'],['Buenos Aires','America/Argentina/Buenos_Aires'],['Reykjavík','Atlantic/Reykjavik'],['London','Europe/London'],['Lisbon','Europe/Lisbon'],['Paris','Europe/Paris'],['Berlin','Europe/Berlin'],['Madrid','Europe/Madrid'],['Rome','Europe/Rome'],['Stockholm','Europe/Stockholm'],['Helsinki','Europe/Helsinki'],['Athens','Europe/Athens'],['Istanbul','Europe/Istanbul'],['Cairo','Africa/Cairo'],['Lagos','Africa/Lagos'],['Nairobi','Africa/Nairobi'],['Johannesburg','Africa/Johannesburg'],['Moscow','Europe/Moscow'],['Dubai','Asia/Dubai'],['Karachi','Asia/Karachi'],['Delhi','Asia/Kolkata'],['Kathmandu','Asia/Kathmandu'],['Dhaka','Asia/Dhaka'],['Bangkok','Asia/Bangkok'],['Jakarta','Asia/Jakarta'],['Singapore','Asia/Singapore'],['Hong Kong','Asia/Hong_Kong'],['Beijing','Asia/Shanghai'],['Seoul','Asia/Seoul'],['Tokyo','Asia/Tokyo'],['Perth','Australia/Perth'],['Adelaide','Australia/Adelaide'],['Sydney','Australia/Sydney'],['Auckland','Pacific/Auckland']];
+const cityName=tz=>(CITIES.find(c=>c[1]===tz)||[tz.split('/').pop().replace(/_/g,' ')])[0];
+function zoneTime(tz){ try{ const d=new Date(); const t=new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:!S.clock.h24}).format(d);
+  const day=new Intl.DateTimeFormat('en-GB',{timeZone:tz,weekday:'short'}).format(d), mine=new Intl.DateTimeFormat('en-GB',{weekday:'short'}).format(d);
+  const off=(new Date(d.toLocaleString('en-US',{timeZone:tz}))-new Date(d.toLocaleString('en-US')))/36e5; return {t,s:(day!==mine?day+' · ':'')+(off===0?'Same time':(off>0?'+':'')+(+off.toFixed(2))+' h')} }catch(e){ return {t:'—',s:''} } }
+function WorldClock(){ push(List('World clock',()=>S.wclock.map(tz=>{ const z=zoneTime(tz); return {t:cityName(tz)+'   '+z.t,s:z.s,tz,ic:ico('globe')} }),{two:true,empty:'No cities. Press Add.',Mempty:{t:'Add',f:()=>addCity()},
+  L:it=>({t:'Options',f:()=>menu('Options',[['Add city',()=>{pop();addCity()}],it?['Remove',()=>{ S.wclock=S.wclock.filter(x=>x!==it.tz); save(); pop() }]:null],{nums:false})}),M:()=>({t:''}),tick(){ render() } })) }
+function addCity(){ push(List('Add city',CITIES.filter(c=>!S.wclock.includes(c[1])).map(c=>({t:c[0],s:zoneTime(c[1]).t,tz:c[1]})),{two:true,M:it=>({t:'Add',f:()=>{ S.wclock.push(it.tz); save(); pop(); note('City added') }})})) }
+
+/* converter: units, and currencies at today's European Central Bank rates (Frankfurter) */
+const CONV={
+  Length:{u:{Millimetres:.001,Centimetres:.01,Metres:1,Kilometres:1000,Inches:.0254,Feet:.3048,Yards:.9144,Miles:1609.344},a:'Kilometres',b:'Miles'},
+  Weight:{u:{Grams:1,Kilograms:1000,Ounces:28.349523,Pounds:453.59237,Stones:6350.29318,Tonnes:1e6},a:'Kilograms',b:'Pounds'},
+  Volume:{u:{Millilitres:1,Litres:1000,Teaspoons:4.92892,Tablespoons:14.7868,Cups:236.588,'Fluid ounces':29.5735,Pints:473.176,'US gallons':3785.41,'UK gallons':4546.09},a:'Litres',b:'US gallons'},
+  Temperature:{u:{Celsius:'c',Fahrenheit:'f',Kelvin:'k'},a:'Celsius',b:'Fahrenheit'},
+  Speed:{u:{'km/h':1,'mph':1.609344,'m/s':3.6,'Knots':1.852},a:'km/h',b:'mph'},
+  Area:{u:{'Square metres':1,'Square km':1e6,Hectares:1e4,Acres:4046.86,'Square feet':.092903,'Square miles':2589988},a:'Square metres',b:'Square feet'},
+  Currency:{u:{},a:'USD',b:'EUR'}};
+function ConverterMenu(){ menu('Converter',Object.keys(CONV).map(k=>[k,()=>Converter(k)])) }
+async function fxRates(){ const fx=S.fx||{}; if(fx.t&&Date.now()-fx.t<12*3600e3&&fx.rates) return fx;
+  const r=await fetch('https://api.frankfurter.dev/v1/latest?base=EUR'); if(!r.ok) throw 0; const j=await r.json(); S.fx={rates:{EUR:1,...j.rates},date:j.date,t:Date.now()}; save(); return S.fx }
+function Converter(cat){ const C=CONV[cat]; let units=Object.keys(C.u), a=C.a, b=C.b, val='1', side=0, fx=null;
+  const conv=x=>{ if(cat==='Temperature'){ const c=a==='Celsius'?x:a==='Fahrenheit'?(x-32)*5/9:x-273.15; return b==='Celsius'?c:b==='Fahrenheit'?c*9/5+32:c+273.15 }
+    if(cat==='Currency'){ if(!fx) return NaN; return x/fx.rates[a]*fx.rates[b] } return x*C.u[a]/C.u[b] };
+  const fmt=n=>!isFinite(n)?'—':Math.abs(n)>=1e9||(Math.abs(n)<1e-4&&n!==0)?n.toExponential(4):String(+n.toPrecision(10));
+  const v={name:'conv',title:cat,
+    draw(el){ const out=conv(parseFloat(val)||0);
+      el.innerHTML=`<div class="cvt"><div class="row${side===0?' on':''}" data-r="0"><small>From</small><b>${esc(val)}</b><span>◂ ${esc(a)} ▸</span></div><div class="row${side===1?' on':''}" data-r="1"><small>To</small><b>${esc(fmt(out))}</b><span>◂ ${esc(b)} ▸</span></div><div class="h">${cat==='Currency'?(fx?'Rates of '+esc(fx.date)+' · European Central Bank':dev.online?'Getting today’s rates…':'Connect to the internet for rates'):'0–9 number · # decimal point · ↑↓ switch field'}</div></div>` },
+    soft(){ return [{t:'Options',f:()=>menu('Options',[['Swap units',()=>{ [a,b]=[b,a]; pop() }],['Clear',()=>{ val='0'; pop() }]],{nums:false})},{t:''},{t:val!=='0'?'Clear':'Back',f:()=>{ if(val==='0'){ pop(); return } val=val.slice(0,-1)||'0'; render() }}] },
+    key(k){ if(/^\d$/.test(k)){ val=val==='0'?k:(val.length<12?val+k:val); render(); return true } if(k==='#'){ if(!val.includes('.')) val+='.'; render(); return true }
+      if(k==='U'||k==='D'){ side=1-side; render(); return true }
+      if(k==='LT'||k==='RT'){ const d=k==='RT'?1:-1; if(side===0) a=units[(units.indexOf(a)+d+units.length)%units.length]; else b=units[(units.indexOf(b)+d+units.length)%units.length]; render(); return true } return false } };
+  push(v);
+  if(cat==='Currency') fxRates().then(f=>{ fx=f; units=Object.keys(f.rates).sort(); if(!units.includes(a)) a='USD'; render() }).catch(()=>{ if(tv()===v) note('Exchange rates not reachable','warn') }) }
+
+/* ringtone composer: notes from the keypad, saved as ringing tones */
+function Composer(edit){ const NOTE=['','C','D','E','F','G','A','B']; let notes=edit?edit.seq.split(',').map(x=>x.trim()):[], dur=8, oct=5, h=null; const stop=()=>{ h&&h.stop(); h=null };
+  const show=n=>{ const [p,d]=n.split(' '); return d+(p==='R'?'-':p.toLowerCase()) };
+  push({name:'composer',title:edit?edit.n:'Composer',hdRight(){ return '♩'+dur+' · oct '+oct },
+    draw(el){ el.innerHTML=`<div class="cmp"><div class="nt">${notes.length?notes.map((n,i)=>`<span>${esc(show(n))}</span>`).join(' '):'<i>1–7 notes · 0 rest · 8/9 shorter/longer · * octave · # sharp</i>'}<b class="cr"></b></div></div>` },
+    soft(){ return [{t:'Options',f:()=>menu('Options',[['Play',()=>{pop();stop();if(notes.length) h=playSeq(notes.join(','),{vol:volG(Math.max(2,prof().vol))})}],['Save',()=>{pop();saveTone(notes,edit)}],['Clear all',()=>{ notes=[]; pop() }]],{nums:false})},{t:notes.length?'Play':'',f:()=>{ stop(); if(notes.length) h=playSeq(notes.join(','),{vol:volG(Math.max(2,prof().vol))}) }},{t:notes.length?'Clear':'Back',f:()=>{ if(!notes.length){ stop(); pop(); return } notes.pop(); render() }}] },
+    key(k){ if(/^[1-7]$/.test(k)){ const n=NOTE[+k]+oct+' '+dur; notes.push(n); stop(); h=playSeq(n,{vol:volG(Math.max(2,prof().vol))}); render(); return true }
+      if(k==='0'){ notes.push('R '+dur); render(); return true }
+      if(k==='8'){ dur=Math.min(32,dur*2); render(); return true } if(k==='9'){ dur=Math.max(1,dur/2); render(); return true }
+      if(k==='*'){ oct=oct>=7?4:oct+1; render(); return true }
+      if(k==='#'&&notes.length){ const [p,d]=notes[notes.length-1].split(' '); if(p!=='R'&&!/[EB]/.test(p[0])){ notes[notes.length-1]=(p.includes('#')?p.replace('#',''):p[0]+'#'+p.slice(1))+' '+d; render() } return true }
+      return false },
+    onPop(){ stop() } }) }
+function saveTone(notes,edit){ if(!notes.length){ note('Add some notes first','info'); return }
+  push(Editor({mode:'text',noPred:true,title:'Save tone',label:'Tone name:',text:edit?edit.n:'My tone',max:20,done(t){ t=t.trim(); if(!t) return; pop();
+    const seq=notes.join(','); if(edit&&edit.n!==t) delete RING[edit.n]; S.tones=S.tones.filter(x=>x.n!==t&&(!edit||x.n!==edit.n)); S.tones.push({n:t,seq}); RING[t]=seq; save();
+    Ask('Set '+t+' as ringing tone?',()=>{ prof().tone=t; save(); note('Ringing tone set') }) }})) }
+
+/* ---------------- organiser ---------------- */
 function AlarmMenu(){ const a=S.alarm; push(List('Alarm clock',()=>[
   {t:'Alarm time: '+(a.on?fmtTime(new Date(2000,0,1,a.h,a.m)):'Off'),f:()=>Radio('Alarm',[[true,'On'],[false,'Off']],()=>a.on,v=>a.on=v,{after:v=>{ if(v) TimeEntry('Alarm time',a.h,a.m,(h,m)=>{a.h=h;a.m=m;a.fired='';save();pop();note('Alarm on')}) }})},
   {t:'Repeat alarm: '+(a.rep?'On':'Off'),f:()=>Radio('Repeat alarm',[[true,'On'],[false,'Off']],()=>a.rep,v=>a.rep=v,{after:v=>{ if(v) Checks('Repeat on',[[1,'Monday'],[2,'Tuesday'],[3,'Wednesday'],[4,'Thursday'],[5,'Friday'],[6,'Saturday'],[0,'Sunday']],()=>a.days,x=>a.days=x) }})},
@@ -1796,31 +2151,45 @@ function Stopwatch(){ let t0=0, acc=0, run=false, laps=[], lapStart=0, mode='spl
 
 /* ---------------- applications & games ---------------- */
 function appItems(){ return S.jars.slice().sort((a,b)=>(b.added||0)-(a.added||0)).map(j=>({t:j.name,j,ic:j.icon?`<img src="${j.icon}" alt="">`:ico(j.game?'game':'java')}))
-  .concat([{t:'Snake',snake:true,ic:ico('game')},{t:'Install new',act:()=>pickApps(),ic:ico('folder')},{t:'Install from web',act:()=>installFromWeb(),ic:ico('web')},{t:'Memory',act:()=>appMemory(),ic:ico('doc')}]) }
+  .concat([{t:'Snake',snake:true,ic:ico('game')},{t:'Blocks',act:()=>Blocks(),ic:ico('game')},{t:'Mines',act:()=>Mines(),ic:ico('game')},{t:'Install new',act:()=>pickApps(),ic:ico('folder')},{t:'Install from web',act:()=>installFromWeb(),ic:ico('web')},{t:'Java engine',act:()=>JavaSettings(),ic:ico('settings')},{t:'Memory',act:()=>appMemory(),ic:ico('doc')}]) }
 function appOpen(it){ if(it.j) openJar(it.j); else if(it.snake) SnakeMenu(); else it.act() }
 function AppsMenu(){ push(List('Applications',appItems,{name:'coll',
   M:it=>({t:it.j?'Open':'Select',f:()=>appOpen(it)}), onSel(it){ appOpen(it) },
   L:it=>it&&it.j?{t:'Options',f:()=>appOptions(it.j)}:{t:''} })) }
 function appMemory(){ Info('Memory',`<p><span class="lbl">Installed applications</span>${S.jars.length}</p><p><span class="lbl">Used by applications</span>${bytes(S.jars.reduce((a,j)=>a+(j.size||0),0))}</p><p>Applications are stored on this ${Host&&Host.platform==='ios'?'iPhone':Host&&Host.platform==='mac'?'Mac':'browser'} and stay after the phone is switched off.</p>`) }
 function appOptions(j){ menu('Options',[['Open',()=>{pop();openJar(j)}],
+  ['Run with',()=>{pop();Radio('Run with',[['auto','Automatic'],['lite','Built-in engine (offline)'],['full','Full engine (online)']],()=>j.engine==='full'?'full':j.engine==='lite'?'lite':'auto',v=>{ if(v==='auto') delete j.engine; else j.engine=v },{note:'Saved'})}],
   ['Details',()=>{pop();Info('Details',`<p><b>${esc(j.name)}</b></p><p><span class="lbl">Vendor</span>${esc(j.vendor||'Unknown')}</p><p><span class="lbl">Version</span>${esc(j.ver||'—')}</p><p><span class="lbl">Size</span>${bytes(j.size)}</p><p><span class="lbl">Main class</span>${esc(j.main||'—')}</p><p><span class="lbl">Profile</span>${esc(j.profile||'MIDP-2.0')}</p><p><span class="lbl">Installed</span>${esc(fmtStamp(j.added||Date.now()))}</p>`)}],
   ['Delete',()=>{pop();Ask('Delete '+j.name+'?',()=>{Blobs.del('jar:'+j.id);S.jars=S.jars.filter(x=>x!==j);save();note('Application deleted')})}],
   ['Install new',()=>{pop();pickApps()}],['Install from web',()=>{pop();installFromWeb()}]],{nums:false}) }
 function Collection(){ AppsMenu() }
 const J2ME_URL=(()=>{ if(window.LARCH_J2ME_URL) return window.LARCH_J2ME_URL; try{ if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)) return new URL('../j2me/larch.html',location.href).href }catch(e){} return 'https://harkhowalia-1.github.io/larch-k7/j2me/larch.html' })();
 const JVM=$('#jvm'); let jvmFrame=null, jvmApp=null;
-async function openJar(j){
-  if(!dev.online){ note('Java needs an internet connection','warn',1800); return }
+/* Two Java engines: the built-in one (JS2ME, bundled with the phone, works offline) and the
+   full one (freej2me on CheerpJ, loaded from the internet, runs far more games).
+   Automatic tries built-in first and moves an application to the full engine if it fails there. */
+const LITE_URL=(()=>{ try{ return new URL('j2me-lite/index.html',location.href).href }catch(e){ return '' } })();
+function engineFor(j){ const pref=S.java||'auto'; if(pref==='lite'||pref==='full') return pref; return j.engine==='full'?'full':'lite' }
+function JavaSettings(){ Radio('Java engine',[['auto','Automatic'],['lite','Built-in only (works offline)'],['full','Full only (needs internet)']],()=>S.java||'auto',v=>S.java=v,{note:'Saved'}) }
+async function openJar(j,engine){
+  engine=engine||engineFor(j);
+  if(engine==='full'&&!dev.online){ note(S.java==='full'?'The full Java engine needs an internet connection':'Connect to the internet to run this application','warn',2200); return }
   let buf=null; try{ buf=await Blobs.get('jar:'+j.id) }catch(e){}
   if(!buf){ note('Add this application again to run it','warn',2200); return }
-  push(JavaView(j,buf)) }
-function JavaView(j,buf){ return {name:'java',full:true,noSoft:true,
-  draw(el){ el.style.background='#000'; if(jvmApp!==j.id) mountJava(j,buf) },
+  push(JavaView(j,buf,engine)) }
+function JavaView(j,buf,engine){ return {name:'java',full:true,noSoft:true,
+  draw(el){ el.style.background='#000'; if(jvmApp!==j.id) mountJava(j,buf,engine) },
   onPop(){ unmountJava() } } }
-function mountJava(j,buf){ unmountJava(); jvmApp=j.id;
-  const f=document.createElement('iframe'); f.title=j.name; f.allow='autoplay; fullscreen'; f.src=J2ME_URL; JVM.appendChild(f); jvmFrame=f;
-  f._run={t:'run',id:j.id,name:j.name,jar:buf}; f._heard=false;
-  setTimeout(()=>{ if(jvmFrame===f&&!f._heard){ exitJava(); note('Java could not start. Check the internet connection.','warn',2400) } },20000) }
+function mountJava(j,buf,engine){ unmountJava(); jvmApp=j.id;
+  const f=document.createElement('iframe'); f.title=j.name; f.allow='autoplay; fullscreen'; f.src=engine==='lite'?LITE_URL:J2ME_URL; JVM.appendChild(f); jvmFrame=f;
+  f._run={t:'run',id:j.id,name:j.name,jar:buf}; f._heard=false; f._engine=engine; f._jar=j; f._t0=Date.now();
+  setTimeout(()=>{ if(jvmFrame===f&&!f._heard){ exitJava(); note(engine==='lite'?'Java could not start':'Java could not start. Check the internet connection.','warn',2400) } },engine==='lite'?8000:20000) }
+// The built-in engine reports an application it can't run; Automatic then remembers to use the full engine for it.
+function liteFailed(f,text){ const j=f._jar; exitJava();
+  if((S.java||'auto')==='auto'&&j&&j.engine!=='lite'){ j.engine='full'; save();
+    if(dev.online){ note('Switching to the full Java engine','wait',1500,()=>openJar(j,'full')); return }
+    note('This application needs the full Java engine, which needs an internet connection','warn',2800); return }
+  note(text||'The application closed','warn',2200) }
 function unmountJava(){ if(jvmFrame){ jvmFrame.remove(); jvmFrame=null } jvmApp=null }
 const javaOn=()=>!!jvmFrame&&S.on&&tv()&&tv().name==='java';
 const JKEY={'0':'Digit0','1':'Digit1','2':'Digit2','3':'Digit3','4':'Digit4','5':'Digit5','6':'Digit6','7':'Digit7','8':'Digit8','9':'Digit9','*':'NumpadMultiply','#':'NumpadDivide',U:'ArrowUp',D:'ArrowDown',LT:'ArrowLeft',RT:'ArrowRight',M:'Enter',L:'F1',R:'F2',CALL:'Enter'};
@@ -1829,7 +2198,67 @@ function exitJava(){ const v=tv(); if(v&&v.name==='java') pop() }
 addEventListener('message',e=>{ if(!jvmFrame||e.source!==jvmFrame.contentWindow) return; const m=e.data||{}; jvmFrame._heard=true;
   if(m.t==='ready'&&jvmFrame._run){ const r=jvmFrame._run; jvmFrame._run=null; jvmFrame.contentWindow.postMessage({...r,jar:r.jar.slice(0)},'*') }
   else if(m.t==='exit') exitJava();
-  else if(m.t==='error'){ exitJava(); note(m.text||'The application closed','warn',2200) } });
+  else if(m.t==='error'){ if(jvmFrame._engine==='lite') liteFailed(jvmFrame,m.text); else { exitJava(); note(m.text||'The application closed','warn',2200) } } });
+/* Blocks: falling-block puzzle. 4/6 or ◂ ▸ move, 2/5 or ▴ rotate, 8 or ▾ drop faster, 0 drops. */
+function Blocks(){ const W=10,H=18,C=14,OX=8,OY=4; const SH=[[[0,0],[1,0],[2,0],[3,0]],[[0,0],[1,0],[0,1],[1,1]],[[0,0],[1,0],[2,0],[1,1]],[[0,0],[1,0],[2,0],[0,1]],[[0,0],[1,0],[2,0],[2,1]],[[1,0],[2,0],[0,1],[1,1]],[[0,0],[1,0],[1,1],[2,1]]];
+  const COL=['#3fc1d9','#f0c419','#a35ad8','#3d6fd8','#f08a24','#43b84a','#e0443e'];
+  let grid,cur,next,score,lines,level,dead,paused,timer;
+  const rnd=()=>{ const i=Math.floor(Math.random()*7); return {i,c:SH[i].map(p=>p.slice()),x:3,y:0} };
+  const fits=(c,x,y)=>c.every(([a,b])=>{ const X=a+x,Y=b+y; return X>=0&&X<W&&Y<H&&(Y<0||!grid[Y][X]) });
+  const rot=c=>{ if(cur.i===1) return c; const r=c.map(([a,b])=>[1-b,a]); const mx=Math.min(...r.map(p=>p[0])), my=Math.min(...r.map(p=>p[1])); return r.map(([a,b])=>[a-mx,b-my]) };
+  const reset=()=>{ grid=Array.from({length:H},()=>Array(W).fill(0)); cur=rnd(); next=rnd(); score=0; lines=0; level=1; dead=false; paused=false; clearInterval(timer); timer=setInterval(fall,Math.max(90,620-level*55)) };
+  const lock=()=>{ cur.c.forEach(([a,b])=>{ if(b+cur.y>=0) grid[b+cur.y][a+cur.x]=cur.i+1 });
+    let n=0; for(let y=H-1;y>=0;y--){ if(grid[y].every(Boolean)){ grid.splice(y,1); grid.unshift(Array(W).fill(0)); n++; y++ } }
+    if(n){ lines+=n; score+=[0,40,100,300,1200][n]*level; const lv=1+Math.floor(lines/10); if(lv!==level){ level=lv; clearInterval(timer); timer=setInterval(fall,Math.max(90,620-level*55)) } beep([1100+n*200],.08,.05,'square') }
+    cur=next; next=rnd(); if(!fits(cur.c,cur.x,cur.y)){ dead=true; clearInterval(timer); if(score>S.games.blocks){ S.games.blocks=score; save() } beep([220],.3,.06,'square') } };
+  function fall(){ if(paused||dead||tv()!==v) return; if(fits(cur.c,cur.x,cur.y+1)) cur.y++; else lock(); paint() }
+  function paint(){ const cv=SCR.querySelector('canvas'); if(!cv) return; const x=cv.getContext('2d'); const st=getComputedStyle($('#lcd'));
+    x.fillStyle=st.getPropertyValue('--tsolid')||'#eee'; x.fillRect(0,0,240,262); x.fillStyle='rgba(0,0,0,.82)'; x.fillRect(OX-2,OY-2,W*C+4,H*C+4); x.fillStyle='#14171b'; x.fillRect(OX,OY,W*C,H*C);
+    const cell=(gx,gy,col,ox,oy)=>{ x.fillStyle=col; x.fillRect((ox||OX)+gx*C+1,(oy||OY)+gy*C+1,C-2,C-2); x.fillStyle='rgba(255,255,255,.28)'; x.fillRect((ox||OX)+gx*C+1,(oy||OY)+gy*C+1,C-2,3) };
+    grid.forEach((r,y)=>r.forEach((q,X)=>{ if(q) cell(X,y,COL[q-1]) }));
+    let gy=cur.y; while(fits(cur.c,cur.x,gy+1)) gy++; cur.c.forEach(([a,b])=>{ x.strokeStyle='rgba(255,255,255,.25)'; x.strokeRect(OX+(a+cur.x)*C+1.5,OY+(b+gy)*C+1.5,C-3,C-3) });
+    cur.c.forEach(([a,b])=>{ if(b+cur.y>=0) cell(a+cur.x,b+cur.y,COL[cur.i]) });
+    const fg=st.getPropertyValue('--tfg')||'#111'; x.fillStyle=fg; x.font='600 12px sans-serif'; x.textAlign='left';
+    const px=OX+W*C+12; x.fillText('Next',px,20); next.c.forEach(([a,b])=>cell(a,b,COL[next.i],px,28));
+    [['Score',score],['Lines',lines],['Level',level],['Best',S.games.blocks]].forEach(([k,val],i)=>{ x.globalAlpha=.7; x.fillText(k,px,100+i*38); x.globalAlpha=1; x.font='700 15px sans-serif'; x.fillText(String(val),px,117+i*38); x.font='600 12px sans-serif' });
+    if(dead||paused){ x.fillStyle='rgba(0,0,0,.72)'; x.fillRect(OX,110,W*C,46); x.fillStyle='#fff'; x.font='700 15px sans-serif'; x.textAlign='center'; x.fillText(dead?'Game over':'Paused',OX+W*C/2,138) } }
+  const move=(dx,dy)=>{ if(fits(cur.c,cur.x+dx,cur.y+dy)){ cur.x+=dx; cur.y+=dy; return true } return false };
+  const v={name:'blocks',title:'Blocks',hdRight(){ return String(score) },
+    draw(el){ el.innerHTML='<canvas class="cv" width="240" height="262"></canvas>'; hiDPI(el.firstChild,240,262); paint() },
+    soft(){ return dead?[{t:''},{t:'Again',f:()=>{reset();render()}},{t:'Back',f:pop}]:[{t:''},{t:paused?'Continue':'Pause',f:()=>{paused=!paused;paint();render()}},{t:'Back',f:pop}] },
+    instant(k){ if(dead||paused) return false;
+      if(k==='LT'||k==='4'){ move(-1,0); paint(); return true } if(k==='RT'||k==='6'){ move(1,0); paint(); return true }
+      if(k==='D'||k==='8'){ if(!move(0,1)) lock(); score+=1; paint(); return true }
+      if(k==='U'||k==='2'||k==='5'){ const r=rot(cur.c); for(const dx of [0,-1,1,-2,2]) if(fits(r,cur.x+dx,cur.y)){ cur.c=r; cur.x+=dx; break } paint(); return true }
+      if(k==='0'||k==='M'){ while(move(0,1)) score+=2; lock(); paint(); return true } return false },
+    onPop(){ clearInterval(timer) } };
+  reset(); push(v) }
+/* Mines: clear the field without hitting a mine. Move with the navigation key or 2/4/6/8, 5 opens, 0 or # flags. */
+function Mines(){ const W=9,H=10,N=12,C=24,OX=12,OY=8; let g,open,flag,cx,cy,started,dead,won,t0,tm;
+  const reset=()=>{ g=Array(W*H).fill(0); open=Array(W*H).fill(false); flag=Array(W*H).fill(false); cx=4; cy=4; started=false; dead=false; won=false; t0=0; clearInterval(tm) };
+  const nb=i=>{ const x=i%W,y=Math.floor(i/W),out=[]; for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const X=x+dx,Y=y+dy; if((dx||dy)&&X>=0&&X<W&&Y>=0&&Y<H) out.push(Y*W+X) } return out };
+  const plant=safe=>{ let k=0; const avoid=new Set([safe,...nb(safe)]); while(k<N){ const i=Math.floor(Math.random()*W*H); if(g[i]!==-1&&!avoid.has(i)){ g[i]=-1; k++ } } for(let i=0;i<W*H;i++) if(g[i]!==-1) g[i]=nb(i).filter(j=>g[j]===-1).length };
+  const reveal=i=>{ if(open[i]||flag[i]) return; open[i]=true; if(g[i]===0) nb(i).forEach(reveal) };
+  const elapsed=()=>t0?Math.floor((Date.now()-t0)/1000):0;
+  const poke=()=>{ const i=cy*W+cx; if(dead||won||flag[i]) return; if(!started){ started=true; plant(i); t0=Date.now(); tm=setInterval(()=>{ if(tv()===v) paint() },1000) }
+    if(g[i]===-1){ dead=true; clearInterval(tm); open=open.map((o,j)=>o||g[j]===-1); beep([200],.35,.06,'square') } else { reveal(i); beep([900],.03,.03,'square') }
+    if(!dead&&open.filter(Boolean).length===W*H-N){ won=true; clearInterval(tm); const t=elapsed(); if(!S.games.mines||t<S.games.mines){ S.games.mines=t; save() } beep([1200,1500],.15,.05,'square') } paint() };
+  const NC=['','#2f6fd8','#2f9a4a','#d33b2f','#6b3fb8','#9a2a1a','#1f8a8a','#222','#777'];
+  function paint(){ const cv=SCR.querySelector('canvas'); if(!cv) return; const x=cv.getContext('2d'); const st=getComputedStyle($('#lcd'));
+    x.fillStyle=st.getPropertyValue('--tsolid')||'#eee'; x.fillRect(0,0,240,262);
+    for(let y=0;y<H;y++) for(let X=0;X<W;X++){ const i=y*W+X, px=OX+X*C, py=OY+y*C;
+      if(open[i]){ x.fillStyle=g[i]===-1?'#d33b2f':'#dfe3e8'; x.fillRect(px,py,C-1,C-1); if(g[i]===-1){ x.fillStyle='#111'; x.beginPath(); x.arc(px+C/2-.5,py+C/2-.5,6,0,7); x.fill() } else if(g[i]){ x.fillStyle=NC[g[i]]; x.font='700 14px sans-serif'; x.textAlign='center'; x.fillText(String(g[i]),px+C/2-.5,py+C/2+4.5) } }
+      else { const gr=x.createLinearGradient(0,py,0,py+C); gr.addColorStop(0,'#9aa6b4'); gr.addColorStop(1,'#6d7887'); x.fillStyle=gr; x.fillRect(px,py,C-1,C-1); if(flag[i]){ x.fillStyle='#d33b2f'; x.beginPath(); x.moveTo(px+9,py+5); x.lineTo(px+17,py+9); x.lineTo(px+9,py+13); x.fill(); x.fillStyle='#111'; x.fillRect(px+8,py+5,1.5,14) } }
+      if(X===cx&&y===cy&&!dead&&!won){ x.strokeStyle='#f0a020'; x.lineWidth=2.5; x.strokeRect(px+1,py+1,C-3,C-3) } }
+    x.fillStyle=st.getPropertyValue('--tfg')||'#111'; x.font='600 12px sans-serif'; x.textAlign='left'; x.fillText('Mines '+(N-flag.filter(Boolean).length),OX,OY+H*C+14); x.textAlign='right'; x.fillText('Time '+elapsed()+'s'+(S.games.mines?' · Best '+S.games.mines+'s':''),OX+W*C-1,OY+H*C+14);
+    if(dead||won){ x.fillStyle='rgba(0,0,0,.72)'; x.fillRect(OX,96,W*C-1,44); x.fillStyle='#fff'; x.font='700 15px sans-serif'; x.textAlign='center'; x.fillText(won?'Cleared in '+elapsed()+'s':'Boom!',OX+W*C/2,123) } }
+  const v={name:'mines',title:'Mines',
+    draw(el){ el.innerHTML='<canvas class="cv" width="240" height="262"></canvas>'; hiDPI(el.firstChild,240,262); paint() },
+    soft(){ return dead||won?[{t:''},{t:'Again',f:()=>{reset();render()}},{t:'Back',f:pop}]:[{t:'Flag',f:()=>{ const i=cy*W+cx; if(!open[i]){ flag[i]=!flag[i]; paint() } }},{t:'Open',f:poke},{t:'Back',f:pop}] },
+    instant(k){ if(dead||won) return false; const m={U:[0,-1],'2':[0,-1],D:[0,1],'8':[0,1],LT:[-1,0],'4':[-1,0],RT:[1,0],'6':[1,0]}[k];
+      if(m){ cx=(cx+m[0]+W)%W; cy=(cy+m[1]+H)%H; paint(); return true } if(k==='5'){ poke(); return true } if(k==='0'||k==='#'){ const i=cy*W+cx; if(!open[i]){ flag[i]=!flag[i]; paint() } return true } return false },
+    onPop(){ clearInterval(tm) } };
+  reset(); push(v) }
 function SnakeMenu(){ menu('Snake',[['New game',()=>Snake()],['Level',()=>Radio('Level',[1,2,3,4,5,6,7,8,9].map(n=>[n,'Level '+n]),()=>S.snake.lvl,v=>S.snake.lvl=v)],['Top score',()=>Info('Top score',`<p style="font-size:28px">${S.snake.best}</p>`)],['Instructions',()=>Info('Instructions','<p>Steer with the navigation key or 2, 4, 6 and 8. Eat food to grow. Avoid the walls and your own tail. Press 5 or the middle key to pause.</p>')]]) }
 function Snake(){ const W=20,H=21,C=12; let sn,dir,nd,food,score,dead,paused,timer;
   const reset=()=>{ sn=[{x:6,y:10},{x:5,y:10},{x:4,y:10}]; dir={x:1,y:0}; nd=dir; food=spawn(); score=0; dead=false; paused=false; clearInterval(timer); timer=setInterval(step,300-S.snake.lvl*26) };
@@ -2027,18 +2456,20 @@ function EmulatorMenu(){ menu('KeyPhone settings',[
   ['Add music',()=>pickMusic()],
   ['Install application',()=>pickApps()],
   ['Backup',()=>menu('Backup',[['Create backup',()=>saveBackup()],['Restore backup',()=>restoreBackup()]])],
+  ['Accounts',()=>menu('Accounts',[['VoIP',()=>VoipMenu()],['Spotify',()=>spOn()?SpotifyMenu():SpotifySetup()],hasApple()?['Apple Music',()=>AppleLib()]:null])],
+  ['Java engine',()=>JavaSettings()],
   ['Phone model',()=>ModelMenu()],
   ['Phone colours',()=>SkinMenu()],
   ['Keypad light',()=>KeyLightMenu()],
   FULL?['Display size',()=>Radio('Display size',[[false,'Phone size'],[true,'Whole screen']],()=>!!S.fill,v=>{ S.fill=v; fit(); syncOverlays() })]:null,
-  ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this device'}</p><p><span class="lbl">Connection</span>${!dev.online?'Offline':({wifi:'Wi-Fi',cellular:'Cellular',wired:'Wired'}[dev.net]||'Online')}</p><p><span class="lbl">Signal strength</span>${dev.sig!=null?dev.sig+' of 5 bars':'Not reported by this device'}</p>`)],
+  ['Device status',()=>Info('Device status',`<p><span class="lbl">Battery</span>${dev.level!=null?Math.round(dev.level*100)+'%'+(dev.charging?', charging':''):'Not reported by this device'}</p><p><span class="lbl">Connection</span>${!dev.online?'Offline':({wifi:'Wi-Fi',cellular:'Cellular',wired:'Wired'}[dev.net]||'Online')}</p><p><span class="lbl">Signal strength</span>${dev.sig!=null?dev.sig+' of 5 bars':'Not reported by this device'}</p><p><span class="lbl">VoIP</span>${esc(voip.label())}</p>`)],
   Host&&Host.platform==='ios'?null:['Keyboard shortcuts',()=>Info('Keyboard shortcuts','<p><span class="lbl">Keypad</span>0–9, * and #</p><p><span class="lbl">Navigation key</span>Arrow keys</p><p><span class="lbl">Middle select key</span>Enter</p><p><span class="lbl">Left / right selection keys</span>[ and ]</p><p><span class="lbl">Clear / Back</span>Backspace</p><p><span class="lbl">Call key</span>=</p><p><span class="lbl">End key</span>Esc (hold to switch off or on)</p><p><span class="lbl">KeyPhone settings</span>\\ (backslash), or the three-line key above the screen</p><p><span class="lbl">Text fields</span>Type letters directly, or paste with ⌘V</p>')],
   ['About',()=>Info('About',`<p><b>KeyPhone</b> ${esc(window.LARCH_VERSION||'')}</p><p>Series 40–style phone shell.</p><p>Contacts, messages, settings and files are stored on this device.</p>`)]
 ],{name:'emu'}) }
 
 function pickFiles(){ try{ $('#fin').click() }catch(e){ note('Could not open files','warn') } }
 function backupName(){ const d=now(); return 'KeyPhone backup '+d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'.json' }
-async function saveBackup(){ const txt=JSON.stringify(S), name=backupName();
+async function saveBackup(){ const B=JSON.parse(JSON.stringify(S)); if(B.voip){ B.voip.pass=''; B.voip.icePass='' } if(B.spotify) B.spotify={cid:B.spotify.cid||''}; const txt=JSON.stringify(B), name=backupName();
   if(Host&&Host.saveFile){ try{ const r=await Host.saveFile(name,txt); if(r) note('Backup saved','ok',1600) }catch(e){ note('The backup was not saved','warn') } return }
   let dl=null; try{ if(window.claude&&window.claude.use) dl=await window.claude.use('downloads') }catch(e){}
   if(dl){ try{ await dl.save({filename:name,data:txt}); note('Backup saved','ok',1600) }catch(e){ if(!e||e.code!=='declined') note('The backup was not saved','warn') } return }
@@ -2151,5 +2582,7 @@ addEventListener('resize',()=>{ fit(); syncOverlays() }); fit(); setTimeout(sync
 
 /* ---------------- start ---------------- */
 applyModel(); applySkin(); applyTheme(); readNet(); refreshContacts(); audioMode(true);
+if(S.voip&&S.voip.on) setTimeout(()=>voip.start(),1200);
+addEventListener('online',()=>{ if(S.voip&&S.voip.on&&!voip.ready()) setTimeout(()=>voip.start(),1500) });
 if(S.on){ S.on=false; powerOn() } else render();
 </script>

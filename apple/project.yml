@@ -37,7 +37,9 @@ targets:
         NSCameraUsageDescription: KeyPhone uses the camera to take photos for its Gallery.
         NSPhotoLibraryUsageDescription: KeyPhone's Gallery shows your photos and videos, and its camera saves pictures to your library.
         NSPhotoLibraryAddUsageDescription: Photos and videos taken with KeyPhone's camera are saved to your library.
-        NSMicrophoneUsageDescription: KeyPhone's Recorder and video camera record sound with the microphone.
+        NSMicrophoneUsageDescription: KeyPhone uses the microphone for VoIP calls, the Recorder and video.
+        NSAppleMusicUsageDescription: KeyPhone's music player plays the songs in your music library.
+        NSLocationWhenInUseUsageDescription: KeyPhone shows the weather where you are.
         UIBackgroundModes:
           - audio
         NSAppTransportSecurity:
@@ -72,8 +74,11 @@ targets:
         LSApplicationCategoryType: public.app-category.utilities
         NSContactsUsageDescription: KeyPhone shows and edits your Mac contacts in the phone's Names list.
         NSCameraUsageDescription: KeyPhone's camera uses your Mac's camera.
-        NSMicrophoneUsageDescription: KeyPhone's Recorder and video camera record sound with the microphone.
+        NSMicrophoneUsageDescription: KeyPhone uses the microphone for VoIP calls, the Recorder and video.
         NSPhotoLibraryUsageDescription: KeyPhone's Gallery shows your photos and videos, and its camera saves pictures to your library.
+        NSAppleEventsUsageDescription: KeyPhone's music player controls the Music and Spotify apps.
+        NSLocationUsageDescription: KeyPhone shows the weather where you are.
+        NSLocationWhenInUseUsageDescription: KeyPhone shows the weather where you are.
         NSHumanReadableCopyright: KeyPhone
         NSAppTransportSecurity:
           NSAllowsArbitraryLoadsInWebContent: true

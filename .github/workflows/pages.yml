@@ -31,6 +31,8 @@ jobs:
           cp -R site/. _site/
           sh apple/make_web.sh
           cp apple/Web/index.html _site/play/index.html
+          cp -R apple/Web/j2me-lite _site/play/j2me-lite
+          cp -R apple/Web/voip _site/play/voip
           sed -i "s#__REPO__#${GITHUB_REPOSITORY}#g" _site/index.html
           touch _site/.nojekyll
 
