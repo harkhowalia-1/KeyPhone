@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Larch K7 Java</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#display{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);image-rendering:pixelated;display:none;outline:none;touch-action:none;-webkit-user-select:none;user-select:none}
+#msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#cfd8e3;font:14px -apple-system,"Helvetica Neue",Arial,sans-serif;text-align:center;padding:16px}
+#msg i{width:26px;height:26px;border-radius:50%;border:3px solid #3a4655;border-top-color:#7fb2ee;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<canvas id="display" tabindex="0"></canvas>
+<div id="msg"><i></i><span id="msgt">Starting Java…</span></div>
+<script src="https://cjrtnc.leaningtech.com/20260317_2978/loader.js"></script>
+<script type="module" src="src/larch.js"></script>
+</body>
+</html>

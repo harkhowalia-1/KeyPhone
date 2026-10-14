@@ -22,6 +22,7 @@ final class HostBridge: BridgeBase {
     private var cameraReply: Int?
     private var dialledFromPhone = false
     private var callStart: Date?
+    private var overlay: WKWebView?
 
     init(webView: WKWebView, presenter: UIViewController) {
         self.presenter = presenter
@@ -63,6 +64,7 @@ final class HostBridge: BridgeBase {
         case "camera": camera(id)
         case "openUrl": openUrl(id, args["url"] as? String ?? "")
         case "haptic": haptic(id, args["kind"] as? String ?? "light")
+        case "web": web(id, args)
         default: return false
         }
         return true
@@ -130,6 +132,51 @@ final class HostBridge: BridgeBase {
         } else {
             tap.impactOccurred()
             tap.prepare()
+        }
+        reply(id, true)
+    }
+
+    // MARK: web pages shown on the phone's own screen
+
+    private func makeOverlay() -> WKWebView {
+        let config = WKWebViewConfiguration()
+        config.allowsInlineMediaPlayback = true
+        let view = WKWebView(frame: .zero, configuration: config)
+        view.customUserAgent = BridgeBase.mobileUserAgent
+        view.pageZoom = 0.8
+        view.allowsBackForwardNavigationGestures = true
+        view.backgroundColor = .white
+        view.navigationDelegate = self
+        view.uiDelegate = self
+        webView?.addSubview(view)
+        overlay = view
+        return view
+    }
+
+    private func web(_ id: Int, _ a: [String: Any]) {
+        switch a["op"] as? String ?? "" {
+        case "show":
+            let view = overlay ?? makeOverlay()
+            if let r = a["rect"] as? [String: Any] {
+                let n = { (k: String) in CGFloat((r[k] as? NSNumber)?.doubleValue ?? 0) }
+                view.frame = CGRect(x: n("x"), y: n("y"), width: n("w"), height: n("h"))
+            }
+            view.isHidden = false
+            if let s = a["url"] as? String, let url = URL(string: s) { view.load(URLRequest(url: url)) }
+        case "load":
+            if let s = a["url"] as? String, let url = URL(string: s) { (overlay ?? makeOverlay()).load(URLRequest(url: url)) }
+        case "hide": overlay?.isHidden = true
+        case "close":
+            overlay?.stopLoading()
+            overlay?.removeFromSuperview()
+            overlay = nil
+        case "back": overlay?.goBack()
+        case "forward": overlay?.goForward()
+        case "reload": overlay?.reload()
+        case "scroll":
+            let dy = (a["dy"] as? NSNumber)?.doubleValue ?? 0
+            overlay?.evaluateJavaScript("window.scrollBy({top:\(dy),behavior:'smooth'})")
+        default: break
         }
         reply(id, true)
     }
@@ -224,5 +271,29 @@ extension HostBridge: UIImagePickerControllerDelegate, UINavigationControllerDel
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
         if let id = cameraReply { cameraReply = nil; reply(id, nil) }
+    }
+}
+
+extension HostBridge: WKNavigationDelegate, WKUIDelegate {
+    func webView(_ view: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) { webState(view) }
+    func webView(_ view: WKWebView, didCommit navigation: WKNavigation!) { webState(view) }
+    func webView(_ view: WKWebView, didFinish navigation: WKNavigation!) { webState(view) }
+    func webView(_ view: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { webState(view) }
+    func webView(_ view: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { webState(view) }
+
+    func webView(_ view: WKWebView, decidePolicyFor action: WKNavigationAction,
+                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if let url = action.request.url, let scheme = url.scheme?.lowercased(),
+           !["http", "https", "about", "data", "blob"].contains(scheme) {
+            UIApplication.shared.open(url)   // tel:, mailto:, maps and so on
+            return decisionHandler(.cancel)
+        }
+        decisionHandler(.allow)
+    }
+
+    func webView(_ view: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
+                 for action: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        if action.targetFrame == nil { view.load(action.request) }
+        return nil
     }
 }

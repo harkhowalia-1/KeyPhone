@@ -12,6 +12,7 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
 
     private let pathMonitor = NWPathMonitor()
     private var statusTimer: Timer?
+    private var overlay: WKWebView?
 
     override init() {
         super.init()
@@ -67,6 +68,7 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
                 NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
             }
             reply(id, true)
+        case "web": web(id, args)
         default: return false
         }
         return true
@@ -137,9 +139,70 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
         reply(id, NSWorkspace.shared.open(url))
     }
 
+    // MARK: web pages shown on the phone's own screen
+
+    private func makeOverlay() -> WKWebView {
+        let view = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
+        view.customUserAgent = BridgeBase.mobileUserAgent
+        view.pageZoom = 0.8
+        view.allowsBackForwardNavigationGestures = true
+        view.navigationDelegate = self
+        view.uiDelegate = self
+        webView?.addSubview(view)
+        overlay = view
+        return view
+    }
+
+    private func web(_ id: Int, _ a: [String: Any]) {
+        switch a["op"] as? String ?? "" {
+        case "show":
+            let view = overlay ?? makeOverlay()
+            if let r = a["rect"] as? [String: Any], let host = webView {
+                let n = { (k: String) in CGFloat((r[k] as? NSNumber)?.doubleValue ?? 0) }
+                let y = host.isFlipped ? n("y") : host.bounds.height - n("y") - n("h")
+                view.frame = NSRect(x: n("x"), y: y, width: n("w"), height: n("h"))
+            }
+            view.isHidden = false
+            if let s = a["url"] as? String, let url = URL(string: s) { view.load(URLRequest(url: url)) }
+        case "load":
+            if let s = a["url"] as? String, let url = URL(string: s) { (overlay ?? makeOverlay()).load(URLRequest(url: url)) }
+        case "hide": overlay?.isHidden = true
+        case "close":
+            overlay?.stopLoading()
+            overlay?.removeFromSuperview()
+            overlay = nil
+            webView?.window?.makeFirstResponder(webView)
+        case "back": overlay?.goBack()
+        case "forward": overlay?.goForward()
+        case "reload": overlay?.reload()
+        case "scroll":
+            let dy = (a["dy"] as? NSNumber)?.doubleValue ?? 0
+            overlay?.evaluateJavaScript("window.scrollBy({top:\(dy),behavior:'smooth'})")
+        default: break
+        }
+        reply(id, true)
+    }
+
     // MARK: WKNavigationDelegate
 
+    func webView(_ view: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        if view === overlay { webState(view) }
+    }
+
+    func webView(_ view: WKWebView, didCommit navigation: WKNavigation!) {
+        if view === overlay { webState(view) }
+    }
+
+    func webView(_ view: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        if view === overlay { webState(view) }
+    }
+
+    func webView(_ view: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        if view === overlay { webState(view) }
+    }
+
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        if webView === overlay { return webState(webView) }
         pushStatus()
         webView.window?.makeFirstResponder(webView)
     }
@@ -147,10 +210,17 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         guard let url = action.request.url else { return decisionHandler(.allow) }
+        if webView === overlay {
+            if let scheme = url.scheme?.lowercased(), !["http", "https", "about", "data", "blob"].contains(scheme) {
+                NSWorkspace.shared.open(url)   // tel:, mailto: and so on
+                return decisionHandler(.cancel)
+            }
+            return decisionHandler(.allow)
+        }
         if url.isFileURL || url.scheme == "about" || url.scheme == "data" || url.scheme == "blob" {
             return decisionHandler(.allow)
         }
-        if action.navigationType == .linkActivated || action.targetFrame == nil {
+        if action.targetFrame == nil || (action.navigationType == .linkActivated && action.targetFrame?.isMainFrame == true) {
             NSWorkspace.shared.open(url)
             return decisionHandler(.cancel)
         }
@@ -169,7 +239,11 @@ final class MacHostBridge: BridgeBase, WKNavigationDelegate, WKUIDelegate {
 
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                  for action: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        if let url = action.request.url { NSWorkspace.shared.open(url) }
+        if webView === overlay {
+            if action.targetFrame == nil { webView.load(action.request) }
+        } else if let url = action.request.url {
+            NSWorkspace.shared.open(url)
+        }
         return nil
     }
 }

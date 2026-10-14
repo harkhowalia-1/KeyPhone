@@ -50,7 +50,10 @@ Signing & Capabilities, and press Run. After editing `phone/index.html`, run
 iOS and macOS don't let apps read your text messages or full call history, and iOS
 doesn't expose signal strength, so the Inbox holds messages saved on the phone,
 the Log lists calls made from Larch K7, and on iPhone the signal bars show online
-or offline. Java `.jar` apps install and list today; a built-in runtime to run
-them is planned.
+or offline. Java `.jar` games run on the phone's own screen through
+[freej2me-web](https://github.com/zb3/freej2me-web) (GPL-3.0, bundled in
+`site/j2me/`), which runs on CheerpJ loaded from the internet, so Java needs a
+connection when an app starts. The browser shows real websites on the phone's
+screen in the Mac and iPhone apps.
 
 Larch K7 is an original design and is not affiliated with any phone maker.

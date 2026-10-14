@@ -1,0 +1,3 @@
+Java ME emulator: freej2me-web by zb3 (https://github.com/zb3/freej2me-web), commit c19416e75cbc15f9a27f7e967ee81cb108761e30,
+based on FreeJ2ME. Licensed under the GNU GPL v3 (see LICENSE); its complete source is at the link above.
+It runs on CheerpJ (https://cheerpj.com), loaded from Leaning Technologies at run time under its Community licence.

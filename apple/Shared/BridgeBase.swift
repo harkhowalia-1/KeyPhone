@@ -32,7 +32,11 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
           openUrl:function(u){return send('openUrl',{url:u})},
           haptic:function(k){return send('haptic',{kind:k})},
           schedule:function(items){return send('schedule',{items:items})},
-          persist:function(json){return send('persist',{json:json})}};
+          persist:function(json){return send('persist',{json:json})},
+          web:function(o){return send('web',o)},
+          filePut:function(id,data){return send('filePut',{id:id,data:data})},
+          fileGet:function(id){return send('fileGet',{id:id})},
+          fileDel:function(id){return send('fileDel',{id:id})}};
         })();
         """
     }
@@ -71,6 +75,9 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
         case "deleteContact": deleteContact(id, args["id"] as? String ?? "")
         case "schedule": schedule(id, args["items"] as? [[String: Any]] ?? [])
         case "persist": persist(id, args["json"] as? String ?? "")
+        case "filePut": filePut(id, args["id"] as? String ?? "", args["data"] as? String ?? "")
+        case "fileGet": fileGet(id, args["id"] as? String ?? "")
+        case "fileDel": fileDel(id, args["id"] as? String ?? "")
         default: reply(id, "Not available on this device", ok: false)
         }
     }
@@ -251,6 +258,54 @@ class BridgeBase: NSObject, WKScriptMessageHandler {
             askedNotifications = true
             center.requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in apply() }
         }
+    }
+
+    // MARK: files the phone keeps (installed Java apps)
+
+    private static func fileURL(_ key: String) -> URL? {
+        let safe = key.map { $0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" ? $0 : "_" }
+        guard !safe.isEmpty else { return nil }
+        let dir = stateURL.deletingLastPathComponent().appendingPathComponent("files", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent(String(safe))
+    }
+
+    private func filePut(_ id: Int, _ key: String, _ base64: String) {
+        DispatchQueue.global(qos: .utility).async {
+            guard let url = Self.fileURL(key), let data = Data(base64Encoded: base64) else {
+                return self.reply(id, "Invalid file", ok: false)
+            }
+            do { try data.write(to: url, options: .atomic); self.reply(id, true) }
+            catch { self.reply(id, error.localizedDescription, ok: false) }
+        }
+    }
+
+    private func fileGet(_ id: Int, _ key: String) {
+        DispatchQueue.global(qos: .utility).async {
+            guard let url = Self.fileURL(key), let data = try? Data(contentsOf: url) else { return self.reply(id, nil) }
+            self.reply(id, data.base64EncodedString())
+        }
+    }
+
+    private func fileDel(_ id: Int, _ key: String) {
+        if let url = Self.fileURL(key) { try? FileManager.default.removeItem(at: url) }
+        reply(id, true)
+    }
+
+    // MARK: in-screen web pages (shared by Mac and iPhone)
+
+    /// Mobile Safari's identity, so sites send their phone layouts.
+    static let mobileUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+
+    func webState(_ view: WKWebView) {
+        var state: [String: Any] = [
+            "title": view.title ?? "", "loading": view.isLoading,
+            "canBack": view.canGoBack, "canFwd": view.canGoForward
+        ]
+        if let url = view.url?.absoluteString { state["url"] = url }
+        guard let data = try? JSONSerialization.data(withJSONObject: state),
+              let json = String(data: data, encoding: .utf8) else { return }
+        evaluate("window.LarchWeb&&LarchWeb(\(json))")
     }
 
     // MARK: saving the phone

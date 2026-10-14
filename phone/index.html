@@ -145,6 +145,11 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
 .dlg .dq{width:30px;height:30px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background:#3f7fd1}
 .dlg p{margin:0;font-size:15px;line-height:1.3}
 #note[hidden]{display:none}
+#jvm,#webl{position:absolute;z-index:4}
+#jvm{inset:0;background:#000}
+#jvm iframe,#webl iframe{display:block;width:100%;height:100%;border:0;background:transparent}
+#webl{left:0;right:0;top:26px;bottom:28px;background:#fff}
+#jvm[hidden],#webl[hidden]{display:none}
 #note{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;z-index:5}
 #note .nb{background:var(--tsolid);color:var(--tfg);border-radius:8px;box-shadow:0 6px 22px rgba(0,0,0,.45);padding:14px 12px;text-align:center;width:100%;border:1px solid rgba(127,127,127,.35)}
 #note .ni{width:32px;height:32px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px}
@@ -253,7 +258,7 @@ textarea.inp{height:80px;resize:vertical;font:12px ui-monospace,Menlo,monospace}
       <div class="k emu" data-k="EMU" title="Emulator settings"><svg viewBox="0 0 14 10" fill="#d6dde5"><rect y="0" width="14" height="2" rx="1"/><rect y="4" width="14" height="2" rx="1"/><rect y="8" width="14" height="2" rx="1"/></svg></div>
       <div class="inner" id="inner">
       <div class="bezel">
-        <div id="lcd"><div id="scr" class="off"></div><div id="note" hidden></div><div id="dim"></div></div>
+        <div id="lcd"><div id="scr" class="off"></div><div id="jvm" hidden></div><div id="webl" hidden><iframe title="Web page" referrerpolicy="no-referrer"></iframe></div><div id="note" hidden></div><div id="dim"></div></div>
         <div class="glass"></div>
       </div>
       <div class="ctl">
@@ -494,14 +499,14 @@ function push(v){ v.moved=Date.now(); V.push(v); render() }
 function pop(n){ n=n||1; for(let i=0;i<n&&V.length>1;i++){ const v=V.pop(); v.onPop&&v.onPop() } render() }
 function popTo(name){ while(V.length>1&&tv().name!==name){ const v=V.pop(); v.onPop&&v.onPop() } render() }
 function home(){ while(V.length>1){ const v=V.pop(); v.onPop&&v.onPop() } if(!V.length&&S.on) V.push(Standby()); render() }
-function render(){ applyTheme(); const v=tv(); if(!v||!S.on){ SCR.className='off'; SCR.innerHTML=''; return }
+function render(){ applyTheme(); const v=tv(); if(!v||!S.on){ SCR.className='off'; SCR.innerHTML=''; syncOverlays(); return }
   SCR.className=(v.full?'full ':'')+(v.cls||'');
   const title=v.hdText?v.hdText():v.title;
   let h=v.full?'':`<div class="hd"><span class="ht">${title==null?'':esc(title)}</span><span class="hr">${v.hdRight?v.hdRight():''}</span></div>`;
   h+='<div class="bd"></div>';
   const s=v.soft?v.soft():[{},{},{}];
   if(!v.noSoft) h+=`<div class="sk${v.full&&v.ovSoft?' ov':''}"><span class="skl" data-s="L">${esc(s[0]&&s[0].t||'')}</span><span class="skm" data-s="M">${esc(s[1]&&s[1].t||'')}</span><span class="skr" data-s="R">${esc(s[2]&&s[2].t||'')}</span></div>`;
-  SCR.innerHTML=h; const bd=SCR.querySelector('.bd'); if(v.noSoft) bd.style.bottom='0'; v.draw&&v.draw(bd) }
+  SCR.innerHTML=h; const bd=SCR.querySelector('.bd'); if(v.noSoft) bd.style.bottom='0'; v.draw&&v.draw(bd); syncOverlays() }
 
 /* note / ask / helpers */
 let noteThen=null,noteT=null;
@@ -641,6 +646,16 @@ function symbols(cb){ const chars=".,'?!\"-()@/:_;+&%*=<>£$€¥#[]{}\\~^¡¿§
     soft(){ return [{t:'Use',f:()=>{pop();cb(chars[i]);render()}},{t:'Use',f:()=>{pop();cb(chars[i]);render()}},{t:'Back',f:pop}] },
     key(k){ const n=chars.length; if(k==='LT')i=(i-1+n)%n; else if(k==='RT')i=(i+1)%n; else if(k==='U')i=(i-6+n)%n; else if(k==='D')i=(i+6)%n; else return false; render(); return true },
     pick(j){ i=j; pop(); cb(chars[i]); render() } }) }
+
+/* ---------------- file storage ---------------- */
+const IDB={db:null,open(){ return this.db||(this.db=new Promise((res,rej)=>{ const r=indexedDB.open('larchK7',1); r.onupgradeneeded=()=>r.result.createObjectStore('files'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error) })) },
+  async tx(mode,fn){ const db=await this.open(); return new Promise((res,rej)=>{ const t=db.transaction('files',mode); const rq=fn(t.objectStore('files')); t.oncomplete=()=>res(rq?rq.result:undefined); t.onerror=()=>rej(t.error) }) }};
+const toB64=buf=>{ const b=new Uint8Array(buf); let s=''; for(let i=0;i<b.length;i+=0x8000) s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000)); return btoa(s) };
+const fromB64=str=>{ const s=atob(str), b=new Uint8Array(s.length); for(let i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return b.buffer };
+const Blobs={
+  put:(id,buf)=>Host&&Host.filePut?Host.filePut(id,toB64(buf)):IDB.tx('readwrite',st=>st.put(buf,id)),
+  get:async id=>{ if(Host&&Host.fileGet){ const s=await Host.fileGet(id); return s?fromB64(s):null } return (await IDB.tx('readonly',st=>st.get(id)))||null },
+  del:id=>(Host&&Host.fileDel?Host.fileDel(id):IDB.tx('readwrite',st=>st.delete(id))).catch(()=>{}) };
 
 /* ---------------- contacts helpers ---------------- */
 const DEVC=()=>!!(Host&&Host.contacts);
@@ -1124,12 +1139,33 @@ function Stopwatch(){ let t0=0, acc=0, run=false, laps=[], lapStart=0, mode='spl
 function AppsMenu(){ menu('Applications',[['Games',()=>menu('Games',[['Snake',()=>SnakeMenu(),'game']].concat(S.jars.filter(j=>j.game).map(j=>[j.name,()=>openJar(j),'java'])),{nums:true})],['Collection',()=>Collection()],['Memory',()=>Info('Memory',`<p><span class="lbl">Installed applications</span>${S.jars.length}</p><p><span class="lbl">Used</span>${Math.round(S.jars.reduce((a,j)=>a+j.size,0)/1024)} kB</p>`)]]) }
 function Collection(){ push(List('Collection',()=>S.jars.map(j=>({t:j.name,s:j.vendor||'',j,ic:j.icon?`<img src="${j.icon}" alt="">`:ico('java')})),{name:'coll',two:true,empty:'No applications. Add .jar files in Settings › Emulator › Add files.',
   M:it=>({t:'Open',f:()=>openJar(it.j)}),
-  L:it=>it?{t:'Options',f:()=>menu('Options',[['Open',()=>{pop();openJar(it.j)}],['Delete',()=>{pop();Ask('Delete '+it.j.name+'?',()=>{S.jars=S.jars.filter(x=>x!==it.j);save();note('Application deleted')})}],
+  L:it=>it?{t:'Options',f:()=>menu('Options',[['Open',()=>{pop();openJar(it.j)}],['Delete',()=>{pop();Ask('Delete '+it.j.name+'?',()=>{Blobs.del('jar:'+it.j.id);S.jars=S.jars.filter(x=>x!==it.j);save();note('Application deleted')})}],
     ['Details',()=>{pop();Info('Details',`<p><b>${esc(it.j.name)}</b></p><p><span class="lbl">Vendor</span>${esc(it.j.vendor||'Unknown')}</p><p><span class="lbl">Version</span>${esc(it.j.ver||'—')}</p><p><span class="lbl">Size</span>${Math.round(it.j.size/1024)} kB</p><p><span class="lbl">Main class</span>${esc(it.j.main||'—')}</p><p><span class="lbl">Profile</span>${esc(it.j.profile||'MIDP-2.0')}</p>`)}],
     ['Application access',()=>{pop();Radio('Network access',[['ask','Ask every time'],['first','Ask first time only'],['always','Always allowed'],['never','Not allowed']],()=>it.j.net||'ask',v=>it.j.net=v)}],
     ['Mark as game',()=>{it.j.game=!it.j.game;save();pop();note(it.j.game?'Added to Games':'Removed from Games')}]],{nums:false})}:{t:''} })) }
-function openJar(j){ if(Host&&Host.runJar){ Host.runJar(j.id); return }
-  Info(j.name,`<p>${j.icon?`<img src="${j.icon}" alt="" style="width:32px;height:32px;float:left;margin:0 8px 4px 0">`:''}<b>${esc(j.name)}</b><br>${esc(j.vendor||'')} ${esc(j.ver||'')}</p><p style="clear:both">Java apps start in the Mac, iPhone and UTM builds of this phone, which include a Java ME runtime. This browser preview can install and list them only.</p>`) }
+const J2ME_URL=(()=>{ if(window.LARCH_J2ME_URL) return window.LARCH_J2ME_URL; try{ if(/^https?:$/.test(location.protocol)&&/github\.io$/.test(location.hostname)) return new URL('../j2me/larch.html',location.href).href }catch(e){} return 'https://harkhowalia-1.github.io/larch-k7/j2me/larch.html' })();
+const JVM=$('#jvm'); let jvmFrame=null, jvmApp=null;
+async function openJar(j){
+  if(!dev.online){ note('Java needs an internet connection','warn',1800); return }
+  let buf=null; try{ buf=await Blobs.get('jar:'+j.id) }catch(e){}
+  if(!buf){ note('Add this application again to run it','warn',2200); return }
+  push(JavaView(j,buf)) }
+function JavaView(j,buf){ return {name:'java',full:true,noSoft:true,
+  draw(el){ el.style.background='#000'; if(jvmApp!==j.id) mountJava(j,buf) },
+  onPop(){ unmountJava() } } }
+function mountJava(j,buf){ unmountJava(); jvmApp=j.id;
+  const f=document.createElement('iframe'); f.title=j.name; f.allow='autoplay; fullscreen'; f.src=J2ME_URL; JVM.appendChild(f); jvmFrame=f;
+  f._run={t:'run',id:j.id,name:j.name,jar:buf}; f._heard=false;
+  setTimeout(()=>{ if(jvmFrame===f&&!f._heard){ exitJava(); note('Java could not start. Check the internet connection.','warn',2400) } },20000) }
+function unmountJava(){ if(jvmFrame){ jvmFrame.remove(); jvmFrame=null } jvmApp=null }
+const javaOn=()=>!!jvmFrame&&S.on&&tv()&&tv().name==='java';
+const JKEY={'0':'Digit0','1':'Digit1','2':'Digit2','3':'Digit3','4':'Digit4','5':'Digit5','6':'Digit6','7':'Digit7','8':'Digit8','9':'Digit9','*':'NumpadMultiply','#':'NumpadDivide',U:'ArrowUp',D:'ArrowDown',LT:'ArrowLeft',RT:'ArrowRight',M:'Enter',L:'F1',R:'F2',CALL:'Enter'};
+function javaKey(k,down){ const code=JKEY[k]; if(code&&jvmFrame&&jvmFrame.contentWindow) jvmFrame.contentWindow.postMessage({t:'key',code,down},'*') }
+function exitJava(){ const v=tv(); if(v&&v.name==='java') pop() }
+addEventListener('message',e=>{ if(!jvmFrame||e.source!==jvmFrame.contentWindow) return; const m=e.data||{}; jvmFrame._heard=true;
+  if(m.t==='ready'&&jvmFrame._run){ const r=jvmFrame._run; jvmFrame._run=null; jvmFrame.contentWindow.postMessage({...r,jar:r.jar.slice(0)},'*') }
+  else if(m.t==='exit') exitJava();
+  else if(m.t==='error'){ exitJava(); note(m.text||'The application closed','warn',2200) } });
 function SnakeMenu(){ menu('Snake',[['New game',()=>Snake()],['Level',()=>Radio('Level',[1,2,3,4,5,6,7,8,9].map(n=>[n,'Level '+n]),()=>S.snake.lvl,v=>S.snake.lvl=v)],['Top score',()=>Info('Top score',`<p style="font-size:28px">${S.snake.best}</p>`)],['Instructions',()=>Info('Instructions','<p>Steer with the navigation key or 2, 4, 6 and 8. Eat food to grow. Avoid the walls and your own tail. Press 5 or the middle key to pause.</p>')]]) }
 function Snake(){ const W=20,H=21,C=12; let sn,dir,nd,food,score,dead,paused,timer;
   const reset=()=>{ sn=[{x:6,y:10},{x:5,y:10},{x:4,y:10}]; dir={x:1,y:0}; nd=dir; food=spawn(); score=0; dead=false; paused=false; clearInterval(timer); timer=setInterval(step,300-S.snake.lvl*26) };
@@ -1156,25 +1192,46 @@ function WebMenu(){ menu('Web',[['Home',()=>openUrl('start')],['Bookmarks',()=>B
   ['Settings',()=>menu('Web settings',[['Appearance settings',()=>menu('Appearance',[['Text wrapping',()=>OnOff('Text wrapping',S.web,'wrap')],['Font size',()=>Radio('Font size',[['small','Small font'],['normal','Normal font'],['large','Large font']],()=>S.fs.web,v=>S.fs.web=v)],['Show images',()=>Radio('Show images',[[true,'Yes'],[false,'No']],()=>S.web.img,v=>S.web.img=v)]])],
     ['Cookies',()=>Radio('Cookies',[[true,'Allow'],[false,'Reject']],()=>S.web.cookies,v=>S.web.cookies=v)],['Download settings',()=>Radio('Automatic saving',[['ask','Ask first'],['auto','Save to Gallery']],()=>S.web.dlsave,v=>S.web.dlsave=v)],['Security settings',()=>push(List('Certificates',[],{empty:'No certificates'}))]])],
   ['Go to address',()=>goAddress()],['Clear the cache',()=>note('Cache cleared')]]) }
-function goAddress(){ push(Editor({mode:'text',noPred:true,lower:true,title:'Address',label:'Address:',text:S.web.last||'http://',done(t){ pop(); if(t.trim()&&t.trim()!=='http://') openUrl(t.trim()) }})) }
+function goAddress(){ const cur=V.find(x=>x.name==='webpage'); push(Editor({mode:'text',noPred:true,lower:true,title:'Address',label:'Address:',text:(cur&&cur.st.url)||S.web.last||'http://',done(t){ pop(); t=t.trim(); if(t&&t!=='http://') openUrl(t) }})) }
 function Bookmarks(){ push(List('Bookmarks',()=>S.web.bm.map(b=>({t:b.t,s:b.u,b,ic:ico('web')})),{two:true,empty:'No bookmarks',
   M:it=>({t:'Go to',f:()=>openUrl(it.b.u)}),Mempty:{t:'Add',f:()=>addBm()},
   L:it=>({t:'Options',f:()=>menu('Options',[['New bookmark',()=>{pop();addBm()}],it?['Edit',()=>{pop();addBm(it.b)}]:null,it?['Delete',()=>{pop();Ask('Delete bookmark?',()=>{S.web.bm=S.web.bm.filter(x=>x!==it.b);save();note('Deleted')})}]:null,it?['Send',()=>{pop();NewMessage(it.b.u)}]:null],{nums:false})}) })) }
 function addBm(b){ push(Editor({mode:'text',noPred:true,title:'Bookmark',label:'Name:',text:b?b.t:'',done(t){ push(Editor({mode:'text',noPred:true,lower:true,title:'Bookmark',label:'Address:',text:b?b.u:'http://',done(u){ if(b&&!b._new){b.t=t;b.u=u} else S.web.bm.push({t,u}); save(); pop(2); note('Bookmark saved') }})) }})) }
-function openUrl(u){ if(S.profile==='flight'){ note('Flight profile is active','warn'); return } if(!dev.online){ note('No network connection','warn'); return }
-  if(u!=='start'){ if(!/^https?:\/\//i.test(u)) u='http://'+u.replace(/^\/+/,''); S.web.last=u; save() }
-  if(Host&&Host.openUrl&&u!=='start'){ Host.openUrl(u); return }
-  note('Connecting','wait',600,()=>push(WebPage(u))) }
-function WebPage(u){ let i=0; const start=u==='start';
-  return {name:'web',title:start?'Larch home':u.replace(/^https?:\/\//,''),
+function openUrl(u){ if(S.profile==='flight'){ note('Flight profile is active','warn'); return }
+  if(u==='start'){ push(WebPage('start')); return }
+  if(!dev.online){ note('No network connection','warn'); return }
+  u=u.trim(); if(!/^[a-z][a-z0-9+.-]*:/i.test(u)) u=/\s/.test(u)||!/\./.test(u)?'https://www.google.com/search?q='+encodeURIComponent(u):'https://'+u.replace(/^\/+/,'');
+  S.web.last=u; save();
+  const cur=V.find(x=>x.name==='webpage');
+  if(cur){ while(tv()!==cur) pop(); cur.st={title:'',url:u,loading:true,canBack:cur.st.canBack}; if(Host&&Host.web) Host.web({op:'load',url:u}); else webLayerSet(u); render(); return }
+  push(WebPage(u)) }
+const WEBL=$('#webl'), WEBF=WEBL.querySelector('iframe'); let webShown=false;
+WEBF.addEventListener('load',()=>{ const v=V.find(x=>x.name==='webpage'); if(v&&!(Host&&Host.web)){ v.st.loading=false; if(tv()===v) render() } });
+function webLayerSet(u){ if(WEBF.getAttribute('src')!==u) WEBF.setAttribute('src',u) }
+function syncOverlays(){ const v=S.on?tv():null;
+  JVM.hidden=!(v&&v.name==='java');
+  const onWeb=!!(v&&v.name==='webpage');
+  if(Host&&Host.web){ if(onWeb){ const bd=SCR.querySelector('.bd'); if(!bd) return; const r=bd.getBoundingClientRect(); Host.web({op:'show',rect:{x:r.left,y:r.top,w:r.width,h:r.height},url:v.pendingUrl||null}).catch(()=>{}); v.pendingUrl=null; webShown=true }
+    else if(webShown){ Host.web({op:'hide'}).catch(()=>{}); webShown=false } }
+  else WEBL.hidden=!onWeb }
+window.LarchWeb=o=>{ const v=V.find(x=>x.name==='webpage'); if(!v) return; Object.assign(v.st,o||{}); if(o&&o.url&&o.url!==S.web.last){ S.web.last=o.url; save() } if(tv()===v) render() };
+function openExternal(u){ if(Host&&Host.openUrl){ Host.openUrl(u); return } const a=document.createElement('a'); a.href=u; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove() }
+function WebPage(u){ let i=0; const start=u==='start'; const native=!!(Host&&Host.web);
+  if(!start){ return {name:'webpage',pendingUrl:native?u:null,st:{title:'',url:u,loading:true,canBack:false,canFwd:false},
+    hdText(){ return this.st.title||this.st.url.replace(/^https?:\/\//,'').split('/')[0] }, hdRight(){ return this.st.loading?'···':'' },
+    draw(el){ el.style.background='#fff'; if(native) el.innerHTML='<div class="empty" style="color:#777">Loading…</div>'; else webLayerSet(this.st.url) },
+    soft(){ const v=this; return [{t:'Options',f:()=>menu('Options',[['Go to address',()=>{pop();goAddress()}],native?['Back',()=>{pop();Host.web({op:'back'})}]:null,native?['Forward',()=>{pop();Host.web({op:'forward'})}]:null,['Reload',()=>{pop(); if(native) Host.web({op:'reload'}); else { WEBF.removeAttribute('src'); webLayerSet(v.st.url) } }],
+        ['Add bookmark',()=>{pop();addBm({t:v.hdText(),u:v.st.url,_new:true})}],['Bookmarks',()=>{pop();Bookmarks()}],['Open in browser',()=>{pop();openExternal(v.st.url)}],['Home',()=>{pop();pop();openUrl('start')}],['Exit',()=>home()]],{nums:false})},
+      {t:''},{t:'Back',f:()=>{ if(native&&v.st.canBack) Host.web({op:'back'}); else pop() }}] },
+    key(k){ if(k==='U'||k==='D'){ if(native) Host.web({op:'scroll',dy:k==='U'?-90:90}); return true } return false },
+    onPop(){ if(native){ Host.web({op:'close'}).catch(()=>{}); webShown=false } else { WEBF.removeAttribute('src'); WEBL.hidden=true } } } }
+  return {name:'web',title:'Larch home',
     draw(el){ const fsz={small:'12px',normal:'13px',large:'15px'}[S.fs.web];
-      if(start) el.innerHTML=`<div class="web" style="font-size:${fsz}"><h3>Larch home</h3><p>Bookmarks</p>${S.web.bm.map((b,j)=>`<div class="bmk${j===i?' on':''}" data-i="${j}">${esc(b.t)}<br><small style="color:#666">${esc(b.u)}</small></div>`).join('')}<p style="margin-top:8px;color:#666">Options › Go to address to type one.</p></div>`;
-      else el.innerHTML=`<div class="web" style="font-size:${fsz}"><h3>${esc(u.replace(/^https?:\/\//,'').split('/')[0])}</h3><p>Web pages open in a new browser tab in this preview. The Mac and iPhone builds show them on this screen.</p><p><a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a></p></div>` },
-    soft(){ return [{t:'Options',f:()=>menu('Options',[['Home',()=>{pop();pop();openUrl('start')}],['Go to address',()=>{pop();goAddress()}],['Add bookmark',()=>{pop();addBm(start?null:{t:u.replace(/^https?:\/\//,''),u,_new:true})}],['Bookmarks',()=>{pop();Bookmarks()}],['Reload',()=>{pop();render()}],['Exit',()=>{home()}]],{nums:false})},
-      {t:start&&S.web.bm.length?'Open':'',f:start?()=>openUrl(S.web.bm[i].u):null},{t:'Back',f:pop}] },
-    key(k){ if(start&&(k==='U'||k==='D')){ const n=S.web.bm.length; if(n){ i=(i+(k==='U'?-1:1)+n)%n; render() } return true } return false },
+      el.innerHTML=`<div class="web" style="font-size:${fsz}"><h3>Larch home</h3><p>Bookmarks</p>${S.web.bm.map((b,j)=>`<div class="bmk${j===i?' on':''}" data-i="${j}">${esc(b.t)}<br><small style="color:#666">${esc(b.u)}</small></div>`).join('')}<p style="margin-top:8px;color:#666">Options › Go to address to type one.</p></div>` },
+    soft(){ return [{t:'Options',f:()=>menu('Options',[['Go to address',()=>{pop();goAddress()}],['Bookmarks',()=>{pop();Bookmarks()}],['Exit',()=>{home()}]],{nums:false})},
+      {t:S.web.bm.length?'Open':'',f:()=>S.web.bm.length&&openUrl(S.web.bm[i].u)},{t:'Back',f:pop}] },
+    key(k){ if(k==='U'||k==='D'){ const n=S.web.bm.length; if(n){ i=(i+(k==='U'?-1:1)+n)%n; render() } return true } return false },
     pick(j){ i=j; openUrl(S.web.bm[j].u) } } }
-
 /* ---------------- power, boot, screen saver ---------------- */
 let booting=false;
 function powerOn(){ if(S.on&&V.length) return; S.on=true; save(); V=[]; booting=true; locked=false; applyTheme();
@@ -1251,11 +1308,13 @@ function dispatch(k,long){
   if(k==='END'){ if(v.name!=='standby') home(); return }
   if(k==='L'||k==='M'||k==='R'){ const s=v.soft?v.soft():[]; const x=s[{L:0,M:1,R:2}[k]]; if(x&&x.f) x.f() }
 }
-function down(k){ ac(); wake(); if(downK) return; downK=k; fired=false; keyTone(k); if(Host&&Host.haptic&&S.on) Host.haptic('light');
+function down(k){ ac(); wake(); if(downK) return; downK=k; fired=false; if(Host&&Host.haptic&&S.on) Host.haptic('light');
+  if(javaOn()){ fired=true; if(k==='END'||k==='PWR') exitJava(); else javaKey(k,true); return }
+  keyTone(k);
   const v=tv(); if(S.on&&!booting&&NOTE.hidden&&v&&v.instant&&v.instant(k)){ fired=true; return }
   if(['U','D','LT','RT','VUP','VDN'].includes(k)&&S.on){ dispatch(k,false); fired=true; rpt=setTimeout(()=>{ rptI=setInterval(()=>dispatch(k,false),110) },450); return }
   lt=setTimeout(()=>{ fired=true; dispatch(k,true) },650) }
-function up(k){ if(downK!==k) return; clearTimeout(lt); clearTimeout(rpt); clearInterval(rptI); downK=null; if(!fired) dispatch(k,false) }
+function up(k){ if(downK!==k) return; clearTimeout(lt); clearTimeout(rpt); clearInterval(rptI); downK=null; if(javaOn()){ javaKey(k,false); return } if(!fired) dispatch(k,false) }
 document.querySelectorAll('[data-k]').forEach(el=>{ const k=el.dataset.k;
   el.addEventListener('pointerdown',e=>{ e.preventDefault(); el.setPointerCapture&&el.setPointerCapture(e.pointerId); el.classList.add('dn'); down(k) });
   const u=()=>{ el.classList.remove('dn'); up(k) }; el.addEventListener('pointerup',u); el.addEventListener('pointercancel',u) });
@@ -1324,7 +1383,7 @@ async function importFile(f){ const n=f.name, ext=n.split('.').pop().toLowerCase
     if(ext==='jar'||mfn){ const mf=mfn?await z.text(mfn):''; const lines=mf.replace(/\r?\n /g,'').split(/\r?\n/); const get=k=>{ const l=lines.find(x=>x.toLowerCase().startsWith(k.toLowerCase()+':')); return l?l.slice(k.length+1).trim():'' };
       const m1=get('MIDlet-1').split(',').map(x=>x.trim()); const ipath=(get('MIDlet-Icon')||m1[1]||'').replace(/^\//,''); const ip=ipath&&z.names.find(x=>x.toLowerCase()===ipath.toLowerCase()); const icon=ip?'data:image/png;base64,'+await z.b64(ip):null;
       const j={id:uid(),name:get('MIDlet-Name')||m1[0]||n.replace(/\.jar$/i,''),vendor:get('MIDlet-Vendor'),ver:get('MIDlet-Version'),main:m1[2]||'',profile:get('MicroEdition-Profile'),size:f.size,icon,file:n,game:false};
-      S.jars.push(j); save(); return j.name+' installed' }
+      await Blobs.put('jar:'+j.id,await f.arrayBuffer()); j.stored=true; S.jars.push(j); save(); return j.name+' installed' }
     const imgs=z.names.filter(x=>/\.(png|jpe?g|gif|bmp)$/i.test(x)); const tx=z.names.find(x=>/\.xml$/i.test(x)); const xml=tx?await z.text(tx):'';
     const pickBy=re=>imgs.find(x=>re.test(x.split('/').pop())); const wp=pickBy(/wall|wp|standby|idle/i)||imgs[0], bg=pickBy(/bg|back|main/i)||wp;
     const toURL=async x=>x?await shrink('data:image/'+(/\.png$/i.test(x)?'png':'jpeg')+';base64,'+await z.b64(x),480,640,.8):null;
@@ -1341,7 +1400,7 @@ function fit(){ const W=280,H=742, wr=$('#wrap'), inn=$('#inner');
     inn.style.left=(pw-W)/2+'px'; inn.style.top=(ph-H)/2+'px'; wr.style.width=vw+'px'; wr.style.height=vh+'px'; return }
   const g=EMBED?4:32, availH=innerHeight-g, availW=innerWidth-g; const s=Math.max(.5,Math.min(1.4,availH/H,availW/W));
   PHONE.style.transform=`scale(${s})`; PHONE.style.setProperty('--sc',`scale(${s})`); wr.style.width=W*s+'px'; wr.style.height=H*s+'px' }
-addEventListener('resize',fit); fit();
+addEventListener('resize',()=>{ fit(); syncOverlays() }); fit();
 
 /* ---------------- start ---------------- */
 applyTheme(); readNet(); refreshContacts();

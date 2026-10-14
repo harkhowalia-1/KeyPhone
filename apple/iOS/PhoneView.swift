@@ -66,7 +66,7 @@ final class PhoneViewController: UIViewController, WKNavigationDelegate {
         if url.isFileURL || url.scheme == "about" || url.scheme == "data" || url.scheme == "blob" {
             return decisionHandler(.allow)
         }
-        if action.navigationType == .linkActivated || action.targetFrame == nil {
+        if action.targetFrame == nil || (action.navigationType == .linkActivated && action.targetFrame?.isMainFrame == true) {
             UIApplication.shared.open(url)
             return decisionHandler(.cancel)
         }
