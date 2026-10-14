@@ -33,6 +33,10 @@ final class MediaController: NSObject {
     private var videoInput: AVCaptureDeviceInput?
     private var audioInput: AVCaptureDeviceInput?
     private var front = false
+    /// Photo mode uses the camera's full-quality still format; video mode adds the movie output and microphone.
+    private var photoMode = true
+    /// Width ÷ height of the viewfinder on the phone's screen; photos are cropped to match it.
+    private var viewAspect: CGFloat = 0
     private let cameraQueue = DispatchQueue(label: "larch.camera")
     private var photoReply: Int?
     private var movieReply: Int?
@@ -55,6 +59,9 @@ final class MediaController: NSObject {
         switch (cmd, op) {
         case ("media", "camera"): cameraShow(id, a)
         case ("media", "rect"): DispatchQueue.main.async { self.place(a["rect"] as? [String: Any]); self.reply(id, true) }
+        case ("media", "mode"):
+            photoMode = (a["mode"] as? String) != "video"
+            cameraQueue.async { self.configure(); self.reply(id, true) }
         case ("media", "flip"): front.toggle(); cameraQueue.async { self.configure(); self.reply(id, true) }
         case ("media", "capture"): capture(id)
         case ("media", "recordVideo"): videoStart(id)
@@ -119,6 +126,7 @@ final class MediaController: NSObject {
             #endif
         }
         view.isHidden = false
+        if view.bounds.width > 0, view.bounds.height > 0 { viewAspect = view.bounds.width / view.bounds.height }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         previewLayer?.frame = view.bounds
@@ -156,7 +164,8 @@ final class MediaController: NSObject {
 
     private func configure() {
         session.beginConfiguration()
-        if session.canSetSessionPreset(.high) { session.sessionPreset = .high }
+        let preset: AVCaptureSession.Preset = photoMode ? .photo : .high
+        if session.canSetSessionPreset(preset) { session.sessionPreset = preset }
         if let old = videoInput { session.removeInput(old); videoInput = nil }
         #if os(iOS)
         let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: front ? .front : .back)
@@ -168,16 +177,36 @@ final class MediaController: NSObject {
             session.addInput(input)
             videoInput = input
         }
-        if audioInput == nil, AVCaptureDevice.authorizationStatus(for: .audio) == .authorized,
+        if photoMode {
+            if let mic = audioInput { session.removeInput(mic); audioInput = nil }
+            if session.outputs.contains(movieOutput), !movieOutput.isRecording { session.removeOutput(movieOutput) }
+        }
+        if !photoMode, audioInput == nil, AVCaptureDevice.authorizationStatus(for: .audio) == .authorized,
            let mic = AVCaptureDevice.default(for: .audio), let input = try? AVCaptureDeviceInput(device: mic),
            session.canAddInput(input) {
             session.addInput(input)
             audioInput = input
         }
         if !session.outputs.contains(photoOutput), session.canAddOutput(photoOutput) { session.addOutput(photoOutput) }
-        if !session.outputs.contains(movieOutput), session.canAddOutput(movieOutput) { session.addOutput(movieOutput) }
+        if !photoMode, !session.outputs.contains(movieOutput), session.canAddOutput(movieOutput) { session.addOutput(movieOutput) }
+        #if os(iOS)
+        // The phone is held upright, so pictures and video are recorded upright too.
+        for output in [photoOutput, movieOutput] as [AVCaptureOutput] {
+            if let connection = output.connection(with: .video) { Self.upright(connection) }
+        }
+        #endif
         session.commitConfiguration()
     }
+
+    #if os(iOS)
+    private static func upright(_ connection: AVCaptureConnection) {
+        if #available(iOS 17.0, *) {
+            if connection.isVideoRotationAngleSupported(90) { connection.videoRotationAngle = 90 }
+        } else if connection.isVideoOrientationSupported {
+            connection.videoOrientation = .portrait
+        }
+    }
+    #endif
 
     private func cameraShow(_ id: Int, _ a: [String: Any]) {
         access(.video) { granted in
@@ -192,6 +221,7 @@ final class MediaController: NSObject {
                     self.addLayer(layer, to: view)
                     self.previewLayer = layer
                 }
+                self.photoMode = (a["mode"] as? String) != "video"
                 self.cameraQueue.async {
                     self.configure()
                     if !self.session.isRunning { self.session.startRunning() }
@@ -214,6 +244,7 @@ final class MediaController: NSObject {
     private func videoStart(_ id: Int) {
         access(.audio) { _ in
             self.cameraQueue.async {
+                self.photoMode = false
                 self.configure()
                 guard self.session.isRunning, !self.movieOutput.isRecording else { return self.reply(id, "Camera not ready", ok: false) }
                 let url = FileManager.default.temporaryDirectory.appendingPathComponent("larch-\(UUID().uuidString).mov")
@@ -264,6 +295,50 @@ final class MediaController: NSObject {
         CGImageDestinationAddImage(dest, image, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
         guard CGImageDestinationFinalize(dest) else { return nil }
         return "data:image/jpeg;base64," + (out as Data).base64EncodedString()
+    }
+
+    /// Crops a photo to the viewfinder's shape (centred, as the viewfinder shows it),
+    /// keeping its full resolution and camera details.
+    static func cropped(_ data: Data, aspect: CGFloat) -> Data? {
+        guard aspect > 0.2, aspect < 5,
+              let src = CGImageSourceCreateWithData(data as CFData, nil),
+              let props = CGImageSourceCopyPropertiesAtIndex(src, 0, nil) as? [CFString: Any],
+              let pw = (props[kCGImagePropertyPixelWidth] as? NSNumber)?.intValue,
+              let ph = (props[kCGImagePropertyPixelHeight] as? NSNumber)?.intValue else { return nil }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: max(pw, ph)
+        ]
+        guard let upright = CGImageSourceCreateThumbnailAtIndex(src, 0, options as CFDictionary) else { return nil }
+        let w = CGFloat(upright.width), h = CGFloat(upright.height)
+        var rect = CGRect(x: 0, y: 0, width: w, height: h)
+        if w / h > aspect {
+            rect.size.width = (h * aspect).rounded()
+            rect.origin.x = ((w - rect.width) / 2).rounded()
+        } else {
+            rect.size.height = (w / aspect).rounded()
+            rect.origin.y = ((h - rect.height) / 2).rounded()
+        }
+        guard let crop = upright.cropping(to: rect) else { return nil }
+        var meta = props
+        meta[kCGImagePropertyOrientation] = 1
+        meta.removeValue(forKey: kCGImagePropertyPixelWidth)
+        meta.removeValue(forKey: kCGImagePropertyPixelHeight)
+        if var tiff = meta[kCGImagePropertyTIFFDictionary] as? [CFString: Any] {
+            tiff[kCGImagePropertyTIFFOrientation] = 1
+            meta[kCGImagePropertyTIFFDictionary] = tiff
+        }
+        if var exif = meta[kCGImagePropertyExifDictionary] as? [CFString: Any] {
+            exif[kCGImagePropertyExifPixelXDimension] = crop.width
+            exif[kCGImagePropertyExifPixelYDimension] = crop.height
+            meta[kCGImagePropertyExifDictionary] = exif
+        }
+        meta[kCGImageDestinationLossyCompressionQuality] = 0.92
+        let out = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(out, "public.jpeg" as CFString, 1, nil) else { return nil }
+        CGImageDestinationAddImage(dest, crop, meta as CFDictionary)
+        return CGImageDestinationFinalize(dest) ? out as Data : nil
     }
 
     static func jpegDataURL(imageData data: Data, max: Int) -> String? {
@@ -505,7 +580,8 @@ extension MediaController: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         guard let id = photoReply else { return }
         photoReply = nil
-        guard let data = photo.fileDataRepresentation() else { return reply(id, "The photo could not be taken", ok: false) }
+        guard let raw = photo.fileDataRepresentation() else { return reply(id, "The photo could not be taken", ok: false) }
+        let data = Self.cropped(raw, aspect: viewAspect) ?? raw
         let preview = Self.jpegDataURL(imageData: data, max: 960) ?? ""
         savePhoto(data) { assetId in self.reply(id, ["id": assetId ?? "", "data": preview]) }
     }

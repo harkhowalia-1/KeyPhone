@@ -1,7 +1,15 @@
 import SwiftUI
+import AppKit
+
+/// Closing the phone's window quits the app, like closing a phone off.
+final class LarchAppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+}
 
 @main
 struct LarchMacApp: App {
+    @NSApplicationDelegateAdaptor(LarchAppDelegate.self) private var appDelegate
+
     var body: some Scene {
         WindowGroup("Larch K7") {
             MacPhoneView()

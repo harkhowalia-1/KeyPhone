@@ -1246,12 +1246,12 @@ function CameraView(mode){ const v={name:'camera',media:true,mode,rec:false,recT
   hdRight(){ return this.rec?'':(this.mode==='video'?'◀ ▶ Photo':'◀ ▶ Video') },
   draw(el){ el.style.background='#000'; el.innerHTML='<div class="empty" style="color:#888">Starting camera…</div>' },
   tick(){ if(this.rec) render() },
-  mediaShow(rect){ if(!this.started){ this.started=true; Host.media({op:'camera',rect}).catch(e=>{ if(tv()===v) pop(); note((e&&e.message)||'Camera not available','warn',2600) }) } else Host.media({op:'rect',rect}).catch(()=>{}) },
+  mediaShow(rect){ if(!this.started){ this.started=true; Host.media({op:'camera',rect,mode:this.mode}).catch(e=>{ if(tv()===v) pop(); note((e&&e.message)||'Camera not available','warn',2600) }) } else Host.media({op:'rect',rect}).catch(()=>{}) },
   soft(){ const v=this; if(v.rec) return [{t:''},{t:'Stop',f:()=>v.stopRec()},{t:''}];
     return [{t:'Options',f:()=>menu('Options',[[v.mode==='photo'?'Video':'Camera',()=>{pop();v.switchMode()}],['Change camera',()=>{pop();Host.media({op:'flip'}).catch(()=>{})}],['Self-timer',()=>{pop();v.selfTimer()}],[v.mode==='photo'?'Images':'Video clips',()=>{pop();LibraryGrid(v.mode==='photo'?'image':'video')}]],{nums:false})},
       {t:v.mode==='photo'?'Capture':'Record',f:()=>v.mode==='photo'?v.shoot():v.startRec()},{t:'Back',f:pop}] },
   key(k){ if(this.rec) return k!=='M'&&k!=='END'; if(k==='LT'||k==='RT'){ this.switchMode(); return true } if(k==='CALL'){ this.mode==='photo'?this.shoot():this.startRec(); return true } return false },
-  switchMode(){ this.mode=this.mode==='photo'?'video':'photo'; render() },
+  switchMode(){ this.mode=this.mode==='photo'?'video':'photo'; if(this.started) Host.media({op:'mode',mode:this.mode}).catch(()=>{}); render() },
   shoot(){ if(this.busy) return; this.busy=true; shutter();
     Host.media({op:'capture'}).then(r=>{ this.busy=false; snapTaken(r) }).catch(e=>{ this.busy=false; note((e&&e.message)||'The photo was not taken','warn') }) },
   selfTimer(){ let n=10; const t=setInterval(()=>{ if(tv()!==v){ clearInterval(t); return } n--; beep([1200],.05,.05,'square'); if(n<=0){ clearInterval(t); endNote(); v.shoot() } else note('Self-timer '+n,'info',1100) },1000); note('Self-timer 10','info',1100) },

@@ -3,209 +3,224 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Larch K7 — keypad phone for Mac and iPhone</title>
-<meta name="description" content="A Series 40–style keypad phone that runs on your Mac and iPhone, with real calls, messages, contacts, photos and alarms.">
-<meta name="theme-color" content="#111418">
-<link rel="icon" type="image/png" href="favicon.png">
+<title>Larch K7 — the keypad phone for Mac and iPhone</title>
+<meta name="description" content="A Series 40–style keypad phone that runs on your Mac and iPhone, with real calls, messages, contacts, camera, music, radio, Java games and the web.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="favicon.png" media="(prefers-color-scheme: light)">
+<link rel="icon" type="image/png" href="favicon-dark.png" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="icon.png">
 <meta property="og:title" content="Larch K7">
 <meta property="og:description" content="The keypad phone, running on your Mac and iPhone.">
 <meta property="og:image" content="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112..125,500..800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
-/* Hardware product page: graphite chassis, LCD-blue light, call-key green for the one action that matters. */
+/* Monochrome, like the icon: black phone on white in light mode, the reverse in dark mode. */
 :root{
-  --chassis:#111418; --panel:#181c22; --panel2:#1f242c; --line:#2a313b; --steel:#c9d2dc; --muted:#8e99a7; --white:#f2f5f8;
-  --lcd:#6aa3e6; --lcd-deep:#2f6fb8; --go:#38c35a; --go-deep:#249244;
-  --f-display:'Archivo','Helvetica Neue',Arial,sans-serif; --f-body:'Instrument Sans','Helvetica Neue',Arial,sans-serif; --f-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
-  color-scheme:dark;
+  --bg:#ffffff; --bg2:#f5f5f7; --tile:#f5f5f7; --line:#d2d2d7; --text:#1d1d1f; --text2:#6e6e73; --text3:#86868b;
+  --btn:#1d1d1f; --btnfg:#ffffff; --btn2:transparent; --btn2fg:#1d1d1f; --icon:#1d1d1f; --code:#f5f5f7; --navbg:rgba(255,255,255,.78);
+  --f:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --bg2:#0b0b0c; --tile:#161617; --line:#2c2c2e; --text:#f5f5f7; --text2:#a1a1a6; --text3:#86868b;
+    --btn:#f5f5f7; --btnfg:#000000; --btn2fg:#f5f5f7; --icon:#f5f5f7; --code:#161617; --navbg:rgba(0,0,0,.72);
+  }
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
-body{margin:0;background:var(--chassis);color:var(--steel);font:16px/1.6 var(--f-body);-webkit-font-smoothing:antialiased}
-a{color:var(--lcd)}
-a:focus-visible,button:focus-visible{outline:2px solid var(--lcd);outline-offset:3px;border-radius:6px}
-.wrap{max-width:1180px;margin:0 auto;padding-inline:24px}
-.mono{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.04em}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.47 var(--f);-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:2px solid var(--text);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:22px}
+.mono{font-family:var(--mono);font-size:13px;letter-spacing:0}
+img.ic-dark{display:none}
+@media (prefers-color-scheme: dark){ img.ic-light{display:none} img.ic-dark{display:inline-block} }
 
 /* nav */
-nav{position:sticky;top:0;z-index:10;background:rgba(17,20,24,.82);backdrop-filter:saturate(140%) blur(12px);-webkit-backdrop-filter:saturate(140%) blur(12px);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;align-items:center;gap:24px;height:62px}
-.brand{display:flex;align-items:center;gap:10px;color:var(--white);text-decoration:none;font:700 17px var(--f-display);font-stretch:118%;letter-spacing:.01em}
-.brand img{width:30px;height:30px}
-nav .links{margin-left:auto;display:flex;gap:22px;align-items:center}
-nav .links a{color:var(--steel);text-decoration:none;font-size:15px}
-nav .links a:hover{color:var(--white)}
-nav .gh{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);padding:7px 12px;border-radius:8px}
+nav{position:sticky;top:0;z-index:10;background:var(--navbg);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:24px;height:52px}
+.brand{display:flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;font-size:17px}
+.brand img{width:28px;height:28px}
+nav .links{margin-left:auto;display:flex;gap:26px;align-items:center;font-size:14px}
+nav .links a{color:var(--text2);text-decoration:none}
+nav .links a:hover{color:var(--text)}
 @media (max-width:640px){nav .links a:not(.gh){display:none}}
 
 /* hero */
-.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
-.hero::before{content:"";position:absolute;inset:-20% -10% auto auto;width:760px;height:760px;background:radial-gradient(closest-side,rgba(106,163,230,.16),transparent);pointer-events:none}
-.hero .wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:48px;align-items:center;padding-block:72px 64px}
-@media (max-width:900px){.hero .wrap{grid-template-columns:1fr;padding-block:48px}}
-.eyebrow{color:var(--lcd);text-transform:uppercase;letter-spacing:.14em}
-h1{font:800 clamp(40px,6vw,72px)/1.02 var(--f-display);font-stretch:121%;color:var(--white);margin:16px 0 20px;letter-spacing:-.01em;text-wrap:balance}
-.lede{font-size:19px;color:var(--steel);max-width:34em;margin:0 0 32px}
-.dl{display:flex;flex-wrap:wrap;gap:12px}
-.btn{display:inline-flex;align-items:center;gap:12px;text-decoration:none;border-radius:12px;padding:13px 18px 13px 16px;font-weight:600;transition:transform .12s,background .12s,border-color .12s;min-width:0}
-.btn:active{transform:translateY(1px)}
-.btn svg{flex:none}
-.btn .t{display:flex;flex-direction:column;line-height:1.15}
-.btn .t small{font:500 12px var(--f-mono);opacity:.8;letter-spacing:.02em}
-.btn.go{background:linear-gradient(180deg,#45d067,var(--go-deep));color:#06200d;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 24px -10px rgba(56,195,90,.6)}
-.btn.go:hover{background:linear-gradient(180deg,#52dc74,#28a04b)}
-.btn.alt{background:var(--panel2);color:var(--white);border:1px solid var(--line)}
-.btn.alt:hover{border-color:var(--lcd)}
-.meta{margin-top:18px;color:var(--muted)}
-.meta b{color:var(--steel);font-weight:500}
-.play{margin-top:22px;font-size:15px}
-.stage{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px}
-.stage iframe{width:100%;max-width:380px;aspect-ratio:380/800;border:0;background:transparent;display:block}
-.stage .cap{color:var(--muted);text-align:center}
+.hero{text-align:center;padding:72px 0 0}
+.hero .appicon{width:128px;height:128px;margin:0 auto 18px;display:block}
+.hero .appicon img{width:128px;height:128px}
+h1{font-weight:700;font-size:clamp(44px,7vw,80px);line-height:1.04;letter-spacing:-.035em;margin:0 auto 18px;max-width:12em;text-wrap:balance}
+.lede{font-size:clamp(19px,2.2vw,24px);line-height:1.35;color:var(--text2);max-width:30em;margin:0 auto 34px;text-wrap:balance;letter-spacing:-.015em}
+.dl{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;border-radius:980px;padding:12px 22px 12px 18px;font-weight:500;font-size:17px;transition:opacity .15s,transform .15s;min-width:0}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--btn);color:var(--btnfg)}
+.btn.primary:hover{opacity:.86}
+.btn.secondary{color:var(--btn2fg);box-shadow:inset 0 0 0 1.5px var(--btn2fg)}
+.btn.secondary:hover{background:var(--tile)}
+.btn .t{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+.btn .t small{font-size:12px;opacity:.7;font-weight:400}
+.meta{margin-top:18px;color:var(--text3);font-size:14px}
+.meta b{color:var(--text2);font-weight:500}
+.play{margin-top:10px;font-size:17px}
+.play a{color:var(--text);text-decoration:none;font-weight:500}
+.play a:hover{text-decoration:underline}
+.stage{margin:56px auto 0;display:flex;flex-direction:column;align-items:center;gap:14px;position:relative}
+.stage::before{content:"";position:absolute;left:50%;top:6%;width:min(560px,90vw);height:80%;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(127,127,127,.18),transparent);pointer-events:none;z-index:0}
+.stage iframe{color-scheme:dark;position:relative;z-index:1;width:100%;max-width:360px;aspect-ratio:380/800;border:0;background:transparent;display:block}
+.stage .cap{color:var(--text3);font-size:14px}
 
-/* spec strip */
-.specs{border-bottom:1px solid var(--line);background:var(--panel)}
+/* specs */
+.specs{margin-top:72px;border-block:1px solid var(--line)}
 .specs dl{margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
-.specs div{padding:22px 24px;border-left:1px solid var(--line)}
-.specs div:first-child{border-left:0}
-.specs dt{color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
-.specs dd{margin:6px 0 0;color:var(--white);font:600 20px var(--f-display);font-stretch:112%}
-@media (max-width:760px){.specs dl{grid-template-columns:repeat(2,minmax(0,1fr))}.specs div:nth-child(3){border-left:0}.specs div:nth-child(n+3){border-top:1px solid var(--line)}}
+.specs div{padding:28px 22px;text-align:center}
+.specs dt{color:var(--text3);font-size:13px;font-weight:500}
+.specs dd{margin:4px 0 0;font-weight:600;font-size:22px;letter-spacing:-.02em}
+@media (max-width:760px){.specs dl{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* sections */
-section{padding-block:88px}
-.kicker{color:var(--lcd);text-transform:uppercase;letter-spacing:.14em}
-h2{font:800 clamp(30px,4vw,44px)/1.08 var(--f-display);font-stretch:118%;color:var(--white);margin:12px 0 16px;text-wrap:balance}
-.sub{max-width:40em;color:var(--steel);margin:0 0 40px;font-size:17px}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-@media (max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+section{padding-block:104px}
+.kicker{color:var(--text3);font-weight:600;font-size:17px;margin:0}
+h2{font-weight:700;font-size:clamp(34px,5vw,56px);line-height:1.07;letter-spacing:-.03em;margin:8px 0 18px;max-width:14em;text-wrap:balance}
+.sub{max-width:36em;color:var(--text2);margin:0 0 48px;font-size:21px;line-height:1.38;letter-spacing:-.015em}
+
+/* feature tiles */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:920px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:600px){.grid{grid-template-columns:1fr}}
-.cell{background:var(--panel);padding:28px 26px 30px;min-width:0}
-.cell .ic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line);color:var(--lcd);margin-bottom:18px}
-.cell h3{margin:0 0 8px;color:var(--white);font:700 19px var(--f-display);font-stretch:112%}
-.cell p{margin:0;color:var(--muted);font-size:15.5px}
-.cell .key{display:inline-block;margin-top:14px;color:var(--steel);background:var(--chassis);border:1px solid var(--line);border-radius:6px;padding:2px 8px}
+.cell{background:var(--tile);border-radius:24px;padding:30px 28px 32px;min-width:0;display:flex;flex-direction:column}
+.cell .ic{width:44px;height:44px;color:var(--icon);margin-bottom:22px}
+.cell h3{margin:0 0 8px;font-weight:600;font-size:21px;letter-spacing:-.02em}
+.cell p{margin:0;color:var(--text2);font-size:16px;line-height:1.45}
+.cell .key{margin-top:auto;padding-top:18px;color:var(--text3);font-size:13px}
+.cell.wide{grid-column:span 2}
+@media (max-width:600px){.cell.wide{grid-column:auto}}
 
 /* install */
-.install{background:var(--panel);border-block:1px solid var(--line)}
+.install{background:var(--bg2)}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 @media (max-width:860px){.cards{grid-template-columns:1fr}}
-.card{background:var(--chassis);border:1px solid var(--line);border-radius:16px;padding:30px;min-width:0}
-.card header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-.card h3{margin:0;color:var(--white);font:700 22px var(--f-display);font-stretch:115%}
-.card .req{color:var(--muted)}
-ol.steps{list-style:none;counter-reset:s;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:16px}
-ol.steps li{counter-increment:s;display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px}
-ol.steps li::before{content:counter(s);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line);color:var(--lcd);font:500 13px var(--f-mono)}
-ol.steps b{color:var(--white);font-weight:600}
-.note{margin-top:22px;padding:14px 16px;border-radius:10px;background:rgba(106,163,230,.08);border:1px solid rgba(106,163,230,.25);font-size:14.5px}
-.cmd{display:flex;align-items:center;gap:10px;margin-top:10px;background:#0b0d10;border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
-.cmd code{font:13px var(--f-mono);color:var(--steel);overflow-x:auto;white-space:nowrap;flex:1;min-width:0}
-.cmd button{flex:none;font:500 12px var(--f-mono);background:var(--panel2);color:var(--steel);border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer}
-.cmd button:hover{color:var(--white);border-color:var(--lcd)}
+.card{background:var(--bg);border-radius:24px;padding:34px;min-width:0;border:1px solid var(--line)}
+.card h3{margin:0;font-weight:600;font-size:26px;letter-spacing:-.025em}
+.card .req{color:var(--text3);margin-top:4px;font-size:14px}
+ol.steps{list-style:none;counter-reset:s;margin:24px 0 0;padding:0;display:flex;flex-direction:column;gap:16px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;color:var(--text2);font-size:16px}
+ol.steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--text);color:var(--bg);font-size:13px;font-weight:600;margin-top:1px}
+ol.steps b{color:var(--text);font-weight:600}
+.note{margin-top:24px;padding:16px 18px;border-radius:14px;background:var(--bg2);font-size:15px;color:var(--text2)}
+.cmd{display:flex;align-items:center;gap:10px;margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.cmd code{font:13px var(--mono);color:var(--text);overflow-x:auto;white-space:nowrap;flex:1;min-width:0}
+.cmd button{flex:none;font:500 13px var(--f);background:var(--text);color:var(--bg);border:0;border-radius:980px;padding:5px 12px;cursor:pointer}
 
 /* limits */
-.limits{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px;align-items:start}
-@media (max-width:860px){.limits{grid-template-columns:1fr;gap:24px}}
+.limits{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:56px;align-items:start}
+@media (max-width:860px){.limits{grid-template-columns:1fr;gap:16px}}
 .limits ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.limits li{padding:18px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px}
+.limits li{padding:20px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:160px minmax(0,1fr);gap:16px;font-size:16px}
 @media (max-width:560px){.limits li{grid-template-columns:1fr;gap:4px}}
-.limits li b{color:var(--white);font-weight:600}
-.limits li span{color:var(--muted)}
+.limits li b{font-weight:600}
+.limits li span{color:var(--text2)}
 
 /* source */
-pre{margin:0;background:#0b0d10;border:1px solid var(--line);border-radius:12px;padding:20px 22px;overflow-x:auto;font:13.5px/1.7 var(--f-mono);color:var(--steel)}
-pre .c{color:#6b7684}
-footer{border-top:1px solid var(--line);padding-block:36px;color:var(--muted);font-size:14px}
+pre{margin:0;background:var(--code);border-radius:18px;padding:24px 26px;overflow-x:auto;font:14px/1.7 var(--mono);color:var(--text)}
+pre .c{color:var(--text3)}
+footer{border-top:1px solid var(--line);padding-block:28px;color:var(--text3);font-size:13px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+footer a{color:var(--text2)}
 </style>
 </head>
 <body>
 
 <nav>
   <div class="wrap">
-    <a class="brand" href="#top"><img src="icon.png" alt=""> Larch K7</a>
+    <a class="brand" href="#top"><img class="ic-light" src="icon.png" alt=""><img class="ic-dark" src="icon-dark.png" alt=""> Larch K7</a>
     <div class="links">
       <a href="#features">Features</a>
       <a href="#install">Install</a>
       <a href="#limits">Limits</a>
-      <a class="gh" href="https://github.com/__REPO__"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Source</a>
+      <a class="gh" href="https://github.com/__REPO__">Source</a>
     </div>
   </div>
 </nav>
 
 <header class="hero" id="top">
   <div class="wrap">
-    <div>
-      <div class="eyebrow mono">Keypad phone · Mac and iPhone</div>
-      <h1>The keypad phone, back on your screen.</h1>
-      <p class="lede">Larch K7 is a Series 40–style feature phone with a real keypad, a 240×320 screen and the menus you remember. Calls, messages, contacts, photos and alarms go through your own device.</p>
-      <div class="dl">
-        <a class="btn go" id="dl-mac" href="https://github.com/__REPO__/releases/latest/download/LarchK7.dmg">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.8zM14.1 5.8c.6-.8 1.1-1.8 1-2.8-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.7-1 2.7 1 .1 2-.5 2.7-1.3z"/></svg>
-          <span class="t">Download for Mac<small id="mac-sub">Disk image · drag to Applications</small></span>
-        </a>
-        <a class="btn alt" id="dl-ios" href="https://github.com/__REPO__/releases/latest/download/LarchK7.ipa">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3" stroke-linecap="round"/></svg>
-          <span class="t">Download for iPhone<small id="ios-sub">.ipa · for sideloading</small></span>
-        </a>
-      </div>
-      <div class="meta mono" id="meta">Checking the latest release…</div>
-      <div class="play"><a href="play/">Play it in your browser →</a></div>
+    <span class="appicon"><img class="ic-light" src="icon.png" alt=""><img class="ic-dark" src="icon-dark.png" alt=""></span>
+    <h1>The keypad phone. Back in your hand.</h1>
+    <p class="lede">A Series 40–style feature phone for Mac and iPhone. Real calls, texts, contacts, camera, music, radio, Java games and the web, all through your own device.</p>
+    <div class="dl">
+      <a class="btn primary" id="dl-mac" href="https://github.com/__REPO__/releases/latest/download/LarchK7.dmg">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.8zM14.1 5.8c.6-.8 1.1-1.8 1-2.8-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.7-1 2.7 1 .1 2-.5 2.7-1.3z"/></svg>
+        <span class="t">Download for Mac<small id="mac-sub">Disk image</small></span>
+      </a>
+      <a class="btn secondary" id="dl-ios" href="https://github.com/__REPO__/releases/latest/download/LarchK7.ipa">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3" stroke-linecap="round"/></svg>
+        <span class="t">Download for iPhone<small id="ios-sub">.ipa for sideloading</small></span>
+      </a>
     </div>
+    <div class="meta" id="meta">Checking the latest release…</div>
+    <div class="play"><a href="play/">Try it in your browser ›</a></div>
     <div class="stage">
       <iframe src="play/#embed" title="Larch K7, playable" loading="eager"></iframe>
-      <div class="cap mono">Live phone. Click the keys, or use your keyboard.</div>
+      <div class="cap">A live phone. Click the keys, or use your keyboard.</div>
+    </div>
+  </div>
+  <div class="specs">
+    <div class="wrap">
+      <dl>
+        <div><dt>Display</dt><dd>240 × 320</dd></div>
+        <div><dt>Keys</dt><dd>21 + nav</dd></div>
+        <div><dt>Runs on</dt><dd>macOS 13 · iOS 16</dd></div>
+        <div><dt>Your data</dt><dd>Stays on device</dd></div>
+      </dl>
     </div>
   </div>
 </header>
 
-<div class="specs">
-  <div class="wrap">
-    <dl>
-      <div><dt class="mono">Display</dt><dd>240 × 320</dd></div>
-      <div><dt class="mono">Keys</dt><dd>21 + nav</dd></div>
-      <div><dt class="mono">Runs on</dt><dd>macOS 13 · iOS 16</dd></div>
-      <div><dt class="mono">Your data</dt><dd>Stays on device</dd></div>
-    </dl>
-  </div>
-</div>
-
 <section id="features">
   <div class="wrap">
-    <div class="kicker mono">What's real</div>
-    <h2>Every key does something.</h2>
-    <p class="sub">The phone hands real work to the device it runs on. Nothing here is a mock-up.</p>
+    <p class="kicker">Features</p>
+    <h2>Every key does something real.</h2>
+    <p class="sub">The phone hands real work to the device it runs on. Where Apple doesn't allow something, the feature isn't there, instead of pretending.</p>
     <div class="grid">
-      <div class="cell"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3.5h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A16 16 0 0 1 5.5 5.1 1.5 1.5 0 0 1 7 3.5z"/></svg></div>
-        <h3>Real calls</h3><p>Dial on the keypad and press the green key. iPhone places the call; on a Mac it goes through FaceTime or your iPhone. Call length lands in the Log.</p><span class="key mono">Call key</span></div>
-      <div class="cell"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3.5 7.5 12 13l8.5-5.5"/></svg></div>
-        <h3>Text messages</h3><p>Write with multi-tap or predictive text, then send through iOS Messages or the Mac Messages app. Sent items are kept on the phone.</p><span class="key mono">Menu › Messaging</span></div>
-      <div class="cell"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.6-3.8 3.6-6 7.5-6s6.9 2.2 7.5 6"/></svg></div>
-        <h3>Your contacts</h3><p>Names is your device's address book. Add, edit or delete a name and the change is made in Contacts too.</p><span class="key mono">Right key › Names</span></div>
-      <div class="cell"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="14" rx="1.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4 17.5 5-5 4 4 2.5-2.5 4.5 4"/></svg></div>
-        <h3>Camera, Gallery and Recorder</h3><p>Take photos and videos with a live viewfinder on the phone's screen. The Gallery is your real Photos library, and the Recorder records voice memos.</p><span class="key mono">Menu › Media</span></div>
-      <div class="cell"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="13" r="7"/><path d="M12 9.5V13l2.2 1.6M4 5.5 7 3M20 5.5 17 3"/></svg></div>
+      <div class="cell"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M7 3.5h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A16 16 0 0 1 5.5 5.1 1.5 1.5 0 0 1 7 3.5z"/></svg>
+        <h3>Real calls</h3><p>Dial on the keypad and press the call key. iPhone places the call; a Mac uses FaceTime or your iPhone. Speed dials, voicemail and call times in the Log.</p><span class="key mono">Call key</span></div>
+      <div class="cell"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3.5 7.5 12 13l8.5-5.5"/></svg>
+        <h3>Text messages</h3><p>Write with multi-tap or predictive text and send through Messages. Drafts, Sent and Saved items stay on the phone.</p><span class="key mono">Menu › Messaging</span></div>
+      <div class="cell"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.6-3.8 3.6-6 7.5-6s6.9 2.2 7.5 6"/></svg>
+        <h3>Your contacts</h3><p>Names is your device's address book. Add, edit or delete a name and Contacts changes too. Groups and speed dials included.</p><span class="key mono">Right key › Names</span></div>
+      <div class="cell"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.8" r="3.4"/></svg>
+        <h3>Camera and Gallery</h3><p>A live viewfinder on the phone's screen. Photos are saved to your library exactly as framed, and the Gallery is your real Photos library.</p><span class="key mono">Menu › Media › Camera</span></div>
+      <div class="cell"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 18V5.5l11-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>
+        <h3>Music and Radio</h3><p>Add your own songs to the music player, with an equaliser. The radio plays thousands of internet stations, and keeps playing with the screen locked.</p><span class="key mono">Menu › Media</span></div>
+      <div class="cell"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+        <h3>Voice recorder</h3><p>Record, pause and play back voice memos. Recordings are stored with the phone and stay after it's switched off.</p><span class="key mono">Menu › Media › Recorder</span></div>
+      <div class="cell"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="13" r="7"/><path d="M12 9.5V13l2.2 1.6M4 5.5 7 3M20 5.5 17 3"/></svg>
         <h3>Alarms that ring</h3><p>Alarm clock, calendar reminders and the countdown timer become system notifications, so they go off even when the app is closed.</p><span class="key mono">Menu › Organiser</span></div>
-      <div class="cell"><div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="3.5"/></svg></div>
-        <h3>Java games and the web</h3><p>Java ME .jar games run on the phone's own screen with the keypad as controls, and the browser opens real websites in mobile layout.</p><span class="key mono">Menu › Applications</span></div>
+      <div class="cell"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><circle cx="16.5" cy="16.5" r="3.5"/></svg>
+        <h3>Java games and apps</h3><p>Install .jar games from a file or a web address. They show up on the Applications page and run on the phone's own screen, with the keypad as controls.</p><span class="key mono">Menu › Applications</span></div>
+      <div class="cell"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.6" ry="8.5"/><path d="M3.8 9h16.4M3.8 15h16.4"/></svg>
+        <h3>The real web</h3><p>Open any site in mobile layout, with bookmarks, text size, image and cookie settings. Install a game straight from a download link.</p><span class="key mono">Menu › Web</span></div>
     </div>
   </div>
 </section>
 
 <section class="install" id="install">
   <div class="wrap">
-    <div class="kicker mono">Install</div>
-    <h2>Two downloads, one phone.</h2>
-    <p class="sub">The apps are built from this repository's source on GitHub's servers every time a new version is tagged.</p>
+    <p class="kicker">Install</p>
+    <h2>Two downloads. One phone.</h2>
+    <p class="sub">Both apps are built from this repository's source on GitHub's servers for every release.</p>
     <div class="cards">
       <article class="card">
-        <header><h3>Mac</h3></header>
-        <div class="req mono">macOS 13 Ventura or later · Apple silicon and Intel</div>
+        <h3>Mac</h3>
+        <div class="req">macOS 13 Ventura or later · Apple silicon and Intel</div>
         <ol class="steps">
           <li><span><b>Download LarchK7.dmg</b> and open it.</span></li>
           <li><span><b>Drag Larch K7 onto Applications</b> in the window that appears.</span></li>
@@ -216,14 +231,14 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-con
         </div>
       </article>
       <article class="card">
-        <header><h3>iPhone</h3></header>
-        <div class="req mono">iOS 16 or later · free Apple ID</div>
+        <h3>iPhone</h3>
+        <div class="req">iOS 16 or later · free Apple ID</div>
         <ol class="steps">
           <li><span><b>Download LarchK7.ipa</b> on your Mac or PC.</span></li>
           <li><span><b>Install it with a sideloading tool</b> such as Sideloadly or AltStore. Connect your iPhone, choose the .ipa and sign in with your Apple ID.</span></li>
           <li><span><b>Trust the app</b> on the iPhone: Settings › General › VPN &amp; Device Management, then turn on Developer Mode if iOS asks.</span></li>
         </ol>
-        <div class="note">With a free Apple ID, iOS stops opening sideloaded apps after 7 days. Reinstall with the same tool to renew; your phone's contacts and settings are kept.</div>
+        <div class="note">With a free Apple ID, iOS stops opening sideloaded apps after 7 days. Reinstall with the same tool to renew; your phone's contacts and settings are kept. The icon follows light and dark mode on iOS 18 and later.</div>
       </article>
     </div>
   </div>
@@ -232,25 +247,25 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-con
 <section id="limits">
   <div class="wrap limits">
     <div>
-      <div class="kicker mono">Straight answers</div>
+      <p class="kicker">Straight answers</p>
       <h2>What it can't do.</h2>
-      <p class="sub">Some things are walled off by Apple, so the phone says so instead of pretending.</p>
+      <p class="sub">Some things are walled off by Apple, so the phone leaves them out instead of faking them.</p>
     </div>
     <ul>
       <li><b>Reading texts</b><span>iOS and macOS don't let apps read your messages, so there is no Inbox. Messages you send are kept in Sent items.</span></li>
       <li><b>Call history</b><span>The Log lists calls made from Larch K7. On iPhone it also logs calls that arrive while the app is open, but iOS never shares the caller's number.</span></li>
-      <li><b>Signal strength</b><span>On iPhone the bars show online or offline. On a Mac they follow your Wi-Fi strength.</span></li>
+      <li><b>Signal strength</b><span>On iPhone the status icon shows Wi-Fi, mobile data or offline. On a Mac it follows your Wi-Fi strength.</span></li>
+      <li><b>FM radio</b><span>Mac and iPhone have no FM receiver, so the Radio plays internet stations from the free radio-browser.info directory.</span></li>
       <li><b>Java start-up</b><span>The Java runtime loads from the internet when an app starts, so Java games need a connection.</span></li>
-      <li><b>Websites in the web version</b><span>In the browser version some sites refuse to show inside the phone; the Mac and iPhone apps show every site.</span></li>
-      <li><b>FM radio</b><span>Mac and iPhone have no FM receiver, so the Radio plays internet stations instead, found through the free radio-browser.info directory.</span></li>
+      <li><b>Web version</b><span>In a browser some sites refuse to show inside the phone, and calls, contacts and the camera need the Mac or iPhone app.</span></li>
     </ul>
   </div>
 </section>
 
 <section id="source" style="padding-top:0">
   <div class="wrap">
-    <div class="kicker mono">Build it yourself</div>
-    <h2>Open source, built in the open.</h2>
+    <p class="kicker">Build it yourself</p>
+    <h2>Open source.</h2>
     <p class="sub">The phone is one HTML file. The Mac and iPhone apps wrap it and connect it to the system. On a Mac with Xcode:</p>
 <pre><span class="c"># get the code</span>
 git clone https://github.com/__REPO__.git
@@ -264,7 +279,7 @@ open Larch.xcodeproj</pre>
 
 <footer>
   <div class="wrap">
-    <span>Larch K7 · an original phone design · not affiliated with any phone maker · Java runtime: <a href="https://github.com/zb3/freej2me-web">freej2me-web</a> (GPL-3.0) on <a href="https://cheerpj.com">CheerpJ</a></span>
+    <span>Larch K7 · an original phone design, not affiliated with any phone maker · Java runtime: <a href="https://github.com/zb3/freej2me-web">freej2me-web</a> (GPL-3.0) on <a href="https://cheerpj.com">CheerpJ</a></span>
     <a href="https://github.com/__REPO__/releases">All releases</a>
   </div>
 </footer>
