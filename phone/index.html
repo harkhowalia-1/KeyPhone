@@ -2699,7 +2699,8 @@ function WebPage(u){ let i=0; const start=u==='start'; const native=!!(Host&&Hos
     onPop(){ if(native){ Host.web({op:'close'}).catch(()=>{}); webShown=false } else { WEBF.removeAttribute('src'); WEBL.hidden=true } } } }
   return {name:'web',title:'Home',
     draw(el){ const fsz={small:'12px',normal:'13px',large:'15px'}[S.fs.web];
-      el.innerHTML=`<div class="web" style="font-size:${fsz}"><h3>Home</h3><p>Bookmarks</p>${S.web.bm.map((b,j)=>`<div class="bmk${j===i?' on':''}" data-i="${j}">${esc(b.t)}<br><small style="color:#666">${esc(b.u)}</small></div>`).join('')}<p style="margin-top:8px;color:#666">Options › Go to address to type one.</p></div>` },
+      el.innerHTML=`<div class="web" style="font-size:${fsz}"><h3>Home</h3><p>Bookmarks</p>${S.web.bm.map((b,j)=>`<div class="bmk${j===i?' on':''}" data-i="${j}">${esc(b.t)}<br><small style="color:#666">${esc(b.u)}</small></div>`).join('')}<p style="margin-top:8px;color:#666">Options › Go to address to type one.</p></div>`;
+      const w=el.firstChild, on=w&&w.querySelector('.bmk.on'); if(on){ if(on.offsetTop+on.offsetHeight>w.scrollTop+w.clientHeight) w.scrollTop=on.offsetTop+on.offsetHeight-w.clientHeight+6; else if(on.offsetTop<w.scrollTop) w.scrollTop=Math.max(0,on.offsetTop-6) } },
     soft(){ return [{t:'Options',f:()=>menu('Options',[['Go to address',()=>{pop();goAddress()}],['Bookmarks',()=>{pop();Bookmarks()}],['Exit',()=>{home()}]],{nums:false})},
       {t:S.web.bm.length?'Open':'',f:()=>S.web.bm.length&&openUrl(S.web.bm[i].u)},{t:'Back',f:pop}] },
     key(k){ if(k==='U'||k==='D'){ const n=S.web.bm.length; if(n){ i=(i+(k==='U'?-1:1)+n)%n; render() } return true } return false },

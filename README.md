@@ -7,6 +7,18 @@ connect it to the system, so calls, messages, contacts, photos and alarms are re
 **Website and downloads:** see the GitHub Pages site for this repository
 (Settings › Pages shows the address).
 
+## Features
+
+- **Calls and VoIP:** dial through the iPhone, or make real calls over your own SIP/VoIP account (WebRTC), with hold, mute, keypad tones and a call log.
+- **Messages and contacts:** multi-tap, predictive text, the Messenger's keyboard or the iPhone keyboard; Names is your device's address book.
+- **Camera, Gallery and Recorder:** a live viewfinder, photos saved exactly as framed, your Photos library, voice memos.
+- **Music:** your Apple Music library by default, plus your own files and Spotify, with seek, shuffle, repeat, volume, Up next and a sleep timer. Internet radio too.
+- **Seven phone models:** original designs from different eras, including the Messenger, a wide QWERTY phone with a landscape screen in five colours (Midnight black among them). Each model has its own menus, fonts, themes and wallpapers.
+- **Organiser:** alarms, reminders and timers that ring with the app closed, calendar, notes, to-do, calculator, stopwatch, weather, world clock, converter, ringtone composer, torch.
+- **Java:** .jar games run offline in the built-in engine, which stays ready in the background so games open at once; the full engine runs more online.
+- **Silent mode:** key, message and ringing tones follow the iPhone's Ring/Silent switch.
+- **Touch screen and keys:** press the phone's keys, or tap, drag, hold and swipe on its screen. Whole-screen layout by default on iPhone.
+
 ## What's in here
 
 | Folder | What it is |
