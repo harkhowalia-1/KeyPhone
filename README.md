@@ -86,3 +86,9 @@ ringing tones while it is set to silent. On a Mac the music player drives the Mu
 app, which can't have songs added to Up next from outside.
 
 KeyPhone is an original design and is not affiliated with any phone maker.
+
+## Support
+
+If you enjoy this project, you can support me here:
+
+<a href="https://buymeacoffee.com/harkhowalia"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-orange.png" alt="Buy me a coffee" height="50"></a>
